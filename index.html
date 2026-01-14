@@ -64,7 +64,7 @@
   height:100%;
   object-fit:contain;
 }
-    .logo img{width:100%; height:100%; object-fit:cover; display:block}
+    .logo img{width:100%; height:100%; display:block}
     .titlewrap{
       display:flex;
       flex-direction:column;
@@ -358,7 +358,7 @@
         </div>
         <div class="choices">
           <label class="choice">
-             <input type="radio" name="q1" value="a"> <span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng/span>
+             <input type="radio" name="q1" value="a"> <span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng/<span>
           </label>
           <label class="choice">
              <input type="radio" name="q1" value="b"> <span>[1] công ty vận tải [2] giao nhận hàng hóa [3] dịch vụ kho bãi</span>
@@ -602,26 +602,15 @@ const correctSets = {
   // You asked to show "actual reasons why to choose that answer" after submit:
   // => we display an expected rationale text (predefined) for each checked option.
   const scenarioRationales = {
-    s1: "Nhân viên trung thực báo cáo sự thật, dù biết điều đó có thể gây bất lợi cho cá nhân và tập thể.
-         Không che giấu lỗi, không né tránh trách nhiệm.
-         Đặt đạo đức nghề nghiệp và uy tín doanh nghiệp lên trên lợi ích ngắn hạn.
-         =>Làm đúng, ngay cả khi không ai ép buộc và dù phải đối mặt với khó khăn.",
-    s2: "Trách nhiệm liên quan đến hoàn thành nhiệm vụ được giao.
-         Trong tình huống này, trọng tâm không phải hoàn thành công việc đúng hạn, mà là đối diện sự thật và lựa chọn điều đúng.
-         =>Trách nhiệm có liên quan, nhưng chưa đủ để mô tả hành động cốt lõi.",
-    s3: "Đoàn kết nhấn mạnh hỗ trợ, phối hợp giữa các thành viên.
-         Hành động của nhân viên A không xuất phát từ việc phối hợp nhóm, mà từ quyết định cá nhân mang tính đạo đức.
-         =>Không phải tình huống thể hiện tinh thần tập thể.",
-    s4: "Sau hành động này, nhân viên A trở nên đáng tin hơn trong mắt quản lý.
-         Tuy nhiên, đáng tin là kết quả của chính trực, không phải giá trị thúc đẩy quyết định ban đầu.
-         =>Giá trị này đến sau hành động, không phải động lực chính."
-    s5: "Kỷ luật liên quan đến tuân thủ quy trình, quy định.
-         Trong tình huống này, quy trình có thể không buộc phải báo cáo lỗi nhỏ.
-         =>Nhân viên A hành động vượt lên quy định, dựa trên đạo đức cá nhân chứ không phải vì kỷ luật."
-    s6: "Hiệu quả thường gắn với tốc độ, chi phí, kết quả nhanh.
-         Báo cáo lỗi khiến tiến độ chậm, phát sinh thêm chi phí.
-         =>Nếu đặt hiệu quả lên trước, nhân viên có thể đã bỏ qua lỗi."
-  };
+  s1: `Không đúng: “Đoàn kết” nhấn mạnh hỗ trợ/phối hợp tập thể. Tình huống này là quyết định đạo đức cá nhân.`,
+  s2: `Không đúng: “Đoàn kết” không phải trọng tâm. Hành động xuất phát từ lựa chọn làm điều đúng.`,
+  s3: `Không đúng: “Đáng tin” là kết quả có thể có sau hành động, không phải giá trị thúc đẩy quyết định ban đầu.`,
+  s4: `ĐÚNG: Nhân viên trung thực báo cáo sự thật dù có thể bất lợi.
+Không che giấu lỗi, không né tránh trách nhiệm.
+Đặt uy tín và đạo đức nghề nghiệp lên trên lợi ích ngắn hạn.`,
+  s5: `Không đúng: “Kỷ luật” là tuân thủ quy trình. Ở đây điểm cốt lõi là làm điều đúng vì đạo đức.`,
+  s6: `Không đúng: “Hiệu quả” thường ưu tiên tốc độ/chi phí. Báo cáo lỗi làm chậm tiến độ nên không phải tinh thần hiệu quả.`
+};
 
   // Google Sheets endpoint (Apps Script Web App). Put your deployed URL here:
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxUODfDLAFrjahu8DeijhWesDGapkgciUq4shrCWgUVibQVPFFSujwRAqpjRf2UI4/exec";
@@ -860,6 +849,7 @@ if (scenarioCorrect.includes(v)) {
 </script>
 </body>
 </html>
+
 
 
 
