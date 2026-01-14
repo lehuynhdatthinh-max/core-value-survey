@@ -60,6 +60,11 @@
       box-shadow: 0 8px 16px rgba(255,122,0,.22);
       overflow:hidden;
     }
+    .logo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
     .logo img{width:100%; height:100%; object-fit:cover; display:block}
     .titlewrap{
       display:flex;
@@ -287,15 +292,15 @@
 <header>
   <div class="header-inner">
     <div class="brand">
-      <!-- Replace this with your logo image if you want:
-           <div class="logo"><img src="YOUR_LOGO_URL_OR_PATH" alt="Company Logo"/></div>
-      -->
-      <div class="logo" aria-label="Company Logo">LOGO</div>
+      <div class="logo">
+        <img src="images/logo.png" alt="Company Logo">
+      </div>
       <div class="titlewrap">
         <div class="title">Core Value Survey Month 1</div>
         <div class="subtitle">All questions required • Auto scoring</div>
       </div>
     </div>
+
     <div class="pill">Orange × White vibe</div>
   </div>
 </header>
@@ -736,3 +741,4 @@ if (scenarioCorrect.includes(v)) {
 </script>
 </body>
 </html>
+
