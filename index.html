@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Core Value Survey Month 1</title>
+
   <style>
     :root{
       --orange:#ff7a00;
@@ -50,21 +51,22 @@
       min-width: 240px;
     }
     .logo{
-      width:100px;          /* tăng khung */
-      height:100px;
+      width:84px;
+      height:84px;
       border-radius:12px;
       background:#fff;
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:visible;    /* QUAN TRỌNG */
-}
+      overflow:hidden;
+      border: 1px solid rgba(229,231,235,.9);
+    }
     .logo img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-    .logo img{width:100%; height:100%; display:block}
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
     .titlewrap{
       display:flex;
       flex-direction:column;
@@ -87,8 +89,48 @@
       border: 1px solid rgba(255,122,0,.25);
       font-size: 12px;
       color: #9a4a00;
-      font-weight: 700;
+      font-weight: 800;
       white-space:nowrap;
+    }
+
+    /* Buttons */
+    button{
+      border:none;
+      cursor:pointer;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing:.2px;
+      font-size: 14px;
+    }
+    .btn-primary{
+      color:white;
+      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
+      box-shadow: 0 10px 20px rgba(255,122,0,.22);
+    }
+    .btn-ghost{
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .toggle-btn{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,122,0,.35);
+      background: #fff;
+      font-weight: 900;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .toggle-btn[data-state="on"]{
+      color: #0f5132;
+      border-color: rgba(16,185,129,.35);
+      background: rgba(16,185,129,.08);
+    }
+    .toggle-btn[data-state="off"]{
+      color: #7f1d1d;
+      border-color: rgba(180,35,24,.28);
+      background: rgba(180,35,24,.08);
     }
 
     /* Layout */
@@ -138,7 +180,7 @@
     label{
       display:block;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 8px;
     }
     input[type="text"], select, textarea{
@@ -175,7 +217,7 @@
     }
     .required{
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       color: #b42318;
       background: rgba(180,35,24,.08);
       border: 1px solid rgba(180,35,24,.18);
@@ -214,6 +256,7 @@
       font-size: 12px;
       color: var(--muted);
       margin: 0 0 6px;
+      font-weight: 700;
     }
 
     .actions{
@@ -222,25 +265,6 @@
       align-items:center;
       justify-content:flex-end;
       padding-top: 6px;
-    }
-    button{
-      border:none;
-      cursor:pointer;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      letter-spacing:.2px;
-      font-size: 14px;
-    }
-    .btn-primary{
-      color:white;
-      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
-      box-shadow: 0 10px 20px rgba(255,122,0,.22);
-    }
-    .btn-ghost{
-      color: var(--ink);
-      background: #fff;
-      border: 1px solid var(--border);
     }
 
     /* Result */
@@ -266,6 +290,8 @@
       color:#7c2d12;
       font-size: 13px;
       margin: 0 0 8px;
+      white-space: pre-wrap;
+      font-weight: 800;
     }
     .reason-card .user{
       color:#111827;
@@ -281,9 +307,104 @@
       border: 1px solid rgba(180,35,24,.22);
       background: rgba(180,35,24,.06);
       color:#7f1d1d;
-      font-weight: 700;
+      font-weight: 900;
     }
     small.muted{color:var(--muted)}
+
+    /* Closed panel */
+    .closed-panel{
+      max-width: 980px;
+      margin: 18px auto 0;
+      padding: 0 18px;
+    }
+    .closed-card{
+      background: #fff;
+      border: 1px solid rgba(229,231,235,.9);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      padding: 18px;
+    }
+    .closed-title{
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .visitor-message{
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,122,0,.22);
+      background: rgba(255,122,0,.06);
+      white-space: pre-wrap;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+    .admin-box{
+      padding-top: 8px;
+      border-top: 1px solid rgba(229,231,235,.9);
+    }
+    .admin-label{
+      display:block;
+      font-size: 13px;
+      font-weight: 900;
+      margin: 10px 0 8px;
+    }
+    .admin-textarea{
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(229,231,235,.9);
+      outline: none;
+      resize: vertical;
+    }
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top: 10px;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 999;
+    }
+    .modal-card{
+      width: min(520px, 100%);
+      background:#fff;
+      border-radius: 16px;
+      border:1px solid rgba(229,231,235,.9);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(229,231,235,.9);
+    }
+    .modal-body{ padding: 14px; }
+    .xbtn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 6px 10px;
+    }
+    .admin-msg{
+      margin-top:10px;
+      font-weight: 900;
+      color:#7f1d1d;
+      min-height: 18px;
+    }
   </style>
 </head>
 
@@ -300,9 +421,44 @@
       </div>
     </div>
 
-    <div class="pill">Orange × White vibe</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div class="pill">Orange × White vibe</div>
+
+      <!-- Admin only -->
+      <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="true">
+        Survey: ON
+      </button>
+
+      <button type="button" id="adminBtn" class="toggle-btn">
+        Admin
+      </button>
+    </div>
   </div>
 </header>
+
+<!-- When survey OFF: only show this + header -->
+<section id="closedPanel" class="closed-panel" style="display:none;">
+  <div class="closed-card">
+    <h2 class="closed-title">Survey is currently OFF</h2>
+
+    <div id="visitorMessage" class="visitor-message"></div>
+
+    <!-- Admin can edit message -->
+    <div class="admin-box" id="adminMessageBox" style="display:none;">
+      <label for="adminMessage" class="admin-label">Your message (edit when survey is OFF)</label>
+      <textarea id="adminMessage" class="admin-textarea" placeholder="Type your message here..."></textarea>
+
+      <div class="admin-actions">
+        <button type="button" id="saveMessageBtn" class="btn-primary">Save message</button>
+        <button type="button" id="clearMessageBtn" class="btn-ghost">Clear</button>
+      </div>
+
+      <small class="muted">
+        Message & toggle state are stored in this browser (localStorage).
+      </small>
+    </div>
+  </div>
+</section>
 
 <main>
   <div class="card">
@@ -349,72 +505,44 @@
         </div>
       </div>
 
-      <!-- 7 checkbox questions (score only if EXACT match correct set) -->
+      <!-- Q1 -->
       <div class="qblock" data-qid="q1">
         <div class="qtitle">
-          <h3>3) Điền từ còn thiếu vào Tầm nhìn của TBS Logistics ?
-                 "Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."(Chọn câu trả lời đúng)</h3>
+          <h3>3) Điền từ còn thiếu vào Tầm nhìn của TBS Logistics?
+            "Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________." (Chọn câu trả lời đúng)
+          </h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
-          <label class="choice">
-             <input type="radio" name="q1" value="a"> <span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng/<span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="b"> <span>[1] công ty vận tải [2] giao nhận hàng hóa [3] dịch vụ kho bãi</span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="c"> <[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="d"> <[1] trung tâm logistics [2] cung cấp dịch vụ [3] giải pháp chuỗi cung ứng</span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="e"> <[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="f"> <[1] nhà cung cấp giải pháp [2] dịch vụ logistics [3] kho vận thông minh</span>
-          </label>
-          <label class="choice">
-             <input type="radio" name="q1" value="g"> <[1] cảng cạn ICD [2] xử lý hàng hóa [3] phân phối nội địa</span>
-          </label>
+          <label class="choice"><input type="radio" name="q1" value="a"><span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng</span></label>
+          <label class="choice"><input type="radio" name="q1" value="b"><span>[1] công ty vận tải [2] giao nhận hàng hóa [3] dịch vụ kho bãi</span></label>
+          <label class="choice"><input type="radio" name="q1" value="c"><span>[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span></label>
+          <label class="choice"><input type="radio" name="q1" value="d"><span>[1] trung tâm logistics [2] cung cấp dịch vụ [3] giải pháp chuỗi cung ứng</span></label>
+          <label class="choice"><input type="radio" name="q1" value="e"><span>[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span></label>
+          <label class="choice"><input type="radio" name="q1" value="f"><span>[1] nhà cung cấp giải pháp [2] dịch vụ logistics [3] kho vận thông minh</span></label>
+          <label class="choice"><input type="radio" name="q1" value="g"><span>[1] cảng cạn ICD [2] xử lý hàng hóa [3] phân phối nội địa</span></label>
         </div>
       </div>
 
+      <!-- Q2 -->
       <div class="qblock" data-qid="q2">
         <div class="qtitle">
-          <h3>4) Điền từ còn thiếu vào sứ mệnh của TBS Logistics:
-            "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."</h3>
+          <h3>4) Điền từ còn thiếu vào Sứ mệnh của TBS Logistics:
+            "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."
+          </h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
-           <label class="choice">
-               <input type="radio" name="q2" value="a">
-               <span>A. [1] năng suất / [2] lợi ích / [3] chăm sóc</span>
-           </label>
-           <label class="choice">
-               <input type="radio" name="q2" value="b">
-               <span>[1] hiệu suất / [2] giá trị / [3] bảo vệ</span>
-           </label>
-           <label class="choice">
-              <input type="radio" name="q2" value="c">
-              <span> [1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo</span>
-           </label>
-          <label class="choice">
-              <input type="radio" name="q2" value="d">
-              <span> 1] năng lực / [2] giá trị / [3] hỗ trợ</span>
-           </label>
-          <label class="choice">
-              <input type="radio" name="q2" value="e">
-              <span> [1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo</span>
-           </label>
-          <label class="choice">
-              <input type="radio" name="q2" value="f">
-              <span> 1] hiệu quả / [2] cơ hội / [3] cải thiện</span>
-           </label>
+          <label class="choice"><input type="radio" name="q2" value="a"><span>A. [1] năng suất / [2] lợi ích / [3] chăm sóc</span></label>
+          <label class="choice"><input type="radio" name="q2" value="b"><span>[1] hiệu suất / [2] giá trị / [3] bảo vệ</span></label>
+          <label class="choice"><input type="radio" name="q2" value="c"><span>[1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo</span></label>
+          <label class="choice"><input type="radio" name="q2" value="d"><span>[1] năng lực / [2] giá trị / [3] hỗ trợ</span></label>
+          <label class="choice"><input type="radio" name="q2" value="e"><span>[1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo</span></label>
+          <label class="choice"><input type="radio" name="q2" value="f"><span>[1] hiệu quả / [2] cơ hội / [3] cải thiện</span></label>
         </div>
       </div>
 
+      <!-- Q3 -->
       <div class="qblock" data-qid="q3">
         <div class="qtitle">
           <h3>5) Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics? (Chọn tất cả các đáp án đúng)</h3>
@@ -432,6 +560,7 @@
         </div>
       </div>
 
+      <!-- Q4 -->
       <div class="qblock" data-qid="q4">
         <div class="qtitle">
           <h3>6) Trong triết lý kinh doanh của TBS Logistics: Cân bằng lợi ích 5 bên gồm: (Chọn nhiều đáp án)</h3>
@@ -449,6 +578,7 @@
         </div>
       </div>
 
+      <!-- Q5 -->
       <div class="qblock" data-qid="q5">
         <div class="qtitle">
           <h3>7) Chọn các mục tiêu ĐÚNG trong năm 2025 của TBS Logistics</h3>
@@ -466,6 +596,7 @@
         </div>
       </div>
 
+      <!-- Q6 -->
       <div class="qblock" data-qid="q6">
         <div class="qtitle">
           <h3>8) Which actions show Respect? (Select all that apply)</h3>
@@ -479,6 +610,7 @@
         </div>
       </div>
 
+      <!-- Q7 -->
       <div class="qblock" data-qid="q7">
         <div class="qtitle">
           <h3>9) Safety culture includes… (Select all that apply)</h3>
@@ -492,43 +624,42 @@
         </div>
       </div>
 
-      <!-- Scenario section -->
+      <!-- Scenario -->
       <div class="qblock" data-qid="scenario">
         <div class="qtitle">
-          <h3>10) Tình huống: Trong quá trình kiểm tra trước khi giao hàng cho khách, nhân viên A phát hiện một lô sản phẩm có dấu hiệu lỗi kỹ thuật nhẹ.
-                  Nếu báo cáo ngay, đơn hàng sẽ bị chậm tiến độ và cả nhóm có thể bị nhắc nhở.
-                  Nếu bỏ qua, hàng vẫn giao kịp thời gian nhưng tiềm ẩn rủi ro khi khách sử dụng.
-                  Sau khi cân nhắc, nhân viên A chủ động báo cáo sự việc với quản lý, đề xuất phương án xử lý để khắc phục lỗi và chấp nhận việc giao hàng trễ nhằm bảo đảm chất lượng 
-                  cho khách hàng.Giá trị nào được thể hiện trong tình huống này?</h3>
+          <h3>10) Tình huống: Nhân viên A phát hiện lô sản phẩm có dấu hiệu lỗi kỹ thuật nhẹ.
+            A chủ động báo cáo sự việc với quản lý, đề xuất phương án xử lý và chấp nhận giao hàng trễ để bảo đảm chất lượng cho khách hàng.
+            Giá trị nào được thể hiện trong tình huống này? (Chọn đáp án)
+          </h3>
           <div class="required">Required</div>
         </div>
 
         <div class="choices">
           <div class="choice">
             <input type="checkbox" id="s1" name="scenario" value="s1">
-            <span><strong>Đoàn</strong> kết.</span>
+            <span><strong>Đoàn kết</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s1">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s1" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s1" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
 
           <div class="choice">
             <input type="checkbox" id="s2" name="scenario" value="s2">
-            <span><strong>Đoàn</strong> kết.</span>
+            <span><strong>Trách nhiệm</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s2">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s2" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s2" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
 
           <div class="choice">
             <input type="checkbox" id="s3" name="scenario" value="s3">
-            <span><strong>Đáng tinh</strong></span>
+            <span><strong>Đáng tin</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s3">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s3" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s3" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
 
           <div class="choice">
@@ -536,29 +667,31 @@
             <span><strong>Chính trực</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s4">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s4" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s4" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
+
           <div class="choice">
             <input type="checkbox" id="s5" name="scenario" value="s5">
             <span><strong>Kỷ luật</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s5">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s5" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s5" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
+
           <div class="choice">
             <input type="checkbox" id="s6" name="scenario" value="s6">
             <span><strong>Hiệu quả</strong>.</span>
           </div>
           <div class="explain" data-explain-for="s6">
-            <p class="hint">Giải thích lý do tại sao giá trị này được thể hiện trong tình huống này:</p>
-            <textarea name="scenario_explain_s6" placeholder="Viết lý do của Anh/chị......."></textarea>
+            <p class="hint">Giải thích lý do:</p>
+            <textarea name="scenario_explain_s6" placeholder="Viết lý do của Anh/Chị..."></textarea>
           </div>
         </div>
 
         <small class="muted">
-          In this section: each checked box = 1 point. Writing is required if checked, but does not affect score.
+          Scenario: mỗi tick đúng được 1 điểm. Phần giải thích bắt buộc nếu tick nhưng không ảnh hưởng điểm.
         </small>
       </div>
 
@@ -578,68 +711,111 @@
   </div>
 </main>
 
+<!-- Admin modal -->
+<div id="adminModal" class="modal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-head">
+      <strong>Admin access</strong>
+      <button type="button" id="adminClose" class="xbtn">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="admin-label" for="adminEmail">Email</label>
+      <input id="adminEmail" type="text" placeholder="name@company.com" />
+
+      <label class="admin-label" for="adminPass">Passcode</label>
+      <input id="adminPass" type="password" placeholder="Enter passcode" />
+
+      <div class="admin-actions">
+        <button type="button" id="adminLogin" class="btn-primary">Login</button>
+        <button type="button" id="adminLogout" class="btn-ghost">Logout</button>
+      </div>
+
+      <div id="adminMsg" class="admin-msg"></div>
+      <small class="muted">
+        Non-admin will only see the message when survey is OFF.
+      </small>
+    </div>
+  </div>
+</div>
+
 <script>
-  // ====== CONFIG ======
-// 7 checkbox questions: score 1 only if the selected set matches EXACTLY the correct set.
-const correctSets = {
-  q3: ["a","c","d","e","f","g"],
-  q4: ["a","c","d","f","g"],
-  q5: ["a","b","d","e","g","h"],
-  q6: ["a","c","d"],
-  q7: ["a","c","d"]
-};
+  // ===================== CONFIG =====================
+  // Correct sets for Q3–Q7 (checkbox exact match)
+  const correctSets = {
+    q3: ["a","c","d","e","f","g"],
+    q4: ["a","c","d","f","g"],
+    q5: ["a","b","d","e","g","h"],
+    q6: ["a","c","d"],
+    q7: ["a","c","d"]
+  };
+
+  // Correct single for Q1–Q2 (radio)
   const correctSingle = {
-  q1: "d",
-  q2: "c"   // Q2 cũng là radio
-};
+    q1: "d",
+    q2: "c"
+  };
 
-// Scenario: ONLY correct choices give points
-// ví dụ: s1, s2, s3 là đúng; s4 là sai
-// const scenarioCorrect = ["s1", "s2", "s3"];
-   const scenarioCorrect = ["s1"];
+  // Scenario: only correct ticks give points (based on your scenario, s4 = Chính trực)
+  const scenarioCorrect = ["s4"];
 
-  // Scenario section: each tick = 1 point, even if it's a "bad" choice.
-  // You asked to show "actual reasons why to choose that answer" after submit:
-  // => we display an expected rationale text (predefined) for each checked option.
+  // Scenario rationales (display after submit)
   const scenarioRationales = {
-  s1: `Không đúng: “Đoàn kết” nhấn mạnh hỗ trợ/phối hợp tập thể. Tình huống này là quyết định đạo đức cá nhân.`,
-  s2: `Không đúng: “Đoàn kết” không phải trọng tâm. Hành động xuất phát từ lựa chọn làm điều đúng.`,
-  s3: `Không đúng: “Đáng tin” là kết quả có thể có sau hành động, không phải giá trị thúc đẩy quyết định ban đầu.`,
-  s4: `ĐÚNG: Nhân viên trung thực báo cáo sự thật dù có thể bất lợi.
-Không che giấu lỗi, không né tránh trách nhiệm.
-Đặt uy tín và đạo đức nghề nghiệp lên trên lợi ích ngắn hạn.`,
-  s5: `Không đúng: “Kỷ luật” là tuân thủ quy trình. Ở đây điểm cốt lõi là làm điều đúng vì đạo đức.`,
-  s6: `Không đúng: “Hiệu quả” thường ưu tiên tốc độ/chi phí. Báo cáo lỗi làm chậm tiến độ nên không phải tinh thần hiệu quả.`
-};
+    s1: `❌ Không đúng: “Đoàn kết” nhấn mạnh hỗ trợ/phối hợp tập thể. Tình huống này là quyết định đạo đức cá nhân.`,
+    s2: `❌ Không đúng: “Trách nhiệm” có liên quan, nhưng hành động cốt lõi là lựa chọn điều đúng dù ảnh hưởng tiến độ.`,
+    s3: `❌ Không đúng: “Đáng tin” thường là kết quả sau hành động. Giá trị thể hiện rõ nhất ở đây là “Chính trực”.`,
+    s4: `✅ ĐÚNG: Báo cáo sự thật, không che giấu lỗi; đặt chất lượng/uy tín lên trên lợi ích ngắn hạn.`,
+    s5: `❌ Không đúng: “Kỷ luật” là tuân thủ quy trình; ở đây nhấn mạnh đạo đức nghề nghiệp và trung thực.`,
+    s6: `❌ Không đúng: “Hiệu quả” thường ưu tiên tốc độ/chi phí; hành động này chấp nhận chậm để đảm bảo chất lượng.`
+  };
 
   // Google Sheets endpoint (Apps Script Web App). Put your deployed URL here:
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxUODfDLAFrjahu8DeijhWesDGapkgciUq4shrCWgUVibQVPFFSujwRAqpjRf2UI4/exec";
+  const GOOGLE_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-  // ====== Helpers ======
+  // Admin gate (client-side)
+  const ADMIN_ALLOWLIST = [
+    "admin1@company.com",
+    "admin2@company.com"
+  ].map(s => s.toLowerCase().trim());
+
+  const ADMIN_PASSCODE = "TBS-2026";
+
+  // ===================== HELPERS =====================
   const $ = (sel, root=document) => root.querySelector(sel);
   const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
   function getCheckedValues(name){
     return $$(`input[name="${name}"]:checked`).map(i => i.value);
   }
+
   function setsEqual(a, b){
+    if (!Array.isArray(a) || !Array.isArray(b)) return false;
     if (a.length !== b.length) return false;
     const sa = [...a].sort().join("|");
     const sb = [...b].sort().join("|");
     return sa === sb;
   }
 
-  // ====== Scenario explain toggles ======
+  function escapeHtml(str){
+    return (str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // ===================== SCENARIO TOGGLES =====================
   function syncScenarioExplain(){
     const scenarioChecks = $$('input[name="scenario"]');
     scenarioChecks.forEach(chk => {
       const box = $(`.explain[data-explain-for="${chk.value}"]`);
       if (!box) return;
+
       box.style.display = chk.checked ? "block" : "none";
 
-      // When checked => textarea required
       const ta = $("textarea", box);
-      if (ta) {
+      if (ta){
         ta.required = chk.checked;
         if (!chk.checked) ta.value = "";
       }
@@ -648,103 +824,155 @@ Không che giấu lỗi, không né tránh trách nhiệm.
   $$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScenarioExplain));
   syncScenarioExplain();
 
-  // ====== Validation for checkbox groups (required) ======
+  // ===================== VALIDATION =====================
   function validateRequiredGroups(){
-  const errors = [];
+    const errors = [];
 
-  // Name + Department
-  if (!$("#fullName").value.trim()) errors.push("Name is required.");
-  if (!$("#department").value) errors.push("Department is required.");
+    if (!$("#fullName").value.trim()) errors.push("Name is required.");
+    if (!$("#department").value) errors.push("Department is required.");
 
-  // Q1, Q2 (radio) required
-  ["q1","q2"].forEach((q, idx) => {
-    if (!document.querySelector(`input[name="${q}"]:checked`)) {
-      errors.push(`Question ${idx + 1} is required.`);
+    // Q1, Q2 radios
+    ["q1","q2"].forEach((q, idx) => {
+      if (!document.querySelector(`input[name="${q}"]:checked`)) {
+        errors.push(`Question ${idx + 1} is required.`);
+      }
+    });
+
+    // Q3–Q7 checkboxes
+    for (let i = 3; i <= 7; i++) {
+      if (getCheckedValues("q" + i).length === 0) {
+        errors.push(`Question ${i} is required.`);
+      }
     }
-  });
 
-  // Q3–Q7 (checkbox) required
-  for (let i = 3; i <= 7; i++) {
-    if (getCheckedValues("q" + i).length === 0) {
-      errors.push(`Question ${i} is required.`);
-    }
+    // Scenario requires at least 1
+    const scenario = getCheckedValues("scenario");
+    if (scenario.length === 0) errors.push("Scenario question is required.");
+
+    // Scenario explanation required for each checked
+    scenario.forEach(v => {
+      const ta = $(`.explain[data-explain-for="${v}"] textarea`);
+      if (ta && !ta.value.trim()) errors.push("Scenario explanation is required for each selected option.");
+    });
+
+    return errors;
   }
 
-  // Scenario required (at least 1 checked)
-  const scenario = getCheckedValues("scenario");
-  if (scenario.length === 0) {
-    errors.push("Scenario question is required.");
-  }
-
-  // Scenario explanation required for each checked option
-  scenario.forEach(v => {
-    const ta = $(`.explain[data-explain-for="${v}"] textarea`);
-    if (ta && !ta.value.trim()) {
-      errors.push("Scenario explanation is required for each selected option.");
-    }
-  });
-
-  return errors;
-}
-  // ====== Scoring ======
+  // ===================== SCORING =====================
   function computeScore(){
-  let score = 0;
+    let score = 0;
 
-  // Q1 & Q2 (radio - single correct)
-  ["q1", "q2"].forEach(q => {
-    const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
-    if (picked === correctSingle[q]) {
-      score += 1;
+    // Q1–Q2 radios
+    ["q1","q2"].forEach(q => {
+      const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
+      if (picked === correctSingle[q]) score += 1;
+    });
+
+    // Q3–Q7 exact-match sets
+    for (let i = 3; i <= 7; i++){
+      const picked = getCheckedValues("q" + i);
+      const correct = correctSets["q" + i];
+      if (setsEqual(picked, correct)) score += 1;
     }
-  });
 
-  // Q3–Q7 (checkbox - exact match)
-  for (let i = 3; i <= 7; i++){
-    const picked = getCheckedValues("q" + i);
-    const correct = correctSets["q" + i];
-    if (setsEqual(picked, correct)) {
-      score += 1;
+    // Scenario: only correct ticks give points
+    const scenarioPicked = getCheckedValues("scenario");
+    scenarioPicked.forEach(v => {
+      if (scenarioCorrect.includes(v)) score += 1;
+    });
+
+    const total =
+      Object.keys(correctSingle).length +
+      Object.keys(correctSets).length +
+      scenarioCorrect.length;
+
+    return { score, total };
+  }
+
+  // ===================== GOOGLE SHEET POST =====================
+  async function postToGoogleSheet(payload){
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_")) return { skipped: true };
+
+    const body = new URLSearchParams();
+    body.append("data", JSON.stringify(payload));
+
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      body
+    });
+
+    return await res.json().catch(() => ({ ok:false }));
+  }
+
+  // ===================== SURVEY ON/OFF STATE =====================
+  const toggleBtn = $("#toggleSurveyBtn");
+  const mainEl = $("main");
+  const closedPanel = $("#closedPanel");
+  const visitorMessage = $("#visitorMessage");
+  const adminMessageBox = $("#adminMessageBox");
+  const adminMessage = $("#adminMessage");
+  const saveMessageBtn = $("#saveMessageBtn");
+  const clearMessageBtn = $("#clearMessageBtn");
+
+  const STORAGE_KEYS = {
+    isOn: "cvSurvey_isOn",
+    msg: "cvSurvey_closedMessage"
+  };
+
+  function applySurveyState(isOn){
+    if (isOn){
+      mainEl.style.display = "";
+      closedPanel.style.display = "none";
+      toggleBtn.textContent = "Survey: ON";
+      toggleBtn.setAttribute("aria-pressed", "true");
+      toggleBtn.dataset.state = "on";
+    } else {
+      mainEl.style.display = "none";
+      closedPanel.style.display = "block";
+      toggleBtn.textContent = "Survey: OFF";
+      toggleBtn.setAttribute("aria-pressed", "false");
+      toggleBtn.dataset.state = "off";
     }
   }
 
-  // Scenario: only correct ticks give points
-  const scenarioPicked = getCheckedValues("scenario");
-  scenarioPicked.forEach(v => {
-    if (scenarioCorrect.includes(v)) {
-      score += 1;
-    }
+  function renderVisitorMessage(){
+    const msg = localStorage.getItem(STORAGE_KEYS.msg) || "We are not collecting responses right now. Please come back later.";
+    visitorMessage.innerHTML = escapeHtml(msg);
+    if (adminMessage) adminMessage.value = msg;
+  }
+
+  // Initial state defaults to ON for admin, OFF for non-admin (enforced later)
+  const savedIsOn = localStorage.getItem(STORAGE_KEYS.isOn);
+  const initialIsOn = savedIsOn === null ? true : (savedIsOn === "true");
+  applySurveyState(initialIsOn);
+  renderVisitorMessage();
+
+  // Toggle click (only admin can see the button anyway)
+  toggleBtn.addEventListener("click", () => {
+    const isCurrentlyOn = toggleBtn.dataset.state !== "off";
+    const nextIsOn = !isCurrentlyOn;
+
+    localStorage.setItem(STORAGE_KEYS.isOn, String(nextIsOn));
+    applySurveyState(nextIsOn);
+
+    if (!nextIsOn) renderVisitorMessage();
   });
 
-  const total =
-    Object.keys(correctSingle).length +      // Q1, Q2
-    Object.keys(correctSets).length +         // Q3–Q7
-    scenarioCorrect.length;                   // scenario max
+  saveMessageBtn.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEYS.msg, adminMessage.value || "");
+    renderVisitorMessage();
+  });
+  clearMessageBtn.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEYS.msg, "");
+    renderVisitorMessage();
+  });
 
-  return { score, total };
-}
-  // ====== Submit handling ======
+  // ===================== SUBMIT HANDLING =====================
   const form = $("#surveyForm");
   const errorBox = $("#errorBox");
   const resultBox = $("#resultBox");
   const scoreLine = $("#scoreLine");
   const scenarioReasons = $("#scenarioReasons");
-
-  async function postToGoogleSheet(payload){
-  console.log("Posting to:", GOOGLE_SCRIPT_URL);
-
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_")) return {skipped:true};
-
-  const body = new URLSearchParams();
-  body.append("data", JSON.stringify(payload));
-
-  const res = await fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    body
-  });
-
-  return await res.json().catch(() => ({ok:false}));
-}
-
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -757,23 +985,22 @@ Không che giấu lỗi, không né tránh trách nhiệm.
     const errors = validateRequiredGroups();
     if (errors.length){
       errorBox.style.display = "block";
-      errorBox.textContent = errors[0]; // show first for clean UI
+      errorBox.textContent = errors[0];
       return;
     }
 
     const {score, total} = computeScore();
 
-    // Build payload for Google Sheet
+    // Payload for sheet
     const payload = {
       timestamp: new Date().toISOString(),
       name: $("#fullName").value.trim(),
       department: $("#department").value,
       score,
       total,
-      // raw answers
       answers: {
-        q1: getCheckedValues("q1"),
-        q2: getCheckedValues("q2"),
+        q1: getCheckedValues("q1")[0] ?? "",
+        q2: getCheckedValues("q2")[0] ?? "",
         q3: getCheckedValues("q3"),
         q4: getCheckedValues("q4"),
         q5: getCheckedValues("q5"),
@@ -784,15 +1011,15 @@ Không che giấu lỗi, không né tránh trách nhiệm.
           s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
           s2: ($(`.explain[data-explain-for="s2"] textarea`)?.value ?? "").trim(),
           s3: ($(`.explain[data-explain-for="s3"] textarea`)?.value ?? "").trim(),
-          s4: ($(`.explain[data-explain-for="s4"] textarea`)?.value ?? "").trim()
+          s4: ($(`.explain[data-explain-for="s4"] textarea`)?.value ?? "").trim(),
+          s5: ($(`.explain[data-explain-for="s5"] textarea`)?.value ?? "").trim(),
+          s6: ($(`.explain[data-explain-for="s6"] textarea`)?.value ?? "").trim()
         }
       }
     };
 
-    // Show result UI immediately
     scoreLine.textContent = `Your score: ${score} / ${total}`;
 
-    // Show "actual reasons" (expected rationales) + user's writing for checked scenario options
     const pickedScenario = payload.answers.scenario;
     pickedScenario.forEach(v => {
       const card = document.createElement("div");
@@ -802,14 +1029,8 @@ Không che giấu lỗi, không né tránh trách nhiệm.
       title.textContent = `Scenario choice: ${v.toUpperCase()}`;
 
       const expected = document.createElement("p");
-expected.className = "expected";
-
-if (scenarioCorrect.includes(v)) {
-  expected.textContent = `✅ Correct choice. Rationale: ${scenarioRationales[v]}`;
-} else {
-  expected.textContent = `❌ Incorrect choice. Rationale: ${scenarioRationales[v]}`;
-}
-
+      expected.className = "expected";
+      expected.textContent = scenarioRationales[v] || "(No rationale configured)";
 
       const user = document.createElement("p");
       user.className = "user";
@@ -825,11 +1046,9 @@ if (scenarioCorrect.includes(v)) {
     resultBox.style.display = "block";
     resultBox.scrollIntoView({behavior:"smooth", block:"start"});
 
-    // Send to Google Sheet (optional)
     try{
       const resp = await postToGoogleSheet(payload);
       if (resp && resp.ok === false && !resp.skipped){
-        // only show if actually attempted and failed
         errorBox.style.display = "block";
         errorBox.textContent = "Submitted but failed to save to Google Sheet. Check Apps Script deployment/CORS.";
       }
@@ -846,12 +1065,86 @@ if (scenarioCorrect.includes(v)) {
     resultBox.style.display = "none";
     scenarioReasons.innerHTML = "";
   });
+
+  // ===================== ADMIN PERMISSION (CLIENT-SIDE) =====================
+  const ADMIN_KEYS = {
+    isAdmin: "cvSurvey_isAdmin",
+    adminEmail: "cvSurvey_adminEmail"
+  };
+
+  const adminBtn = $("#adminBtn");
+  const adminModal = $("#adminModal");
+  const adminClose = $("#adminClose");
+  const adminEmail = $("#adminEmail");
+  const adminPass = $("#adminPass");
+  const adminLogin = $("#adminLogin");
+  const adminLogout = $("#adminLogout");
+  const adminMsg = $("#adminMsg");
+
+  function normalizeEmail(s){
+    return (s || "").toLowerCase().trim();
+  }
+
+  function setAdminUI(isAdmin){
+    toggleBtn.style.display = isAdmin ? "" : "none";
+    adminMessageBox.style.display = isAdmin ? "" : "none";
+
+    // Non-admin always forced OFF
+    if (!isAdmin){
+      localStorage.setItem(STORAGE_KEYS.isOn, "false");
+      applySurveyState(false);
+      renderVisitorMessage();
+    }
+  }
+
+  function loadAdminState(){
+    const isAdmin = localStorage.getItem(ADMIN_KEYS.isAdmin) === "true";
+    const savedEmail = localStorage.getItem(ADMIN_KEYS.adminEmail) || "";
+    adminEmail.value = savedEmail;
+    setAdminUI(isAdmin);
+    return isAdmin;
+  }
+
+  // Open modal
+  adminBtn.addEventListener("click", () => {
+    adminMsg.textContent = "";
+    adminModal.style.display = "flex";
+    adminPass.value = "";
+  });
+
+  adminClose.addEventListener("click", () => adminModal.style.display = "none");
+  adminModal.addEventListener("click", (e) => {
+    if (e.target === adminModal) adminModal.style.display = "none";
+  });
+
+  adminLogin.addEventListener("click", () => {
+    adminMsg.textContent = "";
+    const email = normalizeEmail(adminEmail.value);
+    const pass = adminPass.value || "";
+
+    const allowed = ADMIN_ALLOWLIST.includes(email);
+    const passOk = pass === ADMIN_PASSCODE;
+
+    if (!email){ adminMsg.textContent = "Email is required."; return; }
+    if (!allowed){ adminMsg.textContent = "You do not have permission."; return; }
+    if (!passOk){ adminMsg.textContent = "Wrong passcode."; return; }
+
+    localStorage.setItem(ADMIN_KEYS.isAdmin, "true");
+    localStorage.setItem(ADMIN_KEYS.adminEmail, email);
+
+    setAdminUI(true);
+    adminModal.style.display = "none";
+  });
+
+  adminLogout.addEventListener("click", () => {
+    localStorage.setItem(ADMIN_KEYS.isAdmin, "false");
+    localStorage.removeItem(ADMIN_KEYS.adminEmail);
+    adminMsg.textContent = "Logged out.";
+    setAdminUI(false);
+  });
+
+  // Enforce permission on load
+  loadAdminState();
 </script>
 </body>
 </html>
-
-
-
-
-
-
