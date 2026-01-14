@@ -685,7 +685,7 @@ function escapeHtml(str){
 /* ===================== API ===================== */
 async function apiGetSettings(){
   const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
-  const res = await fetch(url, { method:"GET" });
+  const res = await fetch(url, { method: "GET" });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "getSettings failed");
   return json.settings; // { isOn:boolean, message:string }
@@ -696,7 +696,7 @@ async function apiSaveSettings({ email, passcode, isOn, message }){
   body.append("action", "saveSettings");
   body.append("data", JSON.stringify({ email, passcode, isOn, message }));
 
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method:"POST", body });
+  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "saveSettings failed");
   return json.settings;
@@ -707,7 +707,7 @@ async function apiSubmitSurvey(payload){
   body.append("action", "submitSurvey");
   body.append("data", JSON.stringify(payload));
 
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method:"POST", body });
+  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "submitSurvey failed");
   return json;
@@ -1057,4 +1057,5 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
