@@ -50,16 +50,15 @@
       min-width: 240px;
     }
     .logo{
-      width:70px; height:70px;
-      border-radius: 12px;
-      background: #ffff;
-      display:grid; place-items:center;
-      color:white;
-      font-weight:800;
-      letter-spacing:.5px;
-      box-shadow: 0 8px 16px rgba(255,122,0,.22);
-      overflow:hidden;
-    }
+      width:64px;          /* tăng khung */
+      height:64px;
+      border-radius:12px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:visible;    /* QUAN TRỌNG */
+}
     .logo img{
   width:100%;
   height:100%;
@@ -296,8 +295,8 @@
         <img src="images/logo.png" alt="Company Logo">
       </div>
       <div class="titlewrap">
-        <div class="title">Core Value Survey Month 1</div>
-        <div class="subtitle">All questions required • Auto scoring</div>
+        <div class="title">Khảo sát VHDN "Hiểu" và "Biết" Tháng 1</div>
+        <div class="subtitle">Tất cả câu hỏi đều phải trả lời • Auto chấm điểm</div>
       </div>
     </div>
 
@@ -308,22 +307,22 @@
 <main>
   <div class="card">
     <div class="card-head">
-      <h2>Survey Form</h2>
-      <p>Please complete all required fields. Score will appear after submit.</p>
+      <h2>Bảng khảo sát</h2>
+      <p>Các anh/chị hãy hoàn thành khảo sát. Điểm sẽ tự chấm sau khi nộp khảo sát</p>
     </div>
 
     <form id="surveyForm" novalidate>
       <!-- Basic info -->
       <div class="row">
         <div>
-          <label for="fullName">1) Your Name <span class="required">Required</span></label>
-          <input id="fullName" name="fullName" type="text" placeholder="Type your full name" required />
+          <label for="fullName">1) Họ và Tên <span class="required">Required</span></label>
+          <input id="fullName" name="fullName" type="text" placeholder="Hãy điền tên của Anh/Chị vào đây" required />
         </div>
 
         <div>
-          <label for="department">2) Department <span class="required">Required</span></label>
+          <label for="department">2) Bộ phận <span class="required">Required</span></label>
           <select id="department" name="department" required>
-            <option value="" selected disabled>Select your department</option>
+            <option value="" selected disabled>Anh/Chị hãy chọn phòng ban của Anh/chị</option>
             <option>HCNS</option>
             <option>P.MUA</option>
             <option>HSSE</option>
@@ -814,6 +813,7 @@ if (scenarioCorrect.includes(v)) {
 </script>
 </body>
 </html>
+
 
 
 
