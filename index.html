@@ -324,16 +324,27 @@
           <label for="department">2) Department <span class="required">Required</span></label>
           <select id="department" name="department" required>
             <option value="" selected disabled>Select your department</option>
-            <option>HR</option>
-            <option>Finance</option>
-            <option>Operations</option>
-            <option>Sales</option>
-            <option>Marketing</option>
+            <option>HCNS</option>
+            <option>P.MUA</option>
+            <option>HSSE</option>
+            <option>BẢO TRÌ</option>
+            <option>KINH DOANH</option>
+            <option>KẾ HOẠCH</option>
+            <option>VẬN TẢI</option>
+            <option>CTTT</option>
+            <option>GIAO NHẬN QUỐC TẾ (FORWARDING)</option>
+            <option>XNK</option>
+            <option>KẾ TOÁN</option>
             <option>IT</option>
-            <option>Production</option>
-            <option>Quality</option>
-            <option>Logistics</option>
-            <option>Customer Service</option>
+            <option>KHO 1-4</option>
+            <option>KHO 5</option>
+            <option>KHO 6</option>
+            <option>KHO 7-8 DEPOT</option>
+            <option>KHO ST</option>
+            <option>BẢO VỆ ICD 30</option>
+            <option>BẢO VỆ KHO 6</option>
+            <option>BẢO VỆ KHO 7-8</option>
+            <option>BẢO VỆ KHO ST</option>
           </select>
           <small class="muted">Edit this list to match your org.</small>
         </div>
@@ -373,14 +384,35 @@
 
       <div class="qblock" data-qid="q2">
         <div class="qtitle">
-          <h3>4) What supports Teamwork? (Select all that apply)</h3>
+          <h3>4) Điền từ còn thiếu vào sứ mệnh của TBS Logistics:
+            "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."</h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
-          <label class="choice"><input type="checkbox" name="q2" value="a"> <span>Share information proactively.</span></label>
-          <label class="choice"><input type="checkbox" name="q2" value="b"> <span>Ignore feedback from others.</span></label>
-          <label class="choice"><input type="checkbox" name="q2" value="c"> <span>Help teammates unblock work.</span></label>
-          <label class="choice"><input type="checkbox" name="q2" value="d"> <span>Compete internally even when it harms outcomes.</span></label>
+           <label class="choice">
+               <input type="radio" name="q2" value="a">
+               <span>A. [1] năng suất / [2] lợi ích / [3] chăm sóc</span>
+           </label>
+           <label class="choice">
+               <input type="radio" name="q2" value="b">
+               <span>[1] hiệu suất / [2] giá trị / [3] bảo vệ</span>
+           </label>
+           <label class="choice">
+              <input type="radio" name="q2" value="c">
+              <span> [1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo</span>
+           </label>
+          <label class="choice">
+              <input type="radio" name="q2" value="d">
+              <span> 1] năng lực / [2] giá trị / [3] hỗ trợ</span>
+           </label>
+          <label class="choice">
+              <input type="radio" name="q2" value="e">
+              <span> [1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo</span>
+           </label>
+          <label class="choice">
+              <input type="radio" name="q2" value="f">
+              <span> 1] hiệu quả / [2] cơ hội / [3] cải thiện</span>
+           </label>
         </div>
       </div>
 
@@ -519,7 +551,6 @@
   // ====== CONFIG ======
 // 7 checkbox questions: score 1 only if the selected set matches EXACTLY the correct set.
 const correctSets = {
-  q2: ["a","c"],
   q3: ["a","b","d"],
   q4: ["a","c","d"],
   q5: ["a","b","d"],
@@ -527,7 +558,8 @@ const correctSets = {
   q7: ["a","c","d"]
 };
   const correctSingle = {
-  q1: "a"
+  q1: "d",
+  q2: "c"   // Q2 cũng là radio
 };
 
 // Scenario: ONLY correct choices give points
@@ -583,59 +615,78 @@ const scenarioCorrect = ["s1", "s2", "s3"];
 
   // ====== Validation for checkbox groups (required) ======
   function validateRequiredGroups(){
-    const errors = [];
+  const errors = [];
 
-    // name + dept are native required, we still check for nicer error message.
-    if (!$("#fullName").value.trim()) errors.push("Name is required.");
-    if (!$("#department").value) errors.push("Department is required.");
+  // Name + Department
+  if (!$("#fullName").value.trim()) errors.push("Name is required.");
+  if (!$("#department").value) errors.push("Department is required.");
 
-    // 7 questions each require at least 1 checked
-    for (let i=1;i<=7;i++){
-      const vals = getCheckedValues("q"+i);
-      if (vals.length === 0) errors.push(`Question ${i+2} is required (please select at least one option).`);
+  // Q1, Q2 (radio) required
+  ["q1","q2"].forEach((q, idx) => {
+    if (!document.querySelector(`input[name="${q}"]:checked`)) {
+      errors.push(`Question ${idx + 1} is required.`);
     }
+  });
 
-    // Scenario requires at least 1 checked
-    const scenario = getCheckedValues("scenario");
-    if (scenario.length === 0) errors.push("Scenario question is required (select at least one option).");
-
-    // Scenario explanation required only for checked ones (handled by textarea.required),
-    // but we add message if missing.
-    scenario.forEach(v => {
-      const ta = $(`.explain[data-explain-for="${v}"] textarea`);
-      if (ta && !ta.value.trim()) errors.push("Scenario explanation is required for each selected option.");
-    });
-
-    return errors;
+  // Q3–Q7 (checkbox) required
+  for (let i = 3; i <= 7; i++) {
+    if (getCheckedValues("q" + i).length === 0) {
+      errors.push(`Question ${i} is required.`);
+    }
   }
 
+  // Scenario required (at least 1 checked)
+  const scenario = getCheckedValues("scenario");
+  if (scenario.length === 0) {
+    errors.push("Scenario question is required.");
+  }
+
+  // Scenario explanation required for each checked option
+  scenario.forEach(v => {
+    const ta = $(`.explain[data-explain-for="${v}"] textarea`);
+    if (ta && !ta.value.trim()) {
+      errors.push("Scenario explanation is required for each selected option.");
+    }
+  });
+
+  return errors;
+}
   // ====== Scoring ======
   function computeScore(){
   let score = 0;
 
-  // Q1 (radio - single correct)
-  const q1Picked = document.querySelector('input[name="q1"]:checked')?.value;
-  if (q1Picked === correctSingle.q1) score += 1;
-
-  // Q2–Q7 (checkbox - exact match)
-  for (let i = 2; i <= 7; i++){
-    const picked = getCheckedValues("q" + i);
-    const correct = correctSets["q" + i];
-    if (setsEqual(picked, correct)) score += 1;
-  }
-
-  // Scenario: 1 point ONLY for correct ticks
-  const scenarioPicked = getCheckedValues("scenario");
-  scenarioPicked.forEach(v => {
-    if (scenarioCorrect.includes(v)) score += 1;
+  // Q1 & Q2 (radio - single correct)
+  ["q1", "q2"].forEach(q => {
+    const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
+    if (picked === correctSingle[q]) {
+      score += 1;
+    }
   });
 
-  return score;
-}
-    // total possible:
-    const total = 1 + 6 + scenarioCorrect.length; 
-// Q1 (1) + Q2-7 (6) + scenario đúng tối đa = số đáp án đúng
+  // Q3–Q7 (checkbox - exact match)
+  for (let i = 3; i <= 7; i++){
+    const picked = getCheckedValues("q" + i);
+    const correct = correctSets["q" + i];
+    if (setsEqual(picked, correct)) {
+      score += 1;
+    }
+  }
 
+  // Scenario: only correct ticks give points
+  const scenarioPicked = getCheckedValues("scenario");
+  scenarioPicked.forEach(v => {
+    if (scenarioCorrect.includes(v)) {
+      score += 1;
+    }
+  });
+
+  const total =
+    Object.keys(correctSingle).length +      // Q1, Q2
+    Object.keys(correctSets).length +         // Q3–Q7
+    scenarioCorrect.length;                   // scenario max
+
+  return { score, total };
+}
   // ====== Submit handling ======
   const form = $("#surveyForm");
   const errorBox = $("#errorBox");
@@ -763,5 +814,6 @@ if (scenarioCorrect.includes(v)) {
 </script>
 </body>
 </html>
+
 
 
