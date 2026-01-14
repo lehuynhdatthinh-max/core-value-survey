@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Core Value Survey Month 1</title>
+  <style>
+    :root{
+      --orange:#ff7a00;
+      --orange2:#ffb26b;
+      --white:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background: linear-gradient(135deg, #fff 0%, #fff 45%, rgba(255,122,0,.12) 100%);
+      min-height:100vh;
+    }
+
+    /* Header */
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.7);
+      border-bottom: 1px solid rgba(229,231,235,.8);
+    }
+    .header-inner{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      min-width: 240px;
+    }
+    .logo{
+      width:44px; height:44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%);
+      display:grid; place-items:center;
+      color:white;
+      font-weight:800;
+      letter-spacing:.5px;
+      box-shadow: 0 8px 16px rgba(255,122,0,.22);
+      overflow:hidden;
+    }
+    .logo img{width:100%; height:100%; object-fit:cover; display:block}
+    .titlewrap{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+    .title{
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .subtitle{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pill{
+      padding:8px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255,122,0,.18), rgba(255,122,0,.06));
+      border: 1px solid rgba(255,122,0,.25);
+      font-size: 12px;
+      color: #9a4a00;
+      font-weight: 700;
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    main{
+      max-width: 980px;
+      margin: 18px auto 40px;
+      padding: 0 18px;
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-head{
+      padding: 18px 18px 10px;
+      background: linear-gradient(90deg, rgba(255,122,0,.10), rgba(255,255,255,1));
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+    .card-head p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    form{
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 760px){
+      .row{grid-template-columns:1fr}
+      .brand{min-width:auto}
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    input[type="text"], select, textarea{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline:none;
+      font-size: 14px;
+      background: #fff;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus{
+      border-color: rgba(255,122,0,.65);
+      box-shadow: 0 0 0 4px rgba(255,122,0,.12);
+    }
+    textarea{min-height: 88px; resize: vertical;}
+
+    .qblock{
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,122,0,.05), rgba(255,255,255,1));
+    }
+    .qtitle{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom: 10px;
+    }
+    .qtitle h3{
+      margin:0;
+      font-size: 15px;
+    }
+    .required{
+      font-size: 12px;
+      font-weight: 800;
+      color: #b42318;
+      background: rgba(180,35,24,.08);
+      border: 1px solid rgba(180,35,24,.18);
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .choices{
+      display:grid;
+      gap:10px;
+    }
+    .choice{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.9);
+    }
+    .choice input{margin-top:3px}
+    .choice span{
+      font-size: 14px;
+      line-height: 1.25rem;
+    }
+
+    .explain{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,122,0,.45);
+      background: rgba(255,122,0,.06);
+      display:none;
+    }
+    .explain .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:flex-end;
+      padding-top: 6px;
+    }
+    button{
+      border:none;
+      cursor:pointer;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing:.2px;
+      font-size: 14px;
+    }
+    .btn-primary{
+      color:white;
+      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
+      box-shadow: 0 10px 20px rgba(255,122,0,.22);
+    }
+    .btn-ghost{
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+
+    /* Result */
+    .result{
+      display:none;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(16,185,129,.25);
+      background: rgba(16,185,129,.08);
+    }
+    .result h3{margin:0 0 6px}
+    .result p{margin:0; color: #064e3b}
+    .reason-card{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,122,0,.22);
+      background: rgba(255,122,0,.06);
+    }
+    .reason-card h4{margin:0 0 6px; font-size: 14px}
+    .reason-card .expected{
+      color:#7c2d12;
+      font-size: 13px;
+      margin: 0 0 8px;
+    }
+    .reason-card .user{
+      color:#111827;
+      font-size: 13px;
+      margin:0;
+      white-space: pre-wrap;
+    }
+    .error{
+      display:none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(180,35,24,.22);
+      background: rgba(180,35,24,.06);
+      color:#7f1d1d;
+      font-weight: 700;
+    }
+    small.muted{color:var(--muted)}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <!-- Replace this with your logo image if you want:
+           <div class="logo"><img src="YOUR_LOGO_URL_OR_PATH" alt="Company Logo"/></div>
+      -->
+      <div class="logo" aria-label="Company Logo">LOGO</div>
+      <div class="titlewrap">
+        <div class="title">Core Value Survey Month 1</div>
+        <div class="subtitle">All questions required • Auto scoring</div>
+      </div>
+    </div>
+    <div class="pill">Orange × White vibe</div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="card-head">
+      <h2>Survey Form</h2>
+      <p>Please complete all required fields. Score will appear after submit.</p>
+    </div>
+
+    <form id="surveyForm" novalidate>
+      <!-- Basic info -->
+      <div class="row">
+        <div>
+          <label for="fullName">1) Your Name <span class="required">Required</span></label>
+          <input id="fullName" name="fullName" type="text" placeholder="Type your full name" required />
+        </div>
+
+        <div>
+          <label for="department">2) Department <span class="required">Required</span></label>
+          <select id="department" name="department" required>
+            <option value="" selected disabled>Select your department</option>
+            <option>HR</option>
+            <option>Finance</option>
+            <option>Operations</option>
+            <option>Sales</option>
+            <option>Marketing</option>
+            <option>IT</option>
+            <option>Production</option>
+            <option>Quality</option>
+            <option>Logistics</option>
+            <option>Customer Service</option>
+          </select>
+          <small class="muted">Edit this list to match your org.</small>
+        </div>
+      </div>
+
+      <!-- 7 checkbox questions (score only if EXACT match correct set) -->
+      <div class="qblock" data-qid="q1">
+        <div class="qtitle">
+          <h3>3) Which behaviors demonstrate Integrity? (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q1" value="a"> <span>Admit mistakes and fix them.</span></label>
+          <label class="choice"><input type="checkbox" name="q1" value="b"> <span>Hide issues to avoid trouble.</span></label>
+          <label class="choice"><input type="checkbox" name="q1" value="c"> <span>Speak truthfully, even when it's hard.</span></label>
+          <label class="choice"><input type="checkbox" name="q1" value="d"> <span>Blame others to protect yourself.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q2">
+        <div class="qtitle">
+          <h3>4) What supports Teamwork? (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q2" value="a"> <span>Share information proactively.</span></label>
+          <label class="choice"><input type="checkbox" name="q2" value="b"> <span>Ignore feedback from others.</span></label>
+          <label class="choice"><input type="checkbox" name="q2" value="c"> <span>Help teammates unblock work.</span></label>
+          <label class="choice"><input type="checkbox" name="q2" value="d"> <span>Compete internally even when it harms outcomes.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q3">
+        <div class="qtitle">
+          <h3>5) Customer-first mindset includes… (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q3" value="a"> <span>Listening carefully to customer needs.</span></label>
+          <label class="choice"><input type="checkbox" name="q3" value="b"> <span>Delivering quality, not just speed.</span></label>
+          <label class="choice"><input type="checkbox" name="q3" value="c"> <span>Cutting corners if nobody notices.</span></label>
+          <label class="choice"><input type="checkbox" name="q3" value="d"> <span>Communicating delays transparently.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q4">
+        <div class="qtitle">
+          <h3>6) Which are examples of Ownership? (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q4" value="a"> <span>Take responsibility for outcomes.</span></label>
+          <label class="choice"><input type="checkbox" name="q4" value="b"> <span>Say “not my job” when issues appear.</span></label>
+          <label class="choice"><input type="checkbox" name="q4" value="c"> <span>Propose solutions, not only problems.</span></label>
+          <label class="choice"><input type="checkbox" name="q4" value="d"> <span>Follow through until closure.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q5">
+        <div class="qtitle">
+          <h3>7) Continuous improvement means… (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q5" value="a"> <span>Reflect and learn from results.</span></label>
+          <label class="choice"><input type="checkbox" name="q5" value="b"> <span>Try small experiments to improve.</span></label>
+          <label class="choice"><input type="checkbox" name="q5" value="c"> <span>Keep doing the same thing forever.</span></label>
+          <label class="choice"><input type="checkbox" name="q5" value="d"> <span>Use data to guide changes.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q6">
+        <div class="qtitle">
+          <h3>8) Which actions show Respect? (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q6" value="a"> <span>Listen without interrupting.</span></label>
+          <label class="choice"><input type="checkbox" name="q6" value="b"> <span>Use harsh language under pressure.</span></label>
+          <label class="choice"><input type="checkbox" name="q6" value="c"> <span>Give constructive feedback kindly.</span></label>
+          <label class="choice"><input type="checkbox" name="q6" value="d"> <span>Assume good intent first.</span></label>
+        </div>
+      </div>
+
+      <div class="qblock" data-qid="q7">
+        <div class="qtitle">
+          <h3>9) Safety culture includes… (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+        <div class="choices">
+          <label class="choice"><input type="checkbox" name="q7" value="a"> <span>Report hazards immediately.</span></label>
+          <label class="choice"><input type="checkbox" name="q7" value="b"> <span>Skip PPE to save time.</span></label>
+          <label class="choice"><input type="checkbox" name="q7" value="c"> <span>Follow procedures consistently.</span></label>
+          <label class="choice"><input type="checkbox" name="q7" value="d"> <span>Stop work if unsafe.</span></label>
+        </div>
+      </div>
+
+      <!-- Scenario section -->
+      <div class="qblock" data-qid="scenario">
+        <div class="qtitle">
+          <h3>10) Scenario: A customer reports a recurring defect. What should you do? (Select all that apply)</h3>
+          <div class="required">Required</div>
+        </div>
+
+        <div class="choices">
+          <div class="choice">
+            <input type="checkbox" id="s1" name="scenario" value="s1">
+            <span><strong>Escalate</strong> to relevant teams and share all known details.</span>
+          </div>
+          <div class="explain" data-explain-for="s1">
+            <p class="hint">Explain why this choice fits the scenario (required if checked):</p>
+            <textarea name="scenario_explain_s1" placeholder="Type your reason..."></textarea>
+          </div>
+
+          <div class="choice">
+            <input type="checkbox" id="s2" name="scenario" value="s2">
+            <span><strong>Investigate root cause</strong> using data and process review.</span>
+          </div>
+          <div class="explain" data-explain-for="s2">
+            <p class="hint">Explain why this choice fits the scenario (required if checked):</p>
+            <textarea name="scenario_explain_s2" placeholder="Type your reason..."></textarea>
+          </div>
+
+          <div class="choice">
+            <input type="checkbox" id="s3" name="scenario" value="s3">
+            <span><strong>Respond transparently</strong> with timeline/next steps.</span>
+          </div>
+          <div class="explain" data-explain-for="s3">
+            <p class="hint">Explain why this choice fits the scenario (required if checked):</p>
+            <textarea name="scenario_explain_s3" placeholder="Type your reason..."></textarea>
+          </div>
+
+          <div class="choice">
+            <input type="checkbox" id="s4" name="scenario" value="s4">
+            <span><strong>Ignore</strong> it unless more customers complain.</span>
+          </div>
+          <div class="explain" data-explain-for="s4">
+            <p class="hint">Explain why this choice fits the scenario (required if checked):</p>
+            <textarea name="scenario_explain_s4" placeholder="Type your reason..."></textarea>
+          </div>
+        </div>
+
+        <small class="muted">
+          In this section: each checked box = 1 point. Writing is required if checked, but does not affect score.
+        </small>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
+        <button type="submit" class="btn-primary">Submit Survey</button>
+      </div>
+
+      <div class="error" id="errorBox"></div>
+
+      <div class="result" id="resultBox">
+        <h3>Submitted ✅</h3>
+        <p id="scoreLine"></p>
+        <div id="scenarioReasons"></div>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  // ====== CONFIG ======
+// 7 checkbox questions: score 1 only if the selected set matches EXACTLY the correct set.
+const correctSets = {
+  q1: ["a","c"],
+  q2: ["a","c"],
+  q3: ["a","b","d"],
+  q4: ["a","c","d"],
+  q5: ["a","b","d"],
+  q6: ["a","c","d"],
+  q7: ["a","c","d"]
+};
+
+// Scenario: ONLY correct choices give points
+// ví dụ: s1, s2, s3 là đúng; s4 là sai
+const scenarioCorrect = ["s1", "s2", "s3"];
+
+
+  // Scenario section: each tick = 1 point, even if it's a "bad" choice.
+  // You asked to show "actual reasons why to choose that answer" after submit:
+  // => we display an expected rationale text (predefined) for each checked option.
+  const scenarioRationales = {
+    s1: "Escalation ensures fast coordination and prevents repeated defects across batches/lines.",
+    s2: "Root-cause investigation prevents rework loops and makes the fix permanent.",
+    s3: "Transparency builds trust and sets clear expectations for resolution.",
+    s4: "This is NOT recommended: ignoring defects increases risk, cost, and customer dissatisfaction."
+  };
+
+  // Google Sheets endpoint (Apps Script Web App). Put your deployed URL here:
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxUODfDLAFrjahu8DeijhWesDGapkgciUq4shrCWgUVibQVPFFSujwRAqpjRf2UI4/exec";
+
+  // ====== Helpers ======
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  function getCheckedValues(name){
+    return $$(`input[name="${name}"]:checked`).map(i => i.value);
+  }
+  function setsEqual(a, b){
+    if (a.length !== b.length) return false;
+    const sa = [...a].sort().join("|");
+    const sb = [...b].sort().join("|");
+    return sa === sb;
+  }
+
+  // ====== Scenario explain toggles ======
+  function syncScenarioExplain(){
+    const scenarioChecks = $$('input[name="scenario"]');
+    scenarioChecks.forEach(chk => {
+      const box = $(`.explain[data-explain-for="${chk.value}"]`);
+      if (!box) return;
+      box.style.display = chk.checked ? "block" : "none";
+
+      // When checked => textarea required
+      const ta = $("textarea", box);
+      if (ta) {
+        ta.required = chk.checked;
+        if (!chk.checked) ta.value = "";
+      }
+    });
+  }
+  $$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScenarioExplain));
+  syncScenarioExplain();
+
+  // ====== Validation for checkbox groups (required) ======
+  function validateRequiredGroups(){
+    const errors = [];
+
+    // name + dept are native required, we still check for nicer error message.
+    if (!$("#fullName").value.trim()) errors.push("Name is required.");
+    if (!$("#department").value) errors.push("Department is required.");
+
+    // 7 questions each require at least 1 checked
+    for (let i=1;i<=7;i++){
+      const vals = getCheckedValues("q"+i);
+      if (vals.length === 0) errors.push(`Question ${i+2} is required (please select at least one option).`);
+    }
+
+    // Scenario requires at least 1 checked
+    const scenario = getCheckedValues("scenario");
+    if (scenario.length === 0) errors.push("Scenario question is required (select at least one option).");
+
+    // Scenario explanation required only for checked ones (handled by textarea.required),
+    // but we add message if missing.
+    scenario.forEach(v => {
+      const ta = $(`.explain[data-explain-for="${v}"] textarea`);
+      if (ta && !ta.value.trim()) errors.push("Scenario explanation is required for each selected option.");
+    });
+
+    return errors;
+  }
+
+  // ====== Scoring ======
+  function computeScore(){
+    let score = 0;
+
+    // 7 exact-match questions
+    for (let i=1;i<=7;i++){
+      const picked = getCheckedValues("q"+i);
+      const correct = correctSets["q"+i];
+      if (setsEqual(picked, correct)) score += 1;
+    }
+
+    // scenario: 1 point ONLY for correct ticks
+const scenarioPicked = getCheckedValues("scenario");
+scenarioPicked.forEach(v => {
+  if (scenarioCorrect.includes(v)) {
+    score += 1;
+  }
+});
+
+
+    // total possible:
+    const total = 7 + scenarioCorrect.length;
+return {score, total};
+  }
+
+  // ====== Submit handling ======
+  const form = $("#surveyForm");
+  const errorBox = $("#errorBox");
+  const resultBox = $("#resultBox");
+  const scoreLine = $("#scoreLine");
+  const scenarioReasons = $("#scenarioReasons");
+
+  async function postToGoogleSheet(payload){
+  console.log("Posting to:", GOOGLE_SCRIPT_URL);
+
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_")) return {skipped:true};
+
+  const body = new URLSearchParams();
+  body.append("data", JSON.stringify(payload));
+
+  const res = await fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    body
+  });
+
+  return await res.json().catch(() => ({ok:false}));
+}
+
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    errorBox.style.display = "none";
+    errorBox.textContent = "";
+    resultBox.style.display = "none";
+    scenarioReasons.innerHTML = "";
+
+    const errors = validateRequiredGroups();
+    if (errors.length){
+      errorBox.style.display = "block";
+      errorBox.textContent = errors[0]; // show first for clean UI
+      return;
+    }
+
+    const {score, total} = computeScore();
+
+    // Build payload for Google Sheet
+    const payload = {
+      timestamp: new Date().toISOString(),
+      name: $("#fullName").value.trim(),
+      department: $("#department").value,
+      score,
+      total,
+      // raw answers
+      answers: {
+        q1: getCheckedValues("q1"),
+        q2: getCheckedValues("q2"),
+        q3: getCheckedValues("q3"),
+        q4: getCheckedValues("q4"),
+        q5: getCheckedValues("q5"),
+        q6: getCheckedValues("q6"),
+        q7: getCheckedValues("q7"),
+        scenario: getCheckedValues("scenario"),
+        scenario_explain: {
+          s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
+          s2: ($(`.explain[data-explain-for="s2"] textarea`)?.value ?? "").trim(),
+          s3: ($(`.explain[data-explain-for="s3"] textarea`)?.value ?? "").trim(),
+          s4: ($(`.explain[data-explain-for="s4"] textarea`)?.value ?? "").trim()
+        }
+      }
+    };
+
+    // Show result UI immediately
+    scoreLine.textContent = `Your score: ${score} / ${total}`;
+
+    // Show "actual reasons" (expected rationales) + user's writing for checked scenario options
+    const pickedScenario = payload.answers.scenario;
+    pickedScenario.forEach(v => {
+      const card = document.createElement("div");
+      card.className = "reason-card";
+
+      const title = document.createElement("h4");
+      title.textContent = `Scenario choice: ${v.toUpperCase()}`;
+
+      const expected = document.createElement("p");
+expected.className = "expected";
+
+if (scenarioCorrect.includes(v)) {
+  expected.textContent = `✅ Correct choice. Rationale: ${scenarioRationales[v]}`;
+} else {
+  expected.textContent = `❌ Incorrect choice. Rationale: ${scenarioRationales[v]}`;
+}
+
+
+      const user = document.createElement("p");
+      user.className = "user";
+      const userText = payload.answers.scenario_explain[v] || "(No text provided)";
+      user.textContent = `Your explanation:\n${userText}`;
+
+      card.appendChild(title);
+      card.appendChild(expected);
+      card.appendChild(user);
+      scenarioReasons.appendChild(card);
+    });
+
+    resultBox.style.display = "block";
+    resultBox.scrollIntoView({behavior:"smooth", block:"start"});
+
+    // Send to Google Sheet (optional)
+    try{
+      const resp = await postToGoogleSheet(payload);
+      if (resp && resp.ok === false && !resp.skipped){
+        // only show if actually attempted and failed
+        errorBox.style.display = "block";
+        errorBox.textContent = "Submitted but failed to save to Google Sheet. Check Apps Script deployment/CORS.";
+      }
+    }catch(err){
+      errorBox.style.display = "block";
+      errorBox.textContent = "Submitted but failed to save to Google Sheet. Check network or Apps Script URL.";
+    }
+  });
+
+  $("#resetBtn").addEventListener("click", () => {
+    form.reset();
+    syncScenarioExplain();
+    errorBox.style.display = "none";
+    resultBox.style.display = "none";
+    scenarioReasons.innerHTML = "";
+  });
+</script>
+</body>
+</html>
