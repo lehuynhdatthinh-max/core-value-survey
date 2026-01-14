@@ -50,9 +50,9 @@
       min-width: 240px;
     }
     .logo{
-      width:44px; height:44px;
+      width:70px; height:70px;
       border-radius: 12px;
-      background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%);
+      background: #ffff;
       display:grid; place-items:center;
       color:white;
       font-weight:800;
@@ -342,14 +342,32 @@
       <!-- 7 checkbox questions (score only if EXACT match correct set) -->
       <div class="qblock" data-qid="q1">
         <div class="qtitle">
-          <h3>3) Which behaviors demonstrate Integrity? (Select all that apply)</h3>
+          <h3>3) Điền từ còn thiếu vào Tầm nhìn của TBS Logistics ?
+                 "Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."(Chọn câu trả lời đúng)</h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
-          <label class="choice"><input type="checkbox" name="q1" value="a"> <span>Admit mistakes and fix them.</span></label>
-          <label class="choice"><input type="checkbox" name="q1" value="b"> <span>Hide issues to avoid trouble.</span></label>
-          <label class="choice"><input type="checkbox" name="q1" value="c"> <span>Speak truthfully, even when it's hard.</span></label>
-          <label class="choice"><input type="checkbox" name="q1" value="d"> <span>Blame others to protect yourself.</span></label>
+          <label class="choice">
+             <input type="radio" name="q1" value="a"> <span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng/span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="b"> <span>[1] công ty vận tải [2] giao nhận hàng hóa [3] dịch vụ kho bãi</span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="c"> <[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="d"> <[1] trung tâm logistics [2] cung cấp dịch vụ [3] giải pháp chuỗi cung ứng</span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="e"> <[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="f"> <[1] nhà cung cấp giải pháp [2] dịch vụ logistics [3] kho vận thông minh</span>
+          </label>
+          <label class="choice">
+             <input type="radio" name="q1" value="g"> <[1] cảng cạn ICD [2] xử lý hàng hóa [3] phân phối nội địa</span>
+          </label>
         </div>
       </div>
 
@@ -501,13 +519,15 @@
   // ====== CONFIG ======
 // 7 checkbox questions: score 1 only if the selected set matches EXACTLY the correct set.
 const correctSets = {
-  q1: ["a","c"],
   q2: ["a","c"],
   q3: ["a","b","d"],
   q4: ["a","c","d"],
   q5: ["a","b","d"],
   q6: ["a","c","d"],
   q7: ["a","c","d"]
+};
+  const correctSingle = {
+  q1: "a"
 };
 
 // Scenario: ONLY correct choices give points
@@ -591,28 +611,30 @@ const scenarioCorrect = ["s1", "s2", "s3"];
 
   // ====== Scoring ======
   function computeScore(){
-    let score = 0;
+  let score = 0;
 
-    // 7 exact-match questions
-    for (let i=1;i<=7;i++){
-      const picked = getCheckedValues("q"+i);
-      const correct = correctSets["q"+i];
-      if (setsEqual(picked, correct)) score += 1;
-    }
+  // Q1 (radio - single correct)
+  const q1Picked = document.querySelector('input[name="q1"]:checked')?.value;
+  if (q1Picked === correctSingle.q1) score += 1;
 
-    // scenario: 1 point ONLY for correct ticks
-const scenarioPicked = getCheckedValues("scenario");
-scenarioPicked.forEach(v => {
-  if (scenarioCorrect.includes(v)) {
-    score += 1;
+  // Q2–Q7 (checkbox - exact match)
+  for (let i = 2; i <= 7; i++){
+    const picked = getCheckedValues("q" + i);
+    const correct = correctSets["q" + i];
+    if (setsEqual(picked, correct)) score += 1;
   }
-});
 
+  // Scenario: 1 point ONLY for correct ticks
+  const scenarioPicked = getCheckedValues("scenario");
+  scenarioPicked.forEach(v => {
+    if (scenarioCorrect.includes(v)) score += 1;
+  });
 
+  return score;
+}
     // total possible:
-    const total = 7 + scenarioCorrect.length;
-return {score, total};
-  }
+    const total = 1 + 6 + scenarioCorrect.length; 
+// Q1 (1) + Q2-7 (6) + scenario đúng tối đa = số đáp án đúng
 
   // ====== Submit handling ======
   const form = $("#surveyForm");
@@ -741,4 +763,5 @@ if (scenarioCorrect.includes(v)) {
 </script>
 </body>
 </html>
+
 
