@@ -602,7 +602,7 @@
       <div class="error" id="errorBox"></div>
 
       <div class="result" id="resultBox">
-        <h3>Submitted ✅</h3>
+        <h3>Đã hoàn thành khảo sát ✅</h3>
         <p id="scoreLine"></p>
         <div id="scenarioReasons"></div>
       </div>
@@ -998,9 +998,9 @@ form.addEventListener("submit", async (e) => {
     userAgent: navigator.userAgent
   };
 
-  scoreLine.textContent = `TOTAL: ${score} / ${total}`;
+  scoreLine.textContent = `Tổng Điểm: ${score} / ${total}`;
   const extra = document.createElement("p");
-  extra.textContent = `KNOW: ${knowScore}/${totalKnow} • UNDERSTAND: ${understandScore}/${totalUnderstand}`;
+  extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
   resultBox.insertBefore(extra, scenarioReasons);
 
 
@@ -1009,7 +1009,7 @@ form.addEventListener("submit", async (e) => {
     card.className = "reason-card";
 
     const title = document.createElement("h4");
-    title.textContent = `Scenario choice: ${v.toUpperCase()}`;
+    title.textContent = `Bạn đã chọn những giá trị: ${v.toUpperCase()}`;
 
     const expected = document.createElement("p");
     expected.className = "expected";
@@ -1018,7 +1018,7 @@ form.addEventListener("submit", async (e) => {
     const user = document.createElement("p");
     user.className = "user";
     const userText = payload.answers.scenario_explain[v] || "(No text provided)";
-    user.textContent = `Your explanation:\n${userText}`;
+    user.textContent = `Lời giải thích của Anh/chị:\n${userText}`;
 
     card.appendChild(title);
     card.appendChild(expected);
@@ -1066,6 +1066,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
