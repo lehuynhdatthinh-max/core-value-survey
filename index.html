@@ -639,7 +639,7 @@
 <script>
 /* ===================== CONFIG ===================== */
 /** ✅ Replace this with your Apps Script Web App URL */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztJ8jyRaGr8YZkFObKrkxoZIpAW1EDuITZxmulaC_SBT4lUJEAoRiz69exAI_XrRvZ/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT_6yIX2FAITDnLEBVQF5afEn4i-7o1PWnr58kXuNSX5-60hU0q1wLCo9d5go9LnSf/exec";
 
 /* Scoring rules */
 const correctSingle = { q1: "d", q2: "c" };
@@ -826,30 +826,35 @@ function validateRequiredGroups(){
 }
 
 /* ===================== SCORING ===================== */
-function computeScore(){
-  let score = 0;
+function computeScoreSplit(){
+  let knowScore = 0;
+  let understandScore = 0;
 
+  // KNOW: Q1–Q2 radios
   ["q1","q2"].forEach(q => {
     const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
-    if (picked === correctSingle[q]) score += 1;
+    if (picked === correctSingle[q]) knowScore += 1;
   });
 
+  // KNOW: Q3–Q7 exact-match sets
   for (let i = 3; i <= 7; i++){
-    const picked = getCheckedValues("q"+i);
-    const correct = correctSets["q"+i];
-    if (setsEqual(picked, correct)) score += 1;
+    const picked = getCheckedValues("q" + i);
+    const correct = correctSets["q" + i];
+    if (setsEqual(picked, correct)) knowScore += 1;
   }
 
+  // UNDERSTAND: Scenario (only correct ticks give points)
   getCheckedValues("scenario").forEach(v => {
-    if (scenarioCorrect.includes(v)) score += 1;
+    if (scenarioCorrect.includes(v)) understandScore += 1;
   });
 
-  const total =
-    Object.keys(correctSingle).length +
-    Object.keys(correctSets).length +
-    scenarioCorrect.length;
+  const totalKnow = Object.keys(correctSingle).length + Object.keys(correctSets).length; // 2 + 5 = 7
+  const totalUnderstand = scenarioCorrect.length; // thường = 1
+  const total = totalKnow + totalUnderstand;
 
-  return { score, total };
+  const score = knowScore + understandScore;
+
+  return { knowScore, totalKnow, understandScore, totalUnderstand, score, total };
 }
 
 /* ===================== ADMIN MODAL ===================== */
@@ -965,13 +970,13 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const { score, total } = computeScore();
+  const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
 
   const payload = {
     timestamp: new Date().toISOString(),
     name: $("#fullName").value.trim(),
     department: $("#department").value,
-    score, total,
+    knowScore,totalKnow,understandScore,totalUnderstand,score, total,
     answers: {
       q1: document.querySelector('input[name="q1"]:checked')?.value || "",
       q2: document.querySelector('input[name="q2"]:checked')?.value || "",
@@ -993,7 +998,11 @@ form.addEventListener("submit", async (e) => {
     userAgent: navigator.userAgent
   };
 
-  scoreLine.textContent = `Your score: ${score} / ${total}`;
+  scoreLine.textContent = `TOTAL: ${score} / ${total}`;
+  const extra = document.createElement("p");
+  extra.textContent = `KNOW: ${knowScore}/${totalKnow} • UNDERSTAND: ${understandScore}/${totalUnderstand}`;
+  resultBox.insertBefore(extra, scenarioReasons);
+
 
   payload.answers.scenario.forEach(v => {
     const card = document.createElement("div");
@@ -1057,6 +1066,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
