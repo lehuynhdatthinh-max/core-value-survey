@@ -776,7 +776,7 @@ function validateRequiredGroups(){
     }
   });
 
-  for (let i = 3; i <= 7; i++){
+  for (let i = 3; i <= 5; i++){
     if (getCheckedValues("q"+i).length === 0){
       errors.push(`Question ${i} is required.`);
     }
@@ -807,7 +807,7 @@ function computeScoreSplit(){
   });
 
   // KNOW: Q3–Q7 exact-match sets
-  for (let i = 3; i <= 7; i++){
+  for (let i = 3; i <= 5; i++){
     const picked = getCheckedValues("q" + i);
     const correct = correctSets["q" + i];
     if (setsEqual(picked, correct)) knowScore += 1;
@@ -1034,6 +1034,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
