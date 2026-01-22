@@ -530,35 +530,7 @@
         </div>
       </div>
 
-      <!-- Q6 -->
-      //<div class="qblock" data-qid="q6">
-        //<div class="qtitle">
-          //<h3>8) Which actions show Respect? (Select all that apply)</h3>
-          //<div class="required">Required</div>
-        //</div>
-        //<div class="choices">
-          //<label class="choice"><input type="checkbox" name="q6" value="a"> <span>Listen without interrupting.</span></label>
-          //<label class="choice"><input type="checkbox" name="q6" value="b"> <span>Use harsh language under pressure.</span></label>
-          //<label class="choice"><input type="checkbox" name="q6" value="c"> <span>Give constructive feedback kindly.</span></label>
-          //<label class="choice"><input type="checkbox" name="q6" value="d"> <span>Assume good intent first.</span></label>
-        //</div>
-      //</div>
-
-      <!-- Q7 -->
-      //<div class="qblock" data-qid="q7">
-        //<div class="qtitle">
-          //<h3>9) Safety culture includes… (Select all that apply)</h3>
-          //<div class="required">Required</div>
-        //</div>
-        //<div class="choices">
-          //<label class="choice"><input type="checkbox" name="q7" value="a"> <span>Report hazards immediately.</span></label>
-          //<label class="choice"><input type="checkbox" name="q7" value="b"> <span>Skip PPE to save time.</span></label>
-          //<label class="choice"><input type="checkbox" name="q7" value="c"> <span>Follow procedures consistently.</span></label>
-          //<label class="choice"><input type="checkbox" name="q7" value="d"> <span>Stop work if unsafe.</span></label>
-        //</div>
-      //</div>
-
-      <!-- Scenario -->
+            <!-- Scenario -->
       <div class="qblock" data-qid="scenario">
         <div class="qtitle">
           <h3>10) Tình huống: Trong quá trình kiểm tra trước khi giao hàng cho khách, nhân viên A phát hiện một lô sản phẩm có dấu hiệu lỗi kỹ thuật nhẹ.
@@ -647,8 +619,6 @@ const correctSets = {
   q3: ["a","c","d","e","f","g"],
   q4: ["a","c","d","f","g"],
   q5: ["a","b","d","e","g","h"],
-  q6: ["a","c","d"],
-  q7: ["a","c","d"]
 };
 const scenarioCorrect = ["s4", "s1", "s2"];
 const scenarioRationales = {
@@ -983,8 +953,6 @@ form.addEventListener("submit", async (e) => {
       q3: getCheckedValues("q3"),
       q4: getCheckedValues("q4"),
       q5: getCheckedValues("q5"),
-      q6: getCheckedValues("q6"),
-      q7: getCheckedValues("q7"),
       scenario: getCheckedValues("scenario"),
       scenario_explain: {
         s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
@@ -1066,6 +1034,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
