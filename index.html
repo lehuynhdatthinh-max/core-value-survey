@@ -646,7 +646,7 @@ const correctSets = {
   q4: ["a","c","d","f","g"],
   q5: ["a","b","d","e","g","h"],
 };
-const scenarioCorrect = ["s4", "s1", "s2"];
+const scenarioCorrect = ["s1", "s2", "s3", "s6"];
   const scenarioLabels = {
   s1: "Đoàn kết",
   s2: "Trách nhiệm",
@@ -1038,33 +1038,48 @@ form.addEventListener("submit", async (e) => {
   extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
   resultBox.insertBefore(extra, scenarioReasons);
 
-  // clear + render scenario cards
-  scenarioReasons.innerHTML = "";
+  // ====== RENDER "GỢI Ý ĐÁP ÁN ĐÚNG" (luôn theo scenarioCorrect) ======
+scenarioReasons.innerHTML = "";
 
-  (payload.answers.scenario || []).forEach(v => {
-    const card = document.createElement("div");
-    card.className = "reason-card";
+// danh sách user đã tick
+const pickedScenario = payload.answers.scenario || [];
 
-    const title = document.createElement("h4");
-    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
-    card.appendChild(title);
+scenarioCorrect.forEach(v => {
+  const card = document.createElement("div");
+  card.className = "reason-card";
 
-    const rationale = (scenarioRationales?.[v] || "").trim();
-    if (rationale) {
-      const expected = document.createElement("p");
-      expected.className = "expected";
-      expected.textContent = rationale;
-      card.appendChild(expected);
-    }
+  // title
+  const title = document.createElement("h4");
+  const label = scenarioLabels?.[v] || v;
+  const isPicked = pickedScenario.includes(v);
 
-    const user = document.createElement("p");
-    user.className = "user";
-    const userText = ((payload.answers.scenario_explain?.[v] || "").trim()) || "(Chưa nhập nội dung)";
-    user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
-    card.appendChild(user);
+  title.textContent = `Đáp án đúng: ${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
+  card.appendChild(title);
 
-    scenarioReasons.appendChild(card);
-  });
+  // expected rationale: LUÔN HIỆN vì đây là đáp án đúng
+  const rationale = (scenarioRationales?.[v] || "").trim();
+  if (rationale) {
+    const expected = document.createElement("p");
+    expected.className = "expected";
+    expected.textContent = rationale;
+    card.appendChild(expected);
+  }
+
+  // user explain: chỉ hiện nếu họ có chọn + có nhập
+  const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
+  const user = document.createElement("p");
+  user.className = "user";
+
+  if (isPicked) {
+    user.textContent = `Giải thích của Anh/Chị:\n${userExplain || "(Chưa nhập nội dung)"}`;
+  } else {
+    user.textContent = `Giải thích của Anh/Chị:\n(Bạn không chọn mục này nên không có giải thích)`;
+  }
+
+  card.appendChild(user);
+
+  scenarioReasons.appendChild(card);
+});
 
   // bật kết quả
   resultBox.style.display = "block";
@@ -1121,6 +1136,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
