@@ -360,6 +360,9 @@
       </div>
     </div>
 
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div class="pill">Orange × White vibe</div>
+
       <!-- Admin only -->
       <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
         Survey: OFF
@@ -536,29 +539,27 @@
             <!-- Scenario -->
       <div class="qblock" data-qid="scenario">
         <div class="qtitle">
-          <h3>8) Tình huống: 
-             <p><strong>BỐI CẢNH</strong></p>
-  <p>
+  <h3>
+    8) Tình huống:
+    <br><br><strong>BỐI CẢNH</strong><br>
     Trong ngày làm việc, khối lượng công việc của nhóm tăng cao so với kế hoạch.
     Bạn nhận thấy một đồng nghiệp đang:
-  </p>
-
-  <ul>
-    <li>Phải xử lý nhiều đầu việc cùng lúc</li>
-    <li>Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ</li>
-    <li>Nếu không được hỗ trợ kịp thời có thể dẫn đến:</li>
     <ul>
-      <li>Trễ tiến độ chung</li>
-      <li>Sai sót trong công việc</li>
-      <li>Ảnh hưởng chất lượng và uy tín của nhóm</li>
+      <li>Phải xử lý nhiều đầu việc cùng lúc</li>
+      <li>Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ</li>
+      <li>Nếu không được hỗ trợ kịp thời có thể dẫn đến:</li>
+      <ul>
+        <li>Trễ tiến độ chung</li>
+        <li>Sai sót trong công việc</li>
+        <li>Ảnh hưởng chất lượng và uy tín của nhóm</li>
+      </ul>
     </ul>
-  </ul>
 
-  <p><strong>Câu hỏi:</strong><br>
+    <strong>Câu hỏi:</strong><br>
     Bạn sẽ làm gì? Các giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
-  </p>
-          <div class="required">Required</div>
-        </div>
+  </h3>
+  <div class="required">Required</div>
+</div>
 
         <div class="choices">
           <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
@@ -966,18 +967,20 @@ clearMessageBtn.addEventListener("click", async () => {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // reset UI
   errorBox.style.display = "none";
   errorBox.textContent = "";
   resultBox.style.display = "none";
   scenarioReasons.innerHTML = "";
 
-  // block if server says OFF
+  // block if OFF
   if (!sharedIsOn){
     errorBox.style.display = "block";
-    errorBox.textContent = "Survey is currently OFF.";
+    errorBox.textContent = "Khảo sát đang TẮT.";
     return;
   }
 
+  // validate
   const errors = validateRequiredGroups();
   if (errors.length){
     errorBox.style.display = "block";
@@ -985,13 +988,20 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  // scoring
   const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
 
+  // build payload
   const payload = {
     timestamp: new Date().toISOString(),
     name: $("#fullName").value.trim(),
     department: $("#department").value,
-    knowScore,totalKnow,understandScore,totalUnderstand,score, total,
+    knowScore,
+    totalKnow,
+    understandScore,
+    totalUnderstand,
+    score,
+    total,
     answers: {
       q1: document.querySelector('input[name="q1"]:checked')?.value || "",
       q2: document.querySelector('input[name="q2"]:checked')?.value || "",
@@ -1005,33 +1015,39 @@ form.addEventListener("submit", async (e) => {
         s3: ($(`.explain[data-explain-for="s3"] textarea`)?.value ?? "").trim(),
         s4: ($(`.explain[data-explain-for="s4"] textarea`)?.value ?? "").trim(),
         s5: ($(`.explain[data-explain-for="s5"] textarea`)?.value ?? "").trim(),
-        s6: ($(`.explain[data-explain-for="s6"] textarea`)?.value ?? "").trim()
+        s6: ($(`.explain[data-explain-for="s6"] textarea`)?.value ?? "").trim(),
       }
     },
     userAgent: navigator.userAgent
   };
 
-  scoreLine.textContent = `Tổng Điểm: ${score} / ${total}`;
+  // show result UI (local)
+  scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
+
+  // xóa dòng split cũ nếu tồn tại để tránh chèn lặp
+  resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
+
   const extra = document.createElement("p");
+  extra.setAttribute("data-score-split", "1");
   extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
   resultBox.insertBefore(extra, scenarioReasons);
 
-
+  // render scenario cards
   payload.answers.scenario.forEach(v => {
     const card = document.createElement("div");
     card.className = "reason-card";
 
     const title = document.createElement("h4");
-    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels[v] || v}`;
+    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
 
     const expected = document.createElement("p");
     expected.className = "expected";
-    expected.textContent = scenarioRationales[v] || "(No rationale configured)";
+    expected.textContent = scenarioRationales?.[v] || "(Chưa có nội dung giải thích mẫu)";
 
     const user = document.createElement("p");
     user.className = "user";
-    const userText = payload.answers.scenario_explain[v] || "(No text provided)";
-    user.textContent = `Lời giải thích của Anh/chị:\n${userText}`;
+    const userText = payload.answers.scenario_explain?.[v] || "(Chưa nhập nội dung)";
+    user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
 
     card.appendChild(title);
     card.appendChild(expected);
@@ -1040,44 +1056,44 @@ form.addEventListener("submit", async (e) => {
   });
 
   resultBox.style.display = "block";
-  resultBox.scrollIntoView({behavior:"smooth", block:"start"});
+  resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
 
-try{
-  await apiSubmitSurvey(payload);
+  // submit to server
+  try{
+    await apiSubmitSurvey(payload);
 
-  // ✅ khóa form sau khi submit OK
-  lockFormUntilRefresh();
-
-}catch(err){
-  errorBox.style.display = "block";
-  errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống " + err.message;
-}
-
-// ====== hàm để dưới vẫn OK ======
-function lockFormUntilRefresh(){
-  form.querySelectorAll("input, select, textarea, button:not(#resetBtn)")
-  .forEach(el => el.disabled = true);
-  });
-
-  const note = document.createElement("div");
-  note.style.marginTop = "12px";
-  note.style.padding = "10px 12px";
-  note.style.borderRadius = "12px";
-  note.style.border = "1px solid rgba(255,122,0,.25)";
-  note.style.background = "rgba(255,122,0,.06)";
-  note.style.fontWeight = "900";
-  note.textContent = "Bạn đã nộp khảo sát.";
-
-  resultBox.appendChild(note);
-}
-resetBtn.addEventListener("click", () => {
-  form.reset();
-  syncScenarioExplain();
-  errorBox.style.display = "none";
-  resultBox.style.display = "none";
-  scenarioReasons.innerHTML = "";
+    // ✅ khóa form sau khi submit OK
+    lockFormUntilRefresh();
+  }catch(err){
+    errorBox.style.display = "block";
+    errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
+  }
 });
 
+/* ===================== LOCK FORM ===================== */
+function lockFormUntilRefresh(){
+  // disable toàn bộ input, select, textarea, button (trừ reset)
+  form.querySelectorAll(
+    'input, select, textarea, button:not(#resetBtn)'
+  ).forEach(el => {
+    el.disabled = true;
+  });
+
+  // chỉ thêm note 1 lần
+  if (!document.getElementById("lockedNote")){
+    const note = document.createElement("div");
+    note.id = "lockedNote";
+    note.style.marginTop = "12px";
+    note.style.padding = "10px 12px";
+    note.style.borderRadius = "12px";
+    note.style.border = "1px solid rgba(255,122,0,.25)";
+    note.style.background = "rgba(255,122,0,.06)";
+    note.style.fontWeight = "900";
+    note.textContent =
+      "Bạn đã nộp khảo sát. Vui lòng tải lại trang (F5) nếu muốn làm lại.";
+    resultBox.appendChild(note);
+  }
+}
 /* ===================== BOOT ===================== */
 (async function boot(){
   setAdminUI(false);
@@ -1099,6 +1115,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
