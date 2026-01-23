@@ -345,8 +345,7 @@
       min-height: 18px;
     }
     /* Tạm ẩn câu hỏi 5 */
-[data-qid="q5"] {
-  display: none;
+.qblock[data-qid="q5"]{ display:none; }
 }
   </style>
 </head>
@@ -706,7 +705,16 @@ function escapeHtml(str){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
+/* ====== DISABLE QUESTION ====== */
+function disableQuestion(qid){
+  const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
+  if (!block) return;
 
+  block.querySelectorAll("input, select, textarea").forEach(el => {
+    el.disabled = true;   // ✅ chặn nhập
+    el.required = false; // ✅ tránh bị validation
+  });
+}
 /* ===================== API ===================== */
 async function apiGetSettings(){
   const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
@@ -1136,7 +1144,9 @@ function lockFormUntilRefresh(){
 (async function boot(){
   setAdminUI(false);
   syncScenarioExplain();
-
+  
+disableQuestion("q5");
+  
   try{
     await refreshFromServer();
   }catch(err){
@@ -1152,6 +1162,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
