@@ -361,7 +361,6 @@
     </div>
 
     <div style="display:flex; gap:10px; align-items:center;">
-      <div class="pill">Orange × White vibe</div>
 
       <!-- Admin only -->
       <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
@@ -445,11 +444,11 @@
       <div class="qblock" data-qid="q1">
         <div class="qtitle">
           <h3>
-             <p><strong>Hãy điền vào chỗ trống</strong></p>
+             <p><strong>3) Hãy điền vào chỗ trống</strong></p>
             <p>
-    3)Tầm nhìn của TBS Logistics ?
+      Tầm nhìn của TBS Logistics ?
             </p>
-            <p>"Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ." (Chọn câu trả lời đúng)
+            <p>"Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."
             </p>
           </h3>
           <div class="required">Required</div>
@@ -468,8 +467,15 @@
       <!-- Q2 -->
       <div class="qblock" data-qid="q2">
         <div class="qtitle">
-          <h3>4) Điền từ còn thiếu vào sứ mệnh của TBS Logistics:
-            "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."</h3>
+          <h3>
+            <p><strong>4) Hãy điền vào chỗ trống</strong></p> 
+            <p>
+      Sứ mệnh của TBS Logistics là?
+            </p>
+            <p>
+      "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."
+            </p>
+          </h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
@@ -485,7 +491,7 @@
       <!-- Q3 -->
       <div class="qblock" data-qid="q3">
         <div class="qtitle">
-          <h3>5) Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics? (Chọn tất cả các đáp án đúng)</h3>
+          <h3>5) Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics?</h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
@@ -521,7 +527,7 @@
       <!-- Q5 -->
       <div class="qblock" data-qid="q5">
         <div class="qtitle">
-          <h3>7) Chọn các mục tiêu ĐÚNG trong năm 2025 của TBS Logistics</h3>
+          <h3>7) Chọn các mục tiêu ĐÚNG trong năm 2026 của TBS Logistics</h3>
           <div class="required">Required</div>
         </div>
         <div class="choices">
@@ -670,8 +676,8 @@ const scenarioRationales = {
        •	Làm đúng – làm đủ – đúng thời gian
     🔑 Không đáng tin → hỗ trợ trở thành rủi ro
 `,
-  s4: ``,
-  s5: ``,
+  s4: `     `,
+  s5: `     `,
   s6: `•	Mục tiêu cuối cùng là hoàn thành công việc đúng hạn, đúng chất lượng
     👉 Vai trò: kết quả đạt được sau cùng`
 };
@@ -1040,9 +1046,12 @@ form.addEventListener("submit", async (e) => {
     const title = document.createElement("h4");
     title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
 
+     const rationale = scenarioRationales[v];
+    if (rationale && rationale.trim()) {
     const expected = document.createElement("p");
     expected.className = "expected";
-    expected.textContent = scenarioRationales?.[v] || "(Chưa có nội dung giải thích mẫu)";
+    expected.textContent = rationale;
+    card.appendChild(expected);}
 
     const user = document.createElement("p");
     user.className = "user";
@@ -1115,6 +1124,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
