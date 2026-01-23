@@ -346,7 +346,6 @@
     }
     /* Tạm ẩn câu hỏi 5 */
 .qblock[data-qid="q5"]{ display:none; }
-}
   </style>
 </head>
 
@@ -869,12 +868,12 @@ function computeScoreSplit(){
   });
 
   // KNOW: Q3–Q5 exact-match sets (đúng bộ đáp án mới có điểm)
-["q3","q4","q5"].forEach(q => {
-  // nếu câu này đang bị disable/ẩn thì bỏ qua (không tính điểm, không tính tổng)
+Object.keys(correctSets).forEach(q => {
   const block = document.querySelector(`.qblock[data-qid="${q}"]`);
-  const disabled = block && block.querySelector('input,select,textarea')?.disabled;
+  const anyEl = block?.querySelector("input,select,textarea");
 
-  if (disabled) return;
+  // không có block hoặc đã disable => bỏ qua (không tính điểm, không tính tổng)
+  if (!anyEl || anyEl.disabled) return;
 
   const picked = getCheckedValues(q);
   const correct = correctSets[q];
@@ -992,8 +991,6 @@ clearMessageBtn.addEventListener("click", async () => {
   }
 });
   
-// gọi ngay khi load
-disableQuestion5();
 /* ===================== SUBMIT ===================== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1176,6 +1173,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
