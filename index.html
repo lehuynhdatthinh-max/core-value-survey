@@ -1027,19 +1027,21 @@ form.addEventListener("submit", async (e) => {
     userAgent: navigator.userAgent
   };
 
-  // show result UI (local)
-  scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
+// ===== show result UI (local) =====
+scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
 
-  // xóa dòng split cũ nếu tồn tại để tránh chèn lặp
-  resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
+// xóa dòng split cũ nếu tồn tại để tránh chèn lặp
+resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
 
-  const extra = document.createElement("p");
-  extra.setAttribute("data-score-split", "1");
-  extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
-  resultBox.insertBefore(extra, scenarioReasons);
+const extra = document.createElement("p");
+extra.setAttribute("data-score-split", "1");
+extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
+resultBox.insertBefore(extra, scenarioReasons);
 
-  // render scenario cards
-  payload.answers.scenario.forEach(v => {
+// clear + render scenario cards
+scenarioReasons.innerHTML = "";
+
+(payload.answers.scenario || []).forEach(v => {
   const card = document.createElement("div");
   card.className = "reason-card";
 
@@ -1048,9 +1050,9 @@ form.addEventListener("submit", async (e) => {
   title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
   card.appendChild(title);
 
-  // expected (chỉ hiện nếu có nội dung)
+  // expected/rationale (chỉ hiện nếu có chữ thật)
   const rationale = (scenarioRationales?.[v] || "").trim();
-  if (rationale){
+  if (rationale) {
     const expected = document.createElement("p");
     expected.className = "expected";
     expected.textContent = rationale;
@@ -1066,17 +1068,18 @@ form.addEventListener("submit", async (e) => {
 
   scenarioReasons.appendChild(card);
 });
-  // submit to server
-  try{
-    await apiSubmitSurvey(payload);
 
-    // ✅ khóa form sau khi submit OK
-    lockFormUntilRefresh();
-  }catch(err){
-    errorBox.style.display = "block";
-    errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
-  }
-});
+// ✅ bật kết quả NGAY (để chắc chắn thấy)
+resultBox.style.display = "block";
+resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  // submit to server
+ try{
+  await apiSubmitSurvey(payload);
+  lockFormUntilRefresh();
+}catch(err){
+  errorBox.style.display = "block";
+  errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
+}
 
 /* ===================== LOCK FORM ===================== */
 function lockFormUntilRefresh(){
@@ -1123,6 +1126,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
