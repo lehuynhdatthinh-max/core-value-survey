@@ -1060,13 +1060,12 @@ form.addEventListener("submit", async (e) => {
   // user explain
   const user = document.createElement("p");
   user.className = "user";
-  const userText = (payload.answers.scenario_explain?.[v] || "").trim() || "(Chưa nhập nội dung)";
+  const userText = ((payload.answers.scenario_explain?.[v] || "").trim()) || "(Chưa nhập nội dung)";
   user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
   card.appendChild(user);
 
   scenarioReasons.appendChild(card);
 });
-
   // submit to server
   try{
     await apiSubmitSurvey(payload);
@@ -1124,6 +1123,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
