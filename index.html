@@ -530,11 +530,15 @@
             <!-- Scenario -->
       <div class="qblock" data-qid="scenario">
         <div class="qtitle">
-          <h3>8) Tình huống: Trong quá trình kiểm tra trước khi giao hàng cho khách, nhân viên A phát hiện một lô sản phẩm có dấu hiệu lỗi kỹ thuật nhẹ.
-              Nếu báo cáo ngay, đơn hàng sẽ bị chậm tiến độ.
-              Nếu bỏ qua, hàng vẫn giao kịp thời gian nhưng tiềm ẩn rủi ro.
-              A chủ động báo cáo quản lý, đề xuất phương án xử lý và chấp nhận giao hàng trễ để bảo đảm chất lượng.
-              Giá trị nào được thể hiện trong tình huống này?</h3>
+          <h3>8) Tình huống: 
+             Trong ngày làm việc, khối lượng công việc của nhóm tăng cao so với kế hoạch.Bạn nhận thấy một đồng nghiệp đang:
+              •	Phải xử lý nhiều đầu việc cùng lúc
+              •	Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ
+              •	Nếu không được hỗ trợ kịp thời có thể dẫn đến:
+                    o	Trễ tiến độ chung
+                    o	Sai sót trong công việc
+                    o	Ảnh hưởng chất lượng và uy tín của nhóm
+              Câu hỏi: Bạn sẽ làm gì? Các giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này là gì?
           <div class="required">Required</div>
         </div>
 
@@ -619,12 +623,30 @@ const correctSets = {
 };
 const scenarioCorrect = ["s4", "s1", "s2"];
 const scenarioRationales = {
-  s1: `“Đoàn kết” nhấn mạnh hỗ trợ/phối hợp tập thể. Đây là quyết định đạo đức cá nhân.`,
-  s2: `“Trách nhiệm” có liên quan, nhưng giá trị thể hiện rõ nhất là “Chính trực”.`,
-  s3: `“Đáng tin” thường là kết quả sau hành động.`,
-  s4: `Báo cáo sự thật, không che giấu lỗi; đặt chất lượng/uy tín lên trên lợi ích ngắn hạn.`,
-  s5: `“Kỷ luật” là tuân thủ quy trình; ở đây nhấn mạnh trung thực/đạo đức nghề nghiệp.`,
-  s6: `“Hiệu quả” thường ưu tiên tốc độ/chi phí; hành động này chấp nhận chậm để đảm bảo chất lượng.`
+  s1: `•	Tình huống xuất phát từ khó khăn của đồng nghiệp
+       •	Nếu không có tinh thần đoàn kết:
+            o	Mỗi người chỉ lo việc mình
+            o	Công việc chung dễ đổ vỡ
+    👉Biểu hiện rõ nhất
+       •	Chủ động hỗ trợ khi thấy đồng nghiệp quá tải
+       •	Không đứng ngoài với suy nghĩ “không phải việc của tôi`,
+  s2: `•	Người hỗ trợ không bắt buộc phải làm thêm
+       •	Nhưng vì trách nhiệm với kết quả chung, họ vẫn hành động
+    👉 Biểu hiện
+       •	Quan tâm đến tiến độ, chất lượng chung của nhóm
+       •	Không bỏ mặc rủi ro trễ hạn hay sai sót
+    🔑 Đoàn kết là tinh thần – Trách nhiệm là lý do để hành động.`,
+  s3: `•	Hỗ trợ mà làm không tới nơi → còn hại hơn không hỗ trợ
+       •	Nhóm chỉ vận hành tốt khi các thành viên tin nhau
+    👉 Biểu hiện
+       •	Nhận việc thì làm đến cùng
+       •	Làm đúng – làm đủ – đúng thời gian
+    🔑 Không đáng tin → hỗ trợ trở thành rủi ro
+`,
+  s4: ``,
+  s5: ``,
+  s6: `•	Mục tiêu cuối cùng là hoàn thành công việc đúng hạn, đúng chất lượng
+    👉 Vai trò: kết quả đạt được sau cùng`
 };
 
 /* ===================== HELPERS ===================== */
@@ -1031,6 +1053,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
