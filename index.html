@@ -868,18 +868,32 @@ function computeScoreSplit(){
     if (picked === correctSingle[q]) knowScore += 1;
   });
 
-  // KNOW: Q3–Q7 exact-match sets
-  ["q3", "q4"].forEach((q, idx) => {
-  if (getCheckedValues(q).length === 0){
-    errors.push(`Question ${idx + 5} is required.`);
-  }
+  // KNOW: Q3–Q5 exact-match sets (đúng bộ đáp án mới có điểm)
+["q3","q4","q5"].forEach(q => {
+  // nếu câu này đang bị disable/ẩn thì bỏ qua (không tính điểm, không tính tổng)
+  const block = document.querySelector(`.qblock[data-qid="${q}"]`);
+  const disabled = block && block.querySelector('input,select,textarea')?.disabled;
+
+  if (disabled) return;
+
+  const picked = getCheckedValues(q);
+  const correct = correctSets[q];
+  if (setsEqual(picked, correct)) knowScore += 1;
 });
+  
   // UNDERSTAND: Scenario (only correct ticks give points)
   getCheckedValues("scenario").forEach(v => {
     if (scenarioCorrect.includes(v)) understandScore += 1;
   });
 
-  const totalKnow = Object.keys(correctSingle).length + Object.keys(correctSets).length; // 2 + 5 = 7
+  const enabledSetQuestions = Object.keys(correctSets).filter(q => {
+  const block = document.querySelector(`.qblock[data-qid="${q}"]`);
+  if (!block) return false;
+  const anyEl = block.querySelector("input,select,textarea");
+  return anyEl && !anyEl.disabled;
+});
+const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
+  
   const totalUnderstand = scenarioCorrect.length; // thường = 1
   const total = totalKnow + totalUnderstand;
 
@@ -1162,6 +1176,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
