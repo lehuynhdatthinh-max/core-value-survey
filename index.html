@@ -970,7 +970,18 @@ clearMessageBtn.addEventListener("click", async () => {
     setAdminUI(false);
   }
 });
+function disableQuestion5(){
+  const q5 = document.querySelector('[data-qid="q5"]');
+  if (!q5) return;
 
+  q5.querySelectorAll('input, textarea, select').forEach(el => {
+    el.required = false;
+    el.disabled = true;
+  });
+}
+
+// gọi ngay khi load
+disableQuestion5();
 /* ===================== SUBMIT ===================== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1151,6 +1162,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
