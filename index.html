@@ -1040,32 +1040,32 @@ form.addEventListener("submit", async (e) => {
 
   // render scenario cards
   payload.answers.scenario.forEach(v => {
-    const card = document.createElement("div");
-    card.className = "reason-card";
+  const card = document.createElement("div");
+  card.className = "reason-card";
 
-    const title = document.createElement("h4");
-    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
+  // title
+  const title = document.createElement("h4");
+  title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
+  card.appendChild(title);
 
-     const rationale = scenarioRationales[v];
-    if (rationale && rationale.trim()) {
+  // expected (chỉ hiện nếu có nội dung)
+  const rationale = (scenarioRationales?.[v] || "").trim();
+  if (rationale){
     const expected = document.createElement("p");
     expected.className = "expected";
     expected.textContent = rationale;
-    card.appendChild(expected);}
-
-    const user = document.createElement("p");
-    user.className = "user";
-    const userText = payload.answers.scenario_explain?.[v] || "(Chưa nhập nội dung)";
-    user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
-
-    card.appendChild(title);
     card.appendChild(expected);
-    card.appendChild(user);
-    scenarioReasons.appendChild(card);
-  });
+  }
 
-  resultBox.style.display = "block";
-  resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  // user explain
+  const user = document.createElement("p");
+  user.className = "user";
+  const userText = (payload.answers.scenario_explain?.[v] || "").trim() || "(Chưa nhập nội dung)";
+  user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
+  card.appendChild(user);
+
+  scenarioReasons.appendChild(card);
+});
 
   // submit to server
   try{
@@ -1124,6 +1124,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
