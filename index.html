@@ -831,12 +831,11 @@ function validateRequiredGroups(){
     }
   });
 
-  for (let i = 3; i <= 5; i++){
-    if (getCheckedValues("q"+i).length === 0){
-      errors.push(`Question ${i} is required.`);
-    }
+  ["q3", "q4"].forEach((q, idx) => {
+  if (getCheckedValues(q).length === 0){
+    errors.push(`Question ${idx + 5} is required.`);
   }
-
+});
   const scenario = getCheckedValues("scenario");
   if (scenario.length === 0) errors.push("Scenario question is required.");
 
@@ -970,16 +969,7 @@ clearMessageBtn.addEventListener("click", async () => {
     setAdminUI(false);
   }
 });
-function disableQuestion5(){
-  const q5 = document.querySelector('[data-qid="q5"]');
-  if (!q5) return;
-
-  q5.querySelectorAll('input, textarea, select').forEach(el => {
-    el.required = false;
-    el.disabled = true;
-  });
-}
-
+  
 // gọi ngay khi load
 disableQuestion5();
 /* ===================== SUBMIT ===================== */
@@ -1162,6 +1152,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
