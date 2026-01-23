@@ -1050,7 +1050,7 @@ try{
 
 }catch(err){
   errorBox.style.display = "block";
-  errorBox.textContent = "Submitted but failed to save to Google Sheet. " + err.message;
+  errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống " + err.message;
 }
 
 // ====== hàm để dưới vẫn OK ======
@@ -1066,7 +1066,7 @@ function lockFormUntilRefresh(){
   note.style.border = "1px solid rgba(255,122,0,.25)";
   note.style.background = "rgba(255,122,0,.06)";
   note.style.fontWeight = "900";
-  note.textContent = "Bạn đã nộp khảo sát. Vui lòng tải lại trang (F5) nếu muốn làm lại.";
+  note.textContent = "Bạn đã nộp khảo sát.";
 
   resultBox.appendChild(note);
 }
@@ -1099,6 +1099,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
