@@ -344,6 +344,10 @@
       color:#7f1d1d;
       min-height: 18px;
     }
+    /* Tạm ẩn câu hỏi 5 */
+[data-qid="q5"] {
+  display: none;
+}
   </style>
 </head>
 
@@ -644,7 +648,6 @@ const correctSingle = { q1: "d", q2: "c" };
 const correctSets = {
   q3: ["a","c","d","e","f","g"],
   q4: ["a","c","d","f","g"],
-  q5: ["a","b","d","e","g","h"],
 };
 const scenarioCorrect = ["s1", "s2", "s3", "s6"];
   const scenarioLabels = {
@@ -859,12 +862,11 @@ function computeScoreSplit(){
   });
 
   // KNOW: Q3–Q7 exact-match sets
-  for (let i = 3; i <= 5; i++){
-    const picked = getCheckedValues("q" + i);
-    const correct = correctSets["q" + i];
-    if (setsEqual(picked, correct)) knowScore += 1;
+  ["q3", "q4"].forEach((q, idx) => {
+  if (getCheckedValues(q).length === 0){
+    errors.push(`Question ${idx + 5} is required.`);
   }
-
+});
   // UNDERSTAND: Scenario (only correct ticks give points)
   getCheckedValues("scenario").forEach(v => {
     if (scenarioCorrect.includes(v)) understandScore += 1;
@@ -1149,6 +1151,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
