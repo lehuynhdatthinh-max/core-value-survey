@@ -1042,14 +1042,34 @@ form.addEventListener("submit", async (e) => {
   resultBox.style.display = "block";
   resultBox.scrollIntoView({behavior:"smooth", block:"start"});
 
-  try{
-    await apiSubmitSurvey(payload);
-  }catch(err){
-    errorBox.style.display = "block";
-    errorBox.textContent = "Submitted but failed to save to Google Sheet. " + err.message;
-  }
-});
+try{
+  await apiSubmitSurvey(payload);
 
+  // ✅ khóa form sau khi submit OK
+  lockFormUntilRefresh();
+
+}catch(err){
+  errorBox.style.display = "block";
+  errorBox.textContent = "Submitted but failed to save to Google Sheet. " + err.message;
+}
+
+// ====== hàm để dưới vẫn OK ======
+function lockFormUntilRefresh(){
+  form.querySelectorAll("input, select, textarea, button:not(#resetBtn)")
+  .forEach(el => el.disabled = true);
+  });
+
+  const note = document.createElement("div");
+  note.style.marginTop = "12px";
+  note.style.padding = "10px 12px";
+  note.style.borderRadius = "12px";
+  note.style.border = "1px solid rgba(255,122,0,.25)";
+  note.style.background = "rgba(255,122,0,.06)";
+  note.style.fontWeight = "900";
+  note.textContent = "Bạn đã nộp khảo sát. Vui lòng tải lại trang (F5) nếu muốn làm lại.";
+
+  resultBox.appendChild(note);
+}
 resetBtn.addEventListener("click", () => {
   form.reset();
   syncScenarioExplain();
@@ -1079,6 +1099,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
