@@ -634,6 +634,14 @@ const correctSets = {
   q5: ["a","b","d","e","g","h"],
 };
 const scenarioCorrect = ["s4", "s1", "s2"];
+  const scenarioLabels = {
+  s1: "Đoàn kết",
+  s2: "Trách nhiệm",
+  s3: "Đáng tin",
+  s4: "Chính trực",
+  s5: "Kỷ luật",
+  s6: "Hiệu quả"
+};
 const scenarioRationales = {
   s1: `•	Tình huống xuất phát từ khó khăn của đồng nghiệp
        •	Nếu không có tinh thần đoàn kết:
@@ -1008,7 +1016,7 @@ form.addEventListener("submit", async (e) => {
     card.className = "reason-card";
 
     const title = document.createElement("h4");
-    title.textContent = `Bạn đã chọn những giá trị: ${v.toUpperCase()}`;
+    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels[v] || v}`;
 
     const expected = document.createElement("p");
     expected.className = "expected";
@@ -1065,6 +1073,7 @@ resetBtn.addEventListener("click", () => {
 </script>
 </body>
 </html>
+
 
 
 
