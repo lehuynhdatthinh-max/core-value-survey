@@ -1027,70 +1027,65 @@ form.addEventListener("submit", async (e) => {
     userAgent: navigator.userAgent
   };
 
-// ===== show result UI (local) =====
-scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
+  // ===== show result UI (local) =====
+  scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
 
-// xóa dòng split cũ nếu tồn tại để tránh chèn lặp
-resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
+  // xóa dòng split cũ nếu tồn tại để tránh chèn lặp
+  resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
 
-const extra = document.createElement("p");
-extra.setAttribute("data-score-split", "1");
-extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
-resultBox.insertBefore(extra, scenarioReasons);
+  const extra = document.createElement("p");
+  extra.setAttribute("data-score-split", "1");
+  extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
+  resultBox.insertBefore(extra, scenarioReasons);
 
-// clear + render scenario cards
-scenarioReasons.innerHTML = "";
+  // clear + render scenario cards
+  scenarioReasons.innerHTML = "";
 
-(payload.answers.scenario || []).forEach(v => {
-  const card = document.createElement("div");
-  card.className = "reason-card";
+  (payload.answers.scenario || []).forEach(v => {
+    const card = document.createElement("div");
+    card.className = "reason-card";
 
-  // title
-  const title = document.createElement("h4");
-  title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
-  card.appendChild(title);
+    const title = document.createElement("h4");
+    title.textContent = `Bạn đã chọn giá trị: ${scenarioLabels?.[v] || v}`;
+    card.appendChild(title);
 
-  // expected/rationale (chỉ hiện nếu có chữ thật)
-  const rationale = (scenarioRationales?.[v] || "").trim();
-  if (rationale) {
-    const expected = document.createElement("p");
-    expected.className = "expected";
-    expected.textContent = rationale;
-    card.appendChild(expected);
-  }
+    const rationale = (scenarioRationales?.[v] || "").trim();
+    if (rationale) {
+      const expected = document.createElement("p");
+      expected.className = "expected";
+      expected.textContent = rationale;
+      card.appendChild(expected);
+    }
 
-  // user explain
-  const user = document.createElement("p");
-  user.className = "user";
-  const userText = ((payload.answers.scenario_explain?.[v] || "").trim()) || "(Chưa nhập nội dung)";
-  user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
-  card.appendChild(user);
+    const user = document.createElement("p");
+    user.className = "user";
+    const userText = ((payload.answers.scenario_explain?.[v] || "").trim()) || "(Chưa nhập nội dung)";
+    user.textContent = `Lời giải thích của Anh/Chị:\n${userText}`;
+    card.appendChild(user);
 
-  scenarioReasons.appendChild(card);
-});
+    scenarioReasons.appendChild(card);
+  });
 
-// ✅ bật kết quả NGAY (để chắc chắn thấy)
-resultBox.style.display = "block";
-resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  // bật kết quả
+  resultBox.style.display = "block";
+  resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+
   // submit to server
- try{
-  await apiSubmitSurvey(payload);
-  lockFormUntilRefresh();
-}catch(err){
-  errorBox.style.display = "block";
-  errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
-}
+  try{
+    await apiSubmitSurvey(payload);
+    lockFormUntilRefresh();
+  }catch(err){
+    errorBox.style.display = "block";
+    errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
+  }
+}); // ✅ ĐÓNG submit handler ở đây
+
 
 /* ===================== LOCK FORM ===================== */
 function lockFormUntilRefresh(){
-  // disable toàn bộ input, select, textarea, button (trừ reset)
-  form.querySelectorAll(
-    'input, select, textarea, button:not(#resetBtn)'
-  ).forEach(el => {
-    el.disabled = true;
-  });
+  form.querySelectorAll('input, select, textarea, button:not(#resetBtn)')
+    .forEach(el => { el.disabled = true; });
 
-  // chỉ thêm note 1 lần
   if (!document.getElementById("lockedNote")){
     const note = document.createElement("div");
     note.id = "lockedNote";
@@ -1100,11 +1095,12 @@ function lockFormUntilRefresh(){
     note.style.border = "1px solid rgba(255,122,0,.25)";
     note.style.background = "rgba(255,122,0,.06)";
     note.style.fontWeight = "900";
-    note.textContent =
-      "Bạn đã nộp khảo sát. Vui lòng tải lại trang (F5) nếu muốn làm lại.";
+    note.textContent = "Bạn đã nộp khảo sát. Vui lòng tải lại trang (F5) nếu muốn làm lại.";
     resultBox.appendChild(note);
   }
 }
+
+
 /* ===================== BOOT ===================== */
 (async function boot(){
   setAdminUI(false);
@@ -1118,7 +1114,6 @@ function lockFormUntilRefresh(){
     console.warn(err);
   }
 
-  // visitors auto refresh
   setInterval(() => {
     refreshFromServer().catch(() => {});
   }, 20000);
@@ -1126,6 +1121,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
