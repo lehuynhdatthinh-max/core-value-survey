@@ -1038,6 +1038,19 @@ form.addEventListener("submit", async (e) => {
   extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
   resultBox.insertBefore(extra, scenarioReasons);
 
+// ====== DÒNG GIỚI THIỆU GỢI Ý ======
+let intro = resultBox.querySelector("#scenarioIntro");
+if (!intro) {
+  intro = document.createElement("p");
+  intro.id = "scenarioIntro";
+  intro.style.marginTop = "12px";
+  intro.style.fontWeight = "900";
+  intro.style.color = "#7c2d12"; // cam nâu, hợp vibe
+  intro.textContent =
+    "Dưới đây là đề xuất các giá trị cốt lõi của Ban Văn hóa Doanh nghiệp đưa ra cho tình huống này:";
+  resultBox.insertBefore(intro, scenarioReasons);
+}
+  
   // ====== RENDER "GỢI Ý ĐÁP ÁN ĐÚNG" (luôn theo scenarioCorrect) ======
 scenarioReasons.innerHTML = "";
 
@@ -1136,6 +1149,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
