@@ -1083,22 +1083,25 @@ scenarioCorrect.forEach(v => {
   card.className = "reason-card";
 
   // title
-  const title = document.createElement("h4");
-  const label = scenarioLabels?.[v] || v;
-  const isPicked = pickedScenario.includes(v);
+  const card = document.createElement("div");
+  card.className = "reason-card";
 
-  title.textContent =
-  `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
+const title = document.createElement("h4");
+const label = scenarioLabels?.[v] || v;
+const isPicked = pickedScenario.includes(v);
 
-  // expected rationale: LUÔN HIỆN vì đây là đáp án đúng
-  const rationale = (scenarioRationales?.[v] || "").trim();
-  if (rationale) {
-    const expected = document.createElement("p");
-    expected.className = "expected";
-    expected.textContent = rationale;
-    card.appendChild(expected);
-  }
+title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
+card.appendChild(title); // ✅ bắt buộc có
 
+const rationale = (scenarioRationales?.[v] || "").trim();
+if (rationale) {
+  const expected = document.createElement("p");
+  expected.className = "expected";
+  expected.textContent = rationale;
+  card.appendChild(expected);
+}
+
+scenarioReasons.appendChild(card);
   // user explain: chỉ hiện nếu họ có chọn + có nhập
   const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
   const user = document.createElement("p");
@@ -1172,6 +1175,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
