@@ -1083,26 +1083,23 @@ scenarioCorrect.forEach(v => {
   card.className = "reason-card";
 
   // title
-  const card = document.createElement("div");
-  card.className = "reason-card";
+  const title = document.createElement("h4");
+  const label = scenarioLabels?.[v] || v;
+  const isPicked = pickedScenario.includes(v);
 
-const title = document.createElement("h4");
-const label = scenarioLabels?.[v] || v;
-const isPicked = pickedScenario.includes(v);
+  title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
+  card.appendChild(title);
 
-title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
-card.appendChild(title); // ✅ bắt buộc có
+  // expected rationale (gợi ý)
+  const rationale = (scenarioRationales?.[v] || "").trim();
+  if (rationale) {
+    const expected = document.createElement("p");
+    expected.className = "expected";
+    expected.textContent = rationale;
+    card.appendChild(expected);
+  }
 
-const rationale = (scenarioRationales?.[v] || "").trim();
-if (rationale) {
-  const expected = document.createElement("p");
-  expected.className = "expected";
-  expected.textContent = rationale;
-  card.appendChild(expected);
-}
-
-scenarioReasons.appendChild(card);
-  // user explain: chỉ hiện nếu họ có chọn + có nhập
+  // user explain
   const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
   const user = document.createElement("p");
   user.className = "user";
@@ -1114,7 +1111,6 @@ scenarioReasons.appendChild(card);
   }
 
   card.appendChild(user);
-
   scenarioReasons.appendChild(card);
 });
 
@@ -1175,6 +1171,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
