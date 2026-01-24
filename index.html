@@ -438,7 +438,6 @@
             <option>BẢO VỆ KHO 7-8</option>
             <option>BẢO VỆ KHO ST</option>
           </select>
-          <small class="muted">Edit this list to match your org.</small>
         </div>
       </div>
 
@@ -1088,8 +1087,8 @@ scenarioCorrect.forEach(v => {
   const label = scenarioLabels?.[v] || v;
   const isPicked = pickedScenario.includes(v);
 
-  title.textContent = `Đáp án đúng: ${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
-  card.appendChild(title);
+  title.textContent =
+  `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
 
   // expected rationale: LUÔN HIỆN vì đây là đáp án đúng
   const rationale = (scenarioRationales?.[v] || "").trim();
@@ -1173,6 +1172,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
