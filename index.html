@@ -58,13 +58,6 @@
     .titlewrap{ display:flex; flex-direction:column; line-height:1.1; }
     .title{ font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: .4px; }
     .subtitle{ font-size: 12px; color: var(--muted); }
-    .pill{
-      padding:8px 12px; border-radius:999px;
-      background: linear-gradient(135deg, rgba(255,122,0,.18), rgba(255,122,0,.06));
-      border: 1px solid rgba(255,122,0,.25);
-      font-size: 12px; color:#9a4a00; font-weight: 900;
-      white-space:nowrap;
-    }
 
     button{
       border:none;
@@ -246,6 +239,7 @@
       background: rgba(180,35,24,.06);
       color:#7f1d1d;
       font-weight: 900;
+      white-space: pre-wrap;
     }
     small.muted{color:var(--muted)}
 
@@ -344,8 +338,9 @@
       color:#7f1d1d;
       min-height: 18px;
     }
+
     /* Tạm ẩn câu hỏi 5 */
-.qblock[data-qid="q5"]{ display:none; }
+    .qblock[data-qid="q5"]{ display:none; }
   </style>
 </head>
 
@@ -363,8 +358,6 @@
     </div>
 
     <div style="display:flex; gap:10px; align-items:center;">
-
-      <!-- Admin only -->
       <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
         Survey: OFF
       </button>
@@ -376,13 +369,11 @@
   </div>
 </header>
 
-<!-- Closed panel -->
 <section id="closedPanel" class="closed-panel">
   <div class="closed-card">
-    <h2 class="closed-title">Khảo sát hiện đang đóng</h2>
+    <h2 class="closed-title">Survey is currently OFF</h2>
     <div id="visitorMessage" class="visitor-message"></div>
 
-    <!-- Admin can edit message -->
     <div class="admin-box" id="adminBox">
       <label for="adminMessage" class="admin-label">Your message (when survey is OFF)</label>
       <textarea id="adminMessage" class="admin-textarea" placeholder="Type your message here..."></textarea>
@@ -392,7 +383,7 @@
         <button type="button" id="clearMessageBtn" class="btn-ghost">Clear</button>
       </div>
 
-      <small class="muted">Shared-state is stored on Google Sheet via Apps .</small>
+      <small class="muted">Shared-state is stored on Google Sheet via Apps Script.</small>
     </div>
   </div>
 </section>
@@ -402,10 +393,10 @@
     <div class="card-head">
       <h2>Bảng khảo sát</h2>
       <p>Các anh/chị hãy hoàn thành khảo sát. Điểm sẽ tự chấm sau khi nộp khảo sát</p>
+      <p class="muted" id="bannedStatus" style="margin-top:6px;"></p>
     </div>
 
     <form id="surveyForm" novalidate>
-      <!-- Basic info -->
       <div class="row">
         <div>
           <label for="fullName">1) Họ và Tên <span class="required">Required</span></label>
@@ -445,12 +436,9 @@
       <div class="qblock" data-qid="q1">
         <div class="qtitle">
           <h3>
-             <p><strong>3) Hãy điền vào chỗ trống</strong></p>
-            <p>
-      Tầm nhìn của TBS Logistics ?
-            </p>
-            <p>"Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."
-            </p>
+            <p><strong>3) Hãy điền vào chỗ trống</strong></p>
+            <p>Tầm nhìn của TBS Logistics ?</p>
+            <p>"Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."</p>
           </h3>
           <div class="required">Required</div>
         </div>
@@ -469,13 +457,9 @@
       <div class="qblock" data-qid="q2">
         <div class="qtitle">
           <h3>
-            <p><strong>4) Hãy điền vào chỗ trống</strong></p> 
-            <p>
-      Sứ mệnh của TBS Logistics là?
-            </p>
-            <p>
-      "Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."
-            </p>
+            <p><strong>4) Hãy điền vào chỗ trống</strong></p>
+            <p>Sứ mệnh của TBS Logistics là?</p>
+            <p>"Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."</p>
           </h3>
           <div class="required">Required</div>
         </div>
@@ -525,7 +509,7 @@
         </div>
       </div>
 
-      <!-- Q5 -->
+      <!-- Q5 hidden -->
       <div class="qblock" data-qid="q5">
         <div class="qtitle">
           <h3>7) Chọn các mục tiêu ĐÚNG trong năm 2026 của TBS Logistics</h3>
@@ -543,59 +527,55 @@
         </div>
       </div>
 
-            <!-- Scenario -->
+      <!-- Scenario -->
       <div class="qblock" data-qid="scenario">
         <div class="qtitle">
-  <h3>
-    7) Tình huống:
-    <br><br><strong>BỐI CẢNH</strong><br>
-    Trong ngày làm việc, khối lượng công việc của nhóm tăng cao so với kế hoạch.
-    Bạn nhận thấy một đồng nghiệp đang:
-    <ul>
-      <li>Phải xử lý nhiều đầu việc cùng lúc</li>
-      <li>Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ</li>
-      <li>Nếu không được hỗ trợ kịp thời có thể dẫn đến:</li>
-      <ul>
-        <li>Trễ tiến độ chung</li>
-        <li>Sai sót trong công việc</li>
-        <li>Ảnh hưởng chất lượng và uy tín của nhóm</li>
-      </ul>
-    </ul>
+          <h3>
+            7) Tình huống:
+            <br><br><strong>BỐI CẢNH</strong><br>
+            Trong ngày làm việc, khối lượng công việc của nhóm tăng cao so với kế hoạch.
+            Bạn nhận thấy một đồng nghiệp đang:
+            <ul>
+              <li>Phải xử lý nhiều đầu việc cùng lúc</li>
+              <li>Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ</li>
+              <li>Nếu không được hỗ trợ kịp thời có thể dẫn đến:</li>
+              <ul>
+                <li>Trễ tiến độ chung</li>
+                <li>Sai sót trong công việc</li>
+                <li>Ảnh hưởng chất lượng và uy tín của nhóm</li>
+              </ul>
+            </ul>
 
-    <strong>Câu hỏi:</strong><br>
-    Bạn sẽ làm gì? Các giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
-  </h3>
-  <div class="required">Required</div>
-</div>
+            <strong>Câu hỏi:</strong><br>
+            Bạn sẽ làm gì? Các giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
+          </h3>
+          <div class="required">Required</div>
+        </div>
 
         <div class="choices">
           <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
-          <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
           <div class="choice"><input type="checkbox" id="s2" name="scenario" value="s2"><span><strong>Trách nhiệm</strong>.</span></div>
-          <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
           <div class="choice"><input type="checkbox" id="s3" name="scenario" value="s3"><span><strong>Đáng tin</strong>.</span></div>
-          <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
           <div class="choice"><input type="checkbox" id="s4" name="scenario" value="s4"><span><strong>Chính trực</strong>.</span></div>
-          <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
           <div class="choice"><input type="checkbox" id="s5" name="scenario" value="s5"><span><strong>Kỷ luật</strong>.</span></div>
-          <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
           <div class="choice"><input type="checkbox" id="s6" name="scenario" value="s6"><span><strong>Hiệu quả</strong>.</span></div>
-          <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do:</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+          <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do (tối thiểu 15 từ có ý nghĩa):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
         </div>
-
-        <!--<small class="muted">
-          Mỗi ô tick đúng được 1 điểm. Nếu tick thì phần giải thích bắt buộc (không ảnh hưởng điểm).
-        </small>
-      </div>-->
+      </div>
 
       <div class="actions">
         <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
-        <button type="submit" class="btn-primary">Submit Survey</button>
+        <button type="submit" class="btn-primary" id="submitBtn">Submit Survey</button>
       </div>
 
       <div class="error" id="errorBox"></div>
@@ -637,64 +617,39 @@
 
 <script>
 /* ===================== CONFIG ===================== */
-/** ✅ Replace this with your Apps Script Web App URL */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzL9M_Qa7qAmYxKDWHqLyfDJhouZyEGCJFIBLhpjhc3LssoqMYfW8mpAHz4NC6is3GC/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyj85-CxqL9iRtPq-mBF3ruUc7RNcRaMoCBodYf-vj9sGw3NcbLT9t7hoa8pkZAtcCl/exec";
 
-/* ===================== VALIDATION CONFIG ===================== */
-const MIN_EXPLAIN_WORDS = 15;
+const MIN_MEANINGFUL_WORDS = 15;
 
-// fallback nếu chưa load được từ sheet banned-words
-let bannedWords = new Set([
-  "doan ket",
-  "trach nhiem",
-  "dang tin",
-  "chinh truc",
-  "ky luat",
-  "hieu qua"
+// tokens được phép tính dù ngắn (tuỳ bạn thêm)
+const ALLOW_TOKENS = new Set([
+  "tbs","vfr","it","hr","hsse","icd","erp","crm"
 ]);
 
-// allow list: từ viết tắt / thuật ngữ vẫn tính là từ hợp lệ
-const ALLOW_TOKENS = new Set(["tbs", "logistics", "icd", "erp", "crm", "kpi"]);
 /* Scoring rules */
 const correctSingle = { q1: "d", q2: "c" };
 const correctSets = {
   q3: ["a","c","d","e","f","g"],
   q4: ["a","c","d","f","g"],
 };
-const scenarioCorrect = ["s1", "s2", "s3", "s6"];
-  const scenarioLabels = {
-  s1: "Đoàn kết",
-  s2: "Trách nhiệm",
-  s3: "Đáng tin",
-  s4: "Chính trực",
-  s5: "Kỷ luật",
-  s6: "Hiệu quả"
+const scenarioCorrect = ["s1","s2","s3","s6"];
+
+const scenarioLabels = {
+  s1:"Đoàn kết", s2:"Trách nhiệm", s3:"Đáng tin",
+  s4:"Chính trực", s5:"Kỷ luật", s6:"Hiệu quả"
 };
+
 const scenarioRationales = {
-  s1: `•	Tình huống xuất phát từ khó khăn của đồng nghiệp
-       •	Nếu không có tinh thần đoàn kết:
-            o	Mỗi người chỉ lo việc mình
-            o	Công việc chung dễ đổ vỡ
-    👉Biểu hiện rõ nhất
-       •	Chủ động hỗ trợ khi thấy đồng nghiệp quá tải
-       •	Không đứng ngoài với suy nghĩ “không phải việc của tôi`,
-  s2: `•	Người hỗ trợ không bắt buộc phải làm thêm
-       •	Nhưng vì trách nhiệm với kết quả chung, họ vẫn hành động
-    👉 Biểu hiện
-       •	Quan tâm đến tiến độ, chất lượng chung của nhóm
-       •	Không bỏ mặc rủi ro trễ hạn hay sai sót
-    🔑 Đoàn kết là tinh thần – Trách nhiệm là lý do để hành động.`,
-  s3: `•	Hỗ trợ mà làm không tới nơi → còn hại hơn không hỗ trợ
-       •	Nhóm chỉ vận hành tốt khi các thành viên tin nhau
-    👉 Biểu hiện
-       •	Nhận việc thì làm đến cùng
-       •	Làm đúng – làm đủ – đúng thời gian
-    🔑 Không đáng tin → hỗ trợ trở thành rủi ro
-`,
-  s4: `     `,
-  s5: `     `,
-  s6: `•	Mục tiêu cuối cùng là hoàn thành công việc đúng hạn, đúng chất lượng
-    👉 Vai trò: kết quả đạt được sau cùng`
+  s1: `• Tình huống xuất phát từ khó khăn của đồng nghiệp
+• Chủ động hỗ trợ khi thấy đồng nghiệp quá tải
+• Không đứng ngoài với suy nghĩ "không phải việc của tôi"`,
+  s2: `• Trách nhiệm với kết quả chung
+• Không bỏ mặc rủi ro trễ hạn hay sai sót`,
+  s3: `• Nhận việc thì làm đến cùng
+• Làm đúng – làm đủ – đúng thời gian`,
+  s4: ``,
+  s5: ``,
+  s6: `• Mục tiêu cuối cùng là hoàn thành đúng hạn, đúng chất lượng`
 };
 
 /* ===================== HELPERS ===================== */
@@ -719,15 +674,29 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 
+/* ====== DISABLE QUESTION ====== */
+function disableQuestion(qid){
+  const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
+  if (!block) return;
+  block.querySelectorAll("input, select, textarea").forEach(el => {
+    el.disabled = true;
+    el.required = false;
+  });
+}
+
+/* ===================== BANNED WORDS (loaded from server) ===================== */
+let bannedWords = new Set(); // chứa text đã normalize
+const bannedStatus = $("#bannedStatus");
+
+/* ===== normalize + tokenize + meaningful word count ===== */
 function normalizeForCheck(s){
   return String(s || "")
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // bỏ dấu
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
-    // đổi gạch nối thành space để “chinh-truc” = 2 từ hợp lý
     .replace(/[-_]/g, " ")
-    // bỏ ký tự lạ, chỉ giữ chữ số + chữ + space
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    // JS browser có unicode property \p{L}, nhưng để chắc ăn thì dùng ASCII sau khi bỏ dấu
+    .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -740,7 +709,6 @@ function tokenizeWords(s){
 
 function countMeaningfulWords(s){
   const words = tokenizeWords(s);
-  // loại token quá ngắn kiểu “a”, “ok”
   const filtered = words.filter(w => {
     if (ALLOW_TOKENS.has(w)) return true;
     if (/^\d+$/.test(w)) return true;
@@ -749,13 +717,12 @@ function countMeaningfulWords(s){
   return filtered.length;
 }
 
-/* ========= Keyboard mash detector ========= */
+/* ========= keyboard mash detector ========= */
 function isKeyboardMashToken(w){
   if (!/^[a-z]+$/.test(w)) return false;
   if (w.length < 8) return false;
 
   const rows = ["qwertyuiop","asdfghjkl","zxcvbnm"];
-
   for (const row of rows){
     if (row.includes(w)) return true;
     const rev = row.split("").reverse().join("");
@@ -763,7 +730,8 @@ function isKeyboardMashToken(w){
 
     for (let i=0;i<=row.length-6;i++){
       const sub = row.slice(i,i+6);
-      if (w.includes(sub) || w.includes(sub.split("").reverse().join(""))) return true;
+      const subRev = sub.split("").reverse().join("");
+      if (w.includes(sub) || w.includes(subRev)) return true;
     }
   }
 
@@ -780,7 +748,7 @@ function isKeyboardMashToken(w){
   return (hit / Math.max(w.length-1,1)) >= 0.45;
 }
 
-/* ========= N-gram “human-ish” score ========= */
+/* ========= n-gram score ========= */
 const COMMON_VI_BIGRAMS = new Set([
   "ng","nh","ch","th","tr","ph","kh","qu","gi",
   "an","am","ai","ao","ap","at","au",
@@ -832,13 +800,16 @@ function looksLikeGibberish(text){
 
     const alpha = /^[a-z]+$/.test(w);
 
+    // cực dài
     if (w.length >= 14) suspicious++;
 
+    // ít nguyên âm (nhưng có nguyên âm vẫn có thể spam -> chỉ là 1 tín hiệu)
     let vCount = 0;
     for (const ch of w) if (vowels.has(ch)) vCount++;
     const vRatio = vCount / Math.max(w.length,1);
     if (w.length >= 8 && vRatio < 0.2) suspicious++;
 
+    // chuỗi phụ âm dài
     let consec = 0, maxConsec = 0;
     for (const ch of w){
       const isLetter = /[a-z]/.test(ch);
@@ -848,10 +819,13 @@ function looksLikeGibberish(text){
     }
     if (w.length >= 8 && maxConsec >= 5) suspicious++;
 
+    // ký tự lặp
     if (/(.)\1\1\1/.test(w)) suspicious++;
 
+    // mash bàn phím
     if (alpha && isKeyboardMashToken(w)) suspicious += 2;
 
+    // bigram score thấp
     if (alpha && w.length >= 8){
       const score = bigramHumanScore(w);
       if (score < 0.18) suspicious += 2;
@@ -862,50 +836,66 @@ function looksLikeGibberish(text){
   return suspicious >= 3;
 }
 
-/* ========= Banned words rule =========
-   Nếu nội dung chỉ là 1 cụm (sau normalize) và nằm trong bannedWords -> reject
-*/
+/* ========= banned phrase ========= */
 function isOnlyBannedPhrase(text){
   const t = normalizeForCheck(text);
   if (!t) return false;
-  // Nếu chỉ có 1 cụm từ (ví dụ "doan ket" hoặc "trach nhiem")
+  // Nếu normalize ra đúng 1 cụm nằm trong bannedWords -> reject
   return bannedWords.has(t);
 }
 
-  
-/* ====== DISABLE QUESTION ====== */
-function disableQuestion(qid){
-  const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
-  if (!block) return;
+/* ========= advanced validate ========= */
+function validateExplainAdvanced(text){
+  const meaningfulCount = countMeaningfulWords(text);
+  if (meaningfulCount < MIN_MEANINGFUL_WORDS){
+    return { ok:false, reason:`Phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.` };
+  }
 
-  block.querySelectorAll("input, select, textarea").forEach(el => {
-    el.disabled = true;   // ✅ chặn nhập
-    el.required = false; // ✅ tránh bị validation
-  });
+  // chặn "đoàn kết" (hoặc cụm banned) dù đủ 15 từ (ví dụ lặp 15 lần)
+  if (isOnlyBannedPhrase(text)){
+    return { ok:false, reason:"Không được chỉ ghi mỗi giá trị cốt lõi. Vui lòng giải thích vì sao." };
+  }
+
+  // chặn spam vô nghĩa
+  if (looksLikeGibberish(text)){
+    return { ok:false, reason:"Phát hiện nội dung có dấu hiệu vô nghĩa/spam. Vui lòng viết rõ ràng hơn." };
+  }
+
+  // chặn lặp 1 từ/cụm quá nhiều (vd: "doan ket" x 15)
+  const toks = tokenizeWords(text);
+  if (toks.length >= MIN_MEANINGFUL_WORDS){
+    const freq = {};
+    toks.forEach(t => freq[t] = (freq[t]||0) + 1);
+    const top = Object.values(freq).sort((a,b)=>b-a)[0] || 0;
+    if (top >= Math.ceil(toks.length * 0.7)){
+      return { ok:false, reason:"Nội dung đang lặp lại quá nhiều, vui lòng viết thành câu có lý do cụ thể." };
+    }
+  }
+
+  return { ok:true };
 }
+
 /* ===================== API ===================== */
 async function apiGetSettings(){
   const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
   const res = await fetch(url, { method: "GET" });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "getSettings failed");
-  return json.settings; // { isOn:boolean, message:string }
+  return json.settings;
 }
 
 async function apiGetBannedWords(){
-  // Apps Script: return { ok:true, words:["doan ket","trach nhiem",...] }
   const url = `${GOOGLE_SCRIPT_URL}?action=getBannedWords&ts=${Date.now()}`;
-  const res = await fetch(url, { method: "GET" });
+  const res = await fetch(url, { method:"GET" });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "getBannedWords failed");
-  return Array.isArray(json.words) ? json.words : [];
+  return json.words || [];
 }
-  
+
 async function apiSaveSettings({ email, passcode, isOn, message }){
   const body = new URLSearchParams();
   body.append("action", "saveSettings");
   body.append("data", JSON.stringify({ email, passcode, isOn, message }));
-
   const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "saveSettings failed");
@@ -916,7 +906,6 @@ async function apiSubmitSurvey(payload){
   const body = new URLSearchParams();
   body.append("action", "submitSurvey");
   body.append("data", JSON.stringify(payload));
-
   const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "submitSurvey failed");
@@ -948,8 +937,9 @@ const resultBox     = $("#resultBox");
 const scoreLine     = $("#scoreLine");
 const scenarioReasons = $("#scenarioReasons");
 const resetBtn      = $("#resetBtn");
+const submitBtn     = $("#submitBtn");
 
-/* ===================== SHARED STATE (from server) ===================== */
+/* ===================== SHARED STATE ===================== */
 let sharedIsOn = false;
 let sharedMessage = "";
 let isAdminSession = false;
@@ -981,7 +971,6 @@ function setAdminUI(on){
   adminBox.style.display  = isAdminSession ? "" : "none";
 }
 
-/* Pull from server */
 async function refreshFromServer(){
   const s = await apiGetSettings();
   applySurveyState(!!s.isOn);
@@ -1017,43 +1006,30 @@ function validateRequiredGroups(){
   });
 
   ["q3", "q4"].forEach((q, idx) => {
-  if (getCheckedValues(q).length === 0){
-    errors.push(`Question ${idx + 5} is required.`);
-  }
-});
+    if (getCheckedValues(q).length === 0){
+      errors.push(`Question ${idx + 5} is required.`);
+    }
+  });
+
   const scenario = getCheckedValues("scenario");
   if (scenario.length === 0) errors.push("Scenario question is required.");
 
+  // kiểm tra giải thích nâng cao
   scenario.forEach(v => {
-  const ta = $(`.explain[data-explain-for="${v}"] textarea`);
-  if (!ta) return;
+    const ta = document.querySelector(`.explain[data-explain-for="${v}"] textarea`);
+    if (!ta) return;
 
-  const raw = (ta.value || "").trim();
-  if (!raw){
-    errors.push("Vui lòng nhập phần giải thích cho mỗi lựa chọn đã tick.");
-    return;
-  }
+    const raw = ta.value || "";
+    if (!raw.trim()){
+      errors.push("Phần giải thích bắt buộc cho mỗi lựa chọn đã tick.");
+      return;
+    }
 
-  // 1) không cho chỉ viết đúng 1 cụm bị cấm (lấy từ sheet banned-words)
-  if (isOnlyBannedPhrase(raw)){
-    errors.push("Giải thích đang quá ngắn (chỉ là 1 từ/cụm). Vui lòng viết rõ 'tại sao' nhé.");
-    return;
-  }
-
-  // 2) đủ số từ?
-  const wordCount = countMeaningfulWords(raw);
-  if (wordCount < MIN_EXPLAIN_WORDS){
-    errors.push(`Giải thích phải tối thiểu ${MIN_EXPLAIN_WORDS} từ (hiện tại: ${wordCount}).`);
-    return;
-  }
-
-  // 3) bắt spam vô nghĩa (kể cả có nguyên âm)
-  if (looksLikeGibberish(raw)){
-    errors.push("Phát hiện nội dung không có nghĩa (spam ký tự). Vui lòng viết lại lý do rõ ràng.");
-    return;
-  }
-});
-
+    const r = validateExplainAdvanced(raw);
+    if (!r.ok){
+      errors.push(r.reason);
+    }
+  });
 
   return errors;
 }
@@ -1063,41 +1039,35 @@ function computeScoreSplit(){
   let knowScore = 0;
   let understandScore = 0;
 
-  // KNOW: Q1–Q2 radios
   ["q1","q2"].forEach(q => {
     const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
     if (picked === correctSingle[q]) knowScore += 1;
   });
 
-  // KNOW: Q3–Q5 exact-match sets (đúng bộ đáp án mới có điểm)
-Object.keys(correctSets).forEach(q => {
-  const block = document.querySelector(`.qblock[data-qid="${q}"]`);
-  const anyEl = block?.querySelector("input,select,textarea");
+  Object.keys(correctSets).forEach(q => {
+    const block = document.querySelector(`.qblock[data-qid="${q}"]`);
+    const anyEl = block?.querySelector("input,select,textarea");
+    if (!anyEl || anyEl.disabled) return;
 
-  // không có block hoặc đã disable => bỏ qua (không tính điểm, không tính tổng)
-  if (!anyEl || anyEl.disabled) return;
+    const picked = getCheckedValues(q);
+    const correct = correctSets[q];
+    if (setsEqual(picked, correct)) knowScore += 1;
+  });
 
-  const picked = getCheckedValues(q);
-  const correct = correctSets[q];
-  if (setsEqual(picked, correct)) knowScore += 1;
-});
-  
-  // UNDERSTAND: Scenario (only correct ticks give points)
   getCheckedValues("scenario").forEach(v => {
     if (scenarioCorrect.includes(v)) understandScore += 1;
   });
 
   const enabledSetQuestions = Object.keys(correctSets).filter(q => {
-  const block = document.querySelector(`.qblock[data-qid="${q}"]`);
-  if (!block) return false;
-  const anyEl = block.querySelector("input,select,textarea");
-  return anyEl && !anyEl.disabled;
-});
-const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
-  
-  const totalUnderstand = scenarioCorrect.length; // thường = 1
-  const total = totalKnow + totalUnderstand;
+    const block = document.querySelector(`.qblock[data-qid="${q}"]`);
+    if (!block) return false;
+    const anyEl = block.querySelector("input,select,textarea");
+    return anyEl && !anyEl.disabled;
+  });
 
+  const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
+  const totalUnderstand = scenarioCorrect.length;
+  const total = totalKnow + totalUnderstand;
   const score = knowScore + understandScore;
 
   return { knowScore, totalKnow, understandScore, totalUnderstand, score, total };
@@ -1110,32 +1080,23 @@ function openAdminModal(){
   adminEmail.value = adminSession.email || "";
   adminPass.value = adminSession.passcode || "";
 }
-function closeAdminModal(){
-  adminModal.style.display = "none";
-}
+function closeAdminModal(){ adminModal.style.display = "none"; }
 
 adminBtn.addEventListener("click", openAdminModal);
 adminClose.addEventListener("click", closeAdminModal);
-adminModal.addEventListener("click", (e) => {
-  if (e.target === adminModal) closeAdminModal();
-});
+adminModal.addEventListener("click", (e) => { if (e.target === adminModal) closeAdminModal(); });
 
 adminLogin.addEventListener("click", async () => {
   adminMsg.textContent = "";
-
   const email = (adminEmail.value || "").trim().toLowerCase();
   const pass  = (adminPass.value || "").trim();
-
   if (!email || !pass){
     adminMsg.textContent = "Email & passcode are required.";
     return;
   }
-
-  // session-only
   adminSession = { email, passcode: pass };
   setAdminUI(true);
   closeAdminModal();
-
   try { await refreshFromServer(); } catch(e){}
 });
 
@@ -1145,13 +1106,11 @@ adminLogout.addEventListener("click", () => {
   adminMsg.textContent = "Logged out.";
 });
 
-/* ===================== ADMIN ACTIONS (shared) ===================== */
+/* ===================== ADMIN ACTIONS ===================== */
 toggleBtn.addEventListener("click", async () => {
   if (!isAdminSession) return;
-
-  const nextIsOn = (toggleBtn.dataset.state === "off"); // OFF -> ON
+  const nextIsOn = (toggleBtn.dataset.state === "off");
   const msg = adminMessage.value || sharedMessage || "";
-
   try{
     const s = await apiSaveSettings({ ...adminSession, isOn: nextIsOn, message: msg });
     applySurveyState(!!s.isOn);
@@ -1164,10 +1123,8 @@ toggleBtn.addEventListener("click", async () => {
 
 saveMessageBtn.addEventListener("click", async () => {
   if (!isAdminSession) return;
-
   const isOn = (toggleBtn.dataset.state !== "off");
   const msg  = adminMessage.value || "";
-
   try{
     const s = await apiSaveSettings({ ...adminSession, isOn, message: msg });
     applySurveyState(!!s.isOn);
@@ -1180,9 +1137,7 @@ saveMessageBtn.addEventListener("click", async () => {
 
 clearMessageBtn.addEventListener("click", async () => {
   if (!isAdminSession) return;
-
   const isOn = (toggleBtn.dataset.state !== "off");
-
   try{
     const s = await apiSaveSettings({ ...adminSession, isOn, message: "" });
     applySurveyState(!!s.isOn);
@@ -1192,25 +1147,22 @@ clearMessageBtn.addEventListener("click", async () => {
     setAdminUI(false);
   }
 });
-  
+
 /* ===================== SUBMIT ===================== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // reset UI
   errorBox.style.display = "none";
   errorBox.textContent = "";
   resultBox.style.display = "none";
   scenarioReasons.innerHTML = "";
 
-  // block if OFF
   if (!sharedIsOn){
     errorBox.style.display = "block";
     errorBox.textContent = "Khảo sát đang TẮT.";
     return;
   }
 
-  // validate
   const errors = validateRequiredGroups();
   if (errors.length){
     errorBox.style.display = "block";
@@ -1218,10 +1170,8 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  // scoring
   const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
 
-  // build payload
   const payload = {
     timestamp: new Date().toISOString(),
     name: $("#fullName").value.trim(),
@@ -1251,10 +1201,8 @@ form.addEventListener("submit", async (e) => {
     userAgent: navigator.userAgent
   };
 
-  // ===== show result UI (local) =====
+  // show local result
   scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
-
-  // xóa dòng split cũ nếu tồn tại để tránh chèn lặp
   resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
 
   const extra = document.createElement("p");
@@ -1262,75 +1210,66 @@ form.addEventListener("submit", async (e) => {
   extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
   resultBox.insertBefore(extra, scenarioReasons);
 
-// ====== DÒNG GIỚI THIỆU GỢI Ý ======
-let intro = resultBox.querySelector("#scenarioIntro");
-if (!intro) {
-  intro = document.createElement("p");
-  intro.id = "scenarioIntro";
-  intro.style.marginTop = "12px";
-  intro.style.fontWeight = "900";
-  intro.style.color = "#7c2d12"; // cam nâu, hợp vibe
-  intro.textContent =
-    "Dưới đây là đề xuất các giá trị cốt lõi của Ban Văn hóa Doanh nghiệp đưa ra cho tình huống này:";
-  resultBox.insertBefore(intro, scenarioReasons);
-}
-  
-  // ====== RENDER "GỢI Ý ĐÁP ÁN ĐÚNG" (luôn theo scenarioCorrect) ======
-scenarioReasons.innerHTML = "";
-
-// danh sách user đã tick
-const pickedScenario = payload.answers.scenario || [];
-
-scenarioCorrect.forEach(v => {
-  const card = document.createElement("div");
-  card.className = "reason-card";
-
-  // title
-  const title = document.createElement("h4");
-  const label = scenarioLabels?.[v] || v;
-  const isPicked = pickedScenario.includes(v);
-
-  title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
-  card.appendChild(title);
-
-  // expected rationale (gợi ý)
-  const rationale = (scenarioRationales?.[v] || "").trim();
-  if (rationale) {
-    const expected = document.createElement("p");
-    expected.className = "expected";
-    expected.textContent = rationale;
-    card.appendChild(expected);
+  let intro = resultBox.querySelector("#scenarioIntro");
+  if (!intro) {
+    intro = document.createElement("p");
+    intro.id = "scenarioIntro";
+    intro.style.marginTop = "12px";
+    intro.style.fontWeight = "900";
+    intro.style.color = "#7c2d12";
+    intro.textContent = "Dưới đây là đề xuất các giá trị cốt lõi của Ban Văn hóa Doanh nghiệp đưa ra cho tình huống này:";
+    resultBox.insertBefore(intro, scenarioReasons);
   }
 
-  // user explain
-  const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
-  const user = document.createElement("p");
-  user.className = "user";
+  scenarioReasons.innerHTML = "";
+  const pickedScenario = payload.answers.scenario || [];
 
-  if (isPicked) {
-    user.textContent = `Giải thích của Anh/Chị:\n${userExplain || "(Chưa nhập nội dung)"}`;
-  } else {
-    user.textContent = `Giải thích của Anh/Chị:\n(Bạn không chọn mục này nên không có giải thích)`;
-  }
+  scenarioCorrect.forEach(v => {
+    const card = document.createElement("div");
+    card.className = "reason-card";
 
-  card.appendChild(user);
-  scenarioReasons.appendChild(card);
-});
+    const title = document.createElement("h4");
+    const label = scenarioLabels?.[v] || v;
+    const isPicked = pickedScenario.includes(v);
+    title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
+    card.appendChild(title);
 
-  // bật kết quả
+    const rationale = (scenarioRationales?.[v] || "").trim();
+    if (rationale) {
+      const expected = document.createElement("p");
+      expected.className = "expected";
+      expected.textContent = rationale;
+      card.appendChild(expected);
+    }
+
+    const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
+    const user = document.createElement("p");
+    user.className = "user";
+    user.textContent = isPicked
+      ? `Giải thích của Anh/Chị:\n${userExplain || "(Chưa nhập nội dung)"}`
+      : `Giải thích của Anh/Chị:\n(Bạn không chọn mục này nên không có giải thích)`;
+    card.appendChild(user);
+
+    scenarioReasons.appendChild(card);
+  });
+
   resultBox.style.display = "block";
   resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
 
   // submit to server
+  submitBtn.disabled = true;
   try{
     await apiSubmitSurvey(payload);
     lockFormUntilRefresh();
   }catch(err){
+    // nếu server-side reject thì báo đúng lý do
     errorBox.style.display = "block";
-    errorBox.textContent = "Đã nhập nhưng chưa lưu vào hệ thống: " + (err?.message || err);
+    errorBox.textContent = "Không thể lưu vào hệ thống:\n" + (err?.message || err);
+    submitBtn.disabled = false;
   }
-}); // ✅ ĐÓNG submit handler ở đây
+});
 
+resetBtn.addEventListener("click", () => location.reload());
 
 /* ===================== LOCK FORM ===================== */
 function lockFormUntilRefresh(){
@@ -1351,25 +1290,21 @@ function lockFormUntilRefresh(){
   }
 }
 
-
 /* ===================== BOOT ===================== */
 (async function boot(){
   setAdminUI(false);
   syncScenarioExplain();
+  disableQuestion("q5");
 
-  // Load banned words from sheet (nếu fail thì dùng fallback)
+  // load banned words
   try{
     const words = await apiGetBannedWords();
-    const cleaned = words
-      .map(w => normalizeForCheck(w))
-      .filter(Boolean);
-    if (cleaned.length) bannedWords = new Set(cleaned);
+    bannedWords = new Set(words.map(w => normalizeForCheck(w)).filter(Boolean));
+    if (bannedStatus) bannedStatus.textContent = `Banned-words loaded: ${bannedWords.size} mục.`;
   }catch(e){
-    console.warn("Cannot load banned-words, fallback used.", e);
+    if (bannedStatus) bannedStatus.textContent = "Không tải được banned-words (vẫn chạy, nhưng sẽ dựa vào server-side).";
   }
-  
-disableQuestion("q5");
-  
+
   try{
     await refreshFromServer();
   }catch(err){
@@ -1385,48 +1320,3 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
