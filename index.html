@@ -638,8 +638,23 @@
 <script>
 /* ===================== CONFIG ===================== */
 /** ✅ Replace this with your Apps Script Web App URL */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5wDu1MHg3WK65miGCG1LSN8B_avMsOaMCSpvU5AkmSmlaZ3GvKq3ObJ9Z1h2f8ks/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzL9M_Qa7qAmYxKDWHqLyfDJhouZyEGCJFIBLhpjhc3LssoqMYfW8mpAHz4NC6is3GC/exec";
 
+/* ===================== VALIDATION CONFIG ===================== */
+const MIN_EXPLAIN_WORDS = 15;
+
+// fallback nếu chưa load được từ sheet banned-words
+let bannedWords = new Set([
+  "doan ket",
+  "trach nhiem",
+  "dang tin",
+  "chinh truc",
+  "ky luat",
+  "hieu qua"
+]);
+
+// allow list: từ viết tắt / thuật ngữ vẫn tính là từ hợp lệ
+const ALLOW_TOKENS = new Set(["tbs", "logistics", "icd", "erp", "crm", "kpi"]);
 /* Scoring rules */
 const correctSingle = { q1: "d", q2: "c" };
 const correctSets = {
@@ -703,6 +718,161 @@ function escapeHtml(str){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
+
+function normalizeForCheck(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // bỏ dấu
+    .replace(/đ/g, "d")
+    // đổi gạch nối thành space để “chinh-truc” = 2 từ hợp lý
+    .replace(/[-_]/g, " ")
+    // bỏ ký tự lạ, chỉ giữ chữ số + chữ + space
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeWords(s){
+  const t = normalizeForCheck(s);
+  if (!t) return [];
+  return t.split(" ").filter(Boolean);
+}
+
+function countMeaningfulWords(s){
+  const words = tokenizeWords(s);
+  // loại token quá ngắn kiểu “a”, “ok”
+  const filtered = words.filter(w => {
+    if (ALLOW_TOKENS.has(w)) return true;
+    if (/^\d+$/.test(w)) return true;
+    return w.length >= 2;
+  });
+  return filtered.length;
+}
+
+/* ========= Keyboard mash detector ========= */
+function isKeyboardMashToken(w){
+  if (!/^[a-z]+$/.test(w)) return false;
+  if (w.length < 8) return false;
+
+  const rows = ["qwertyuiop","asdfghjkl","zxcvbnm"];
+
+  for (const row of rows){
+    if (row.includes(w)) return true;
+    const rev = row.split("").reverse().join("");
+    if (rev.includes(w)) return true;
+
+    for (let i=0;i<=row.length-6;i++){
+      const sub = row.slice(i,i+6);
+      if (w.includes(sub) || w.includes(sub.split("").reverse().join(""))) return true;
+    }
+  }
+
+  const mashBigrams = new Set([
+    "qw","we","er","rt","ty","yu","ui","io","op",
+    "as","sd","df","fg","gh","hj","jk","kl",
+    "zx","xc","cv","vb","bn","nm",
+    "qa","az","ws","sx","ed","dc","rf","fv","tg","gb","yh","hn","uj","jm",
+  ]);
+  let hit = 0;
+  for (let i=0;i<w.length-1;i++){
+    if (mashBigrams.has(w.slice(i,i+2))) hit++;
+  }
+  return (hit / Math.max(w.length-1,1)) >= 0.45;
+}
+
+/* ========= N-gram “human-ish” score ========= */
+const COMMON_VI_BIGRAMS = new Set([
+  "ng","nh","ch","th","tr","ph","kh","qu","gi",
+  "an","am","ai","ao","ap","at","au",
+  "ba","be","bi","bo","bu",
+  "ca","co","cu","da","de","di","do","du",
+  "em","en","et","eu",
+  "ha","he","hi","ho","hu",
+  "ia","ie","im","in","it",
+  "la","le","li","lo","lu",
+  "ma","me","mi","mo","mu",
+  "na","ne","ni","no","nu",
+  "oa","oi","on","op","ot",
+  "ra","re","ri","ro","ru",
+  "sa","se","si","so","su",
+  "ta","te","ti","to","tu",
+  "ua","ui","un","ut",
+  "va","ve","vi","vo","vu"
+]);
+const COMMON_EN_BIGRAMS = new Set([
+  "th","he","in","er","an","re","on","at","en","nd",
+  "ti","es","or","te","of","ed","is","it","al","ar",
+  "st","to","nt","ng","se","ha","as","ou","io","le"
+]);
+
+function bigramHumanScore(token){
+  if (!/^[a-z]+$/.test(token)) return 1;
+  if (token.length < 6) return 1;
+
+  let good = 0;
+  const total = token.length - 1;
+  for (let i=0;i<token.length-1;i++){
+    const bg = token.slice(i,i+2);
+    if (COMMON_VI_BIGRAMS.has(bg) || COMMON_EN_BIGRAMS.has(bg)) good++;
+  }
+  return good / Math.max(total,1);
+}
+
+function looksLikeGibberish(text){
+  const tokens = tokenizeWords(text);
+  if (!tokens.length) return false;
+
+  const vowels = new Set(["a","e","i","o","u","y"]);
+  let suspicious = 0;
+
+  for (const w0 of tokens){
+    const w = w0.toLowerCase();
+    if (ALLOW_TOKENS.has(w)) continue;
+    if (/^\d+$/.test(w) && w.length <= 6) continue;
+
+    const alpha = /^[a-z]+$/.test(w);
+
+    if (w.length >= 14) suspicious++;
+
+    let vCount = 0;
+    for (const ch of w) if (vowels.has(ch)) vCount++;
+    const vRatio = vCount / Math.max(w.length,1);
+    if (w.length >= 8 && vRatio < 0.2) suspicious++;
+
+    let consec = 0, maxConsec = 0;
+    for (const ch of w){
+      const isLetter = /[a-z]/.test(ch);
+      const isConsonant = isLetter && !vowels.has(ch);
+      if (isConsonant){ consec++; maxConsec = Math.max(maxConsec, consec); }
+      else consec = 0;
+    }
+    if (w.length >= 8 && maxConsec >= 5) suspicious++;
+
+    if (/(.)\1\1\1/.test(w)) suspicious++;
+
+    if (alpha && isKeyboardMashToken(w)) suspicious += 2;
+
+    if (alpha && w.length >= 8){
+      const score = bigramHumanScore(w);
+      if (score < 0.18) suspicious += 2;
+      else if (score < 0.25) suspicious += 1;
+    }
+  }
+
+  return suspicious >= 3;
+}
+
+/* ========= Banned words rule =========
+   Nếu nội dung chỉ là 1 cụm (sau normalize) và nằm trong bannedWords -> reject
+*/
+function isOnlyBannedPhrase(text){
+  const t = normalizeForCheck(text);
+  if (!t) return false;
+  // Nếu chỉ có 1 cụm từ (ví dụ "doan ket" hoặc "trach nhiem")
+  return bannedWords.has(t);
+}
+
+  
 /* ====== DISABLE QUESTION ====== */
 function disableQuestion(qid){
   const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
@@ -722,6 +892,15 @@ async function apiGetSettings(){
   return json.settings; // { isOn:boolean, message:string }
 }
 
+async function apiGetBannedWords(){
+  // Apps Script: return { ok:true, words:["doan ket","trach nhiem",...] }
+  const url = `${GOOGLE_SCRIPT_URL}?action=getBannedWords&ts=${Date.now()}`;
+  const res = await fetch(url, { method: "GET" });
+  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+  if (!json.ok) throw new Error(json.error || "getBannedWords failed");
+  return Array.isArray(json.words) ? json.words : [];
+}
+  
 async function apiSaveSettings({ email, passcode, isOn, message }){
   const body = new URLSearchParams();
   body.append("action", "saveSettings");
@@ -846,11 +1025,35 @@ function validateRequiredGroups(){
   if (scenario.length === 0) errors.push("Scenario question is required.");
 
   scenario.forEach(v => {
-    const ta = $(`.explain[data-explain-for="${v}"] textarea`);
-    if (ta && !ta.value.trim()){
-      errors.push("Scenario explanation is required for each selected option.");
-    }
-  });
+  const ta = $(`.explain[data-explain-for="${v}"] textarea`);
+  if (!ta) return;
+
+  const raw = (ta.value || "").trim();
+  if (!raw){
+    errors.push("Vui lòng nhập phần giải thích cho mỗi lựa chọn đã tick.");
+    return;
+  }
+
+  // 1) không cho chỉ viết đúng 1 cụm bị cấm (lấy từ sheet banned-words)
+  if (isOnlyBannedPhrase(raw)){
+    errors.push("Giải thích đang quá ngắn (chỉ là 1 từ/cụm). Vui lòng viết rõ 'tại sao' nhé.");
+    return;
+  }
+
+  // 2) đủ số từ?
+  const wordCount = countMeaningfulWords(raw);
+  if (wordCount < MIN_EXPLAIN_WORDS){
+    errors.push(`Giải thích phải tối thiểu ${MIN_EXPLAIN_WORDS} từ (hiện tại: ${wordCount}).`);
+    return;
+  }
+
+  // 3) bắt spam vô nghĩa (kể cả có nguyên âm)
+  if (looksLikeGibberish(raw)){
+    errors.push("Phát hiện nội dung không có nghĩa (spam ký tự). Vui lòng viết lại lý do rõ ràng.");
+    return;
+  }
+});
+
 
   return errors;
 }
@@ -1153,6 +1356,17 @@ function lockFormUntilRefresh(){
 (async function boot(){
   setAdminUI(false);
   syncScenarioExplain();
+
+  // Load banned words from sheet (nếu fail thì dùng fallback)
+  try{
+    const words = await apiGetBannedWords();
+    const cleaned = words
+      .map(w => normalizeForCheck(w))
+      .filter(Boolean);
+    if (cleaned.length) bannedWords = new Set(cleaned);
+  }catch(e){
+    console.warn("Cannot load banned-words, fallback used.", e);
+  }
   
 disableQuestion("q5");
   
@@ -1171,6 +1385,7 @@ disableQuestion("q5");
 </script>
 </body>
 </html>
+
 
 
 
