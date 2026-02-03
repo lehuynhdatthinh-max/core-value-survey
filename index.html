@@ -839,11 +839,6 @@ function validateExplainAdvanced(text){
     return { ok:false, reason:`Phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.` };
   }
 
-  // chặn "đoàn kết" (hoặc cụm banned) dù đủ 15 từ (ví dụ lặp 15 lần)
-  if (isOnlyBannedPhrase(text)){
-    return { ok:false, reason:"Không được chỉ ghi mỗi giá trị cốt lõi. Vui lòng giải thích vì sao." };
-  }
-
   // chặn spam vô nghĩa
   if (looksLikeGibberish(text)){
     return { ok:false, reason:"Phát hiện nội dung có dấu hiệu vô nghĩa/spam. Vui lòng viết rõ ràng hơn." };
@@ -1291,4 +1286,5 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
