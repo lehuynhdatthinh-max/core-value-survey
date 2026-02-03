@@ -837,7 +837,7 @@ function looksLikeGibberish(text){
 function validateExplainAdvanced(text){
   const meaningfulCount = countMeaningfulWords(text);
   if (meaningfulCount < MIN_MEANINGFUL_WORDS){
-    return { ok:false, reason:`Phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.` };
+    return { ok:false, reason:`Phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ.` };
   }
 
   // chặn spam vô nghĩa
@@ -1287,6 +1287,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
