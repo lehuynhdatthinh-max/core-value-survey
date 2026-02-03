@@ -684,10 +684,6 @@ function disableQuestion(qid){
   });
 }
 
-/* ===================== BANNED WORDS (loaded from server) ===================== */
-let bannedWords = new Set(); // chứa text đã normalize
-const bannedStatus = $("#bannedStatus");
-
 /* ===== normalize + tokenize + meaningful word count ===== */
 function normalizeForCheck(s){
   return String(s || "")
@@ -836,14 +832,6 @@ function looksLikeGibberish(text){
   return suspicious >= 3;
 }
 
-/* ========= banned phrase ========= */
-function isOnlyBannedPhrase(text){
-  const t = normalizeForCheck(text);
-  if (!t) return false;
-  // Nếu normalize ra đúng 1 cụm nằm trong bannedWords -> reject
-  return bannedWords.has(t);
-}
-
 /* ========= advanced validate ========= */
 function validateExplainAdvanced(text){
   const meaningfulCount = countMeaningfulWords(text);
@@ -882,14 +870,6 @@ async function apiGetSettings(){
   const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
   if (!json.ok) throw new Error(json.error || "getSettings failed");
   return json.settings;
-}
-
-async function apiGetBannedWords(){
-  const url = `${GOOGLE_SCRIPT_URL}?action=getBannedWords&ts=${Date.now()}`;
-  const res = await fetch(url, { method:"GET" });
-  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
-  if (!json.ok) throw new Error(json.error || "getBannedWords failed");
-  return json.words || [];
 }
 
 async function apiSaveSettings({ email, passcode, isOn, message }){
@@ -1296,15 +1276,6 @@ function lockFormUntilRefresh(){
   syncScenarioExplain();
   disableQuestion("q5");
 
-  // load banned words
-  try{
-    const words = await apiGetBannedWords();
-    bannedWords = new Set(words.map(w => normalizeForCheck(w)).filter(Boolean));
-    if (bannedStatus) bannedStatus.textContent = `Banned-words loaded: ${bannedWords.size} mục.`;
-  }catch(e){
-    if (bannedStatus) bannedStatus.textContent = "Không tải được banned-words (vẫn chạy, nhưng sẽ dựa vào server-side).";
-  }
-
   try{
     await refreshFromServer();
   }catch(err){
@@ -1320,3 +1291,4 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
