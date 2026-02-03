@@ -972,8 +972,8 @@ $$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScena
 function validateRequiredGroups(){
   const errors = [];
 
-  if (!$("#fullName").value.trim()) errors.push("Name is required.");
-  if (!$("#department").value) errors.push("Department is required.");
+  if (!$("#fullName").value.trim()) errors.push("Chưa điền tên.");
+  if (!$("#department").value) errors.push("Chưa chọn bộ phận.");
 
   ["q1","q2"].forEach((q, idx) => {
     if (!document.querySelector(`input[name="${q}"]:checked`)) {
@@ -1287,6 +1287,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
