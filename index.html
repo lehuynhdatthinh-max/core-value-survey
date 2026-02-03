@@ -976,18 +976,18 @@ function validateRequiredGroups(){
 
   ["q1","q2"].forEach((q, idx) => {
     if (!document.querySelector(`input[name="${q}"]:checked`)) {
-      errors.push(`Question ${idx + 1} is required.`);
+      errors.push(`Câu hỏi ${idx + 1} chưa trả lời.`);
     }
   });
 
   ["q3", "q4"].forEach((q, idx) => {
     if (getCheckedValues(q).length === 0){
-      errors.push(`Question ${idx + 5} is required.`);
+      errors.push(`Câu hỏi ${idx + 5} chưa trả lời.`);
     }
   });
 
   const scenario = getCheckedValues("scenario");
-  if (scenario.length === 0) errors.push("Scenario question is required.");
+  if (scenario.length === 0) errors.push("Câu hỏi tình huống chưa trả lời.");
 
   // kiểm tra giải thích nâng cao
   scenario.forEach(v => {
@@ -1286,5 +1286,6 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
