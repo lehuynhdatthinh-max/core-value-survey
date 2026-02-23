@@ -352,7 +352,7 @@
         <img src="images/logo.png" alt="Company Logo">
       </div>
       <div class="titlewrap">
-        <div class="title">Khảo sát VHDN "Hiểu" và "Biết" Tháng 1</div>
+        <div class="title">Khảo sát VHDN "Hiểu" và "Biết" Tháng 2</div>
         <div class="subtitle">Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</div>
       </div>
     </div>
@@ -534,21 +534,24 @@
             7) Tình huống:
             <br><br><strong>Hãy chọn những đáp án phù hợp</strong><br>
             <br><br><strong>BỐI CẢNH</strong><br>
-            Trong ngày làm việc, khối lượng công việc của nhóm tăng cao so với kế hoạch.
-            Bạn nhận thấy một đồng nghiệp đang:
+            Trong quá trình làm việc bạn nhận thấy:
             <ul>
-              <li>Phải xử lý nhiều đầu việc cùng lúc</li>
-              <li>Có dấu hiệu căng thẳng, làm nhanh để kịp tiến độ</li>
-              <li>Nếu không được hỗ trợ kịp thời có thể dẫn đến:</li>
+              <li>Quy trình công ty khá chặt chẽ, nhiều bước kiểm soát</li>
+              <li>Nếu “làm tắt” hoặc bỏ qua một vài bước:</li>
               <ul>
-                <li>Trễ tiến độ chung</li>
-                <li>Sai sót trong công việc</li>
-                <li>Ảnh hưởng chất lượng và uy tín của nhóm</li>
+                <li>Công việc có thể xong nhanh hơn</li>
+                <li>Dễ được khen vì “linh hoạt”, “xử lý nhanh”</li>
+              </ul>
+              <li>Tuy nhiên, nếu không tuân thủ đúng quy trình có thể dẫn đến:</li>
+              <ul>
+                <li>Rủi ro sai sót, khó truy vết</li>
+                <li>Vi phạm quy định nội bộ hoặc pháp lý</li>
+                <li>Ảnh hưởng uy tín cá nhân và tập thể về lâu dài</li>
               </ul>
             </ul>
 
             <strong>Câu hỏi:</strong><br>
-            Bạn sẽ làm gì? Các giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
+            Bạn sẽ chọn cách nào?Những giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
           </h3>
           <div class="required">Required</div>
         </div>
@@ -633,7 +636,7 @@ const correctSets = {
   q3: ["a","c","d","e","f","g"],
   q4: ["a","c","d","f","g"],
 };
-const scenarioCorrect = ["s1","s2","s3","s6"];
+const scenarioCorrect = ["s2","s3","s4","s5","s6"];
 
 const scenarioLabels = {
   s1:"Đoàn kết", s2:"Trách nhiệm", s3:"Đáng tin",
@@ -641,16 +644,43 @@ const scenarioLabels = {
 };
 
 const scenarioRationales = {
-  s1: `• Tình huống xuất phát từ khó khăn của đồng nghiệp
-• Chủ động hỗ trợ khi thấy đồng nghiệp quá tải
-• Không đứng ngoài với suy nghĩ "không phải việc của tôi"`,
-  s2: `• Trách nhiệm với kết quả chung
-• Không bỏ mặc rủi ro trễ hạn hay sai sót`,
-  s3: `• Nhận việc thì làm đến cùng
-• Làm đúng – làm đủ – đúng thời gian`,
-  s4: ``,
-  s5: ``,
-  s6: `• Mục tiêu cuối cùng là hoàn thành đúng hạn, đúng chất lượng`
+  s1: ``,
+  s2: `Người tuân thủ quy trình hiểu rằng:
+•	Hậu quả không chỉ cho cá nhân
+•	Mà cho cả phòng ban và công ty
+👉 Biểu hiện
+•	Nghĩ đến rủi ro dài hạn thay vì lợi ích ngắn hạn
+•	Sẵn sàng chịu áp lực tiến độ để bảo vệ kết quả chung
+🔑 Trách nhiệm là dám chậm hơn một chút để đúng ngay từ đầu`,
+  s3: `Một cá nhân đáng tin là người:
+•	Làm việc nhất quán
+•	Kết quả có thể kiểm tra, truy xuất
+👉 Biểu hiện
+•	Công việc hoàn thành đúng quy trình
+•	Có thể bàn giao, kiểm tra, audit bất cứ lúc nào
+🔑 Không đáng tin → cả hệ thống phải kiểm soát lại từ đầu`,
+  s4: `Làm đúng ngay cả khi:
+•	Không ai kiểm tra
+•	Có cơ hội “đi đường vòng”
+• Chính trực là làm đúng vì nó đúng, không vì sợ bị phát hiện
+👉 Biểu hiện
+•	Không hợp thức hóa việc làm sai quy trình
+•	Dám nói “không” với cách làm nhanh nhưng sai
+🔑 Chính trực là ranh giới giữa linh hoạt và gian lận`,
+  s5: `Quy trình được xây dựng để kiểm soát rủi ro, không phải để làm khó
+• “Làm tắt” có thể nhanh hôm nay nhưng mất kiểm soát ngày mai
+👉 Biểu hiện rõ nhất
+•	Tuân thủ đúng các bước theo quy định
+•	Không tự ý bỏ qua bước dù chịu áp lực tiến độ
+🔑 Không có Kỷ luật → quy trình chỉ tồn tại trên giấy`,
+  s6: `Hiệu quả không chỉ là nhanh
+• Hiệu quả thật sự là:
+•	Đúng quy trình
+•	Không phát sinh sửa sai
+•	Không để lại rủi ro tiềm ẩn
+👉 Vai trò
+•	Quy trình giúp công việc bền vững – ổn định – lặp lại được
+🔑 Nhanh nhưng sai → không bao giờ là hiệu quả`
 };
 
 /* ===================== HELPERS ===================== */
@@ -1287,6 +1317,7 @@ function lockFormUntilRefresh(){
 </script>
 </body>
 </html>
+
 
 
 
