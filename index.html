@@ -341,106 +341,72 @@
 
     /* Tạm ẩn câu hỏi 5 */
     .qblock[data-qid="q5"]{ display:none; }
-    /* ===================== TẾT DECOR (2 bên) ===================== */
+    /* ===== TẾT SIDE DECOR (2 bên) ===== */
 :root{
-  --tet-red: #d7262f;
-  --tet-gold: #f6c453;
-  --tet-pink: #ff7bb0;
-  --tet-green: #1f8a4c;
+  --sideW: 280px;     /* độ rộng mảng Tết 2 bên */
+  --sideOpacity: .95; /* độ đậm/nhạt nền Tết */
 }
 
-/* nền không khí tết nhẹ */
+/* Chừa khoảng trống 2 bên để không đè lên nội dung */
 body{
-  position: relative;
-  overflow-x: hidden;
+  padding-left: var(--sideW);
+  padding-right: var(--sideW);
 }
 
-/* 2 dải trang trí cố định */
+/* Hai panel Tết cố định */
 .tet-side{
   position: fixed;
   top: 0;
   bottom: 0;
-  width: clamp(70px, 10vw, 130px);
+  width: var(--sideW);
+  z-index: 0;                 /* nằm dưới nội dung */
   pointer-events: none;
-  z-index: 0;
-  opacity: .92;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,.08));
+  opacity: var(--sideOpacity);
+
+  background-image: url("images/tet-bg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05) contrast(1.05);
 }
 
-/* để content nổi lên */
-header, main, #closedPanel{
+/* Bên trái: lấy phần trái của ảnh */
+.tet-left{
+  left: 0;
+  background-position: left center;
+}
+
+/* Bên phải: lấy phần phải của ảnh */
+.tet-right{
+  right: 0;
+  background-position: right center;
+}
+
+/* Đảm bảo nội dung nằm trên nền */
+header, main, .closed-panel{
   position: relative;
   z-index: 2;
 }
 
-/* Left / Right */
-.tet-left{ left: 0; }
-.tet-right{ right: 0; transform: scaleX(-1); }
-
-/* Tạo pattern dọc: đèn lồng + hoa + pháo */
-.tet-side::before{
-  content:"";
-  position:absolute;
-  inset: 0;
-  background:
-    /* confetti chấm */
-    radial-gradient(circle at 20% 12%, rgba(246,196,83,.9) 0 4px, transparent 5px),
-    radial-gradient(circle at 65% 18%, rgba(215,38,47,.85) 0 3px, transparent 4px),
-    radial-gradient(circle at 35% 26%, rgba(255,123,176,.75) 0 3px, transparent 4px),
-    radial-gradient(circle at 70% 38%, rgba(31,138,76,.65) 0 3px, transparent 4px),
-    radial-gradient(circle at 25% 55%, rgba(246,196,83,.75) 0 4px, transparent 5px),
-    radial-gradient(circle at 80% 68%, rgba(215,38,47,.7) 0 3px, transparent 4px),
-    radial-gradient(circle at 30% 82%, rgba(255,123,176,.65) 0 3px, transparent 4px),
-
-    /* dây treo */
-    linear-gradient(to bottom, rgba(215,38,47,.35), rgba(215,38,47,0)),
-
-    /* đèn lồng (lặp theo chiều dọc) */
-    radial-gradient(circle at 55% 8%, rgba(215,38,47,.95) 0 16px, transparent 17px),
-    radial-gradient(circle at 55% 8%, rgba(246,196,83,.95) 0 5px, transparent 6px),
-
-    radial-gradient(circle at 45% 28%, rgba(215,38,47,.9) 0 14px, transparent 15px),
-    radial-gradient(circle at 45% 28%, rgba(246,196,83,.9) 0 4px, transparent 5px),
-
-    radial-gradient(circle at 55% 52%, rgba(215,38,47,.88) 0 15px, transparent 16px),
-    radial-gradient(circle at 55% 52%, rgba(246,196,83,.88) 0 5px, transparent 6px),
-
-    radial-gradient(circle at 45% 75%, rgba(215,38,47,.85) 0 14px, transparent 15px),
-    radial-gradient(circle at 45% 75%, rgba(246,196,83,.85) 0 4px, transparent 5px),
-
-    /* hoa mai/đào dạng bông (đơn giản) */
-    radial-gradient(circle at 35% 20%, rgba(246,196,83,.85) 0 10px, transparent 11px),
-    radial-gradient(circle at 35% 20%, rgba(255,255,255,.6) 0 3px, transparent 4px),
-
-    radial-gradient(circle at 70% 60%, rgba(255,123,176,.72) 0 10px, transparent 11px),
-    radial-gradient(circle at 70% 60%, rgba(255,255,255,.55) 0 3px, transparent 4px),
-
-    /* pháo dây */
-    repeating-linear-gradient(
-      to bottom,
-      rgba(215,38,47,.22) 0 10px,
-      rgba(246,196,83,.18) 10px 20px
-    );
-
-  background-repeat: no-repeat;
-}
-
-/* làm mờ dần phần giữa để không “đè” nội dung */
+/* Nếu muốn “blend” cho dịu hơn (tuỳ chọn) */
 .tet-side::after{
   content:"";
   position:absolute;
-  top:0; bottom:0;
-  left:0; right:0;
+  inset:0;
   background: linear-gradient(
     to right,
-    rgba(255,255,255,.0) 0%,
-    rgba(255,255,255,.55) 55%,
-    rgba(255,255,255,.85) 100%
+    rgba(255,255,255,.15),
+    rgba(255,255,255,.05),
+    rgba(255,255,255,.15)
   );
 }
 
-/* mobile: ẩn để gọn */
-@media (max-width: 860px){
+/* Responsive: màn nhỏ thì tắt 2 bên cho gọn */
+@media (max-width: 1100px){
+  :root{ --sideW: 160px; }
+}
+@media (max-width: 820px){
+  body{ padding-left: 0; padding-right: 0; }
   .tet-side{ display:none; }
 }
   </style>
@@ -1587,6 +1553,7 @@ function applyTetDecorByLunar(){
 </script>
 </body>
 </html>
+
 
 
 
