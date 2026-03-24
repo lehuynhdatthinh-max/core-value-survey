@@ -1,1 +1,988 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bảng câu hỏi phỏng vấn khi nghỉ việc</title>
 
+  <style>
+    :root{
+      --orange:#ff7a00;
+      --orange2:#ffb26b;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:16px;
+      --soft:#fff8f3;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background: linear-gradient(135deg, #fff 0%, #fff 45%, rgba(255,122,0,.10) 100%);
+      min-height:100vh;
+    }
+
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.82);
+      border-bottom: 1px solid rgba(229,231,235,.85);
+    }
+    .header-inner{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+      min-width: 240px;
+    }
+    .logo{
+      width:78px; height:78px;
+      border-radius:12px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      border: 1px solid rgba(229,231,235,.9);
+      flex-shrink:0;
+    }
+    .logo img{ width:100%; height:100%; object-fit:contain; display:block; }
+    .titlewrap{ display:flex; flex-direction:column; line-height:1.15; }
+    .title{
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+    .subtitle{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      font-size: 14px;
+    }
+    .btn-primary{
+      color:white;
+      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
+      box-shadow: 0 10px 20px rgba(255,122,0,.22);
+    }
+    .btn-ghost{
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .toggle-btn{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,122,0,.35);
+      background: #fff;
+      font-weight: 900;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .toggle-btn[data-state="on"]{
+      color: #0f5132;
+      border-color: rgba(16,185,129,.35);
+      background: rgba(16,185,129,.08);
+    }
+    .toggle-btn[data-state="off"]{
+      color: #7f1d1d;
+      border-color: rgba(180,35,24,.28);
+      background: rgba(180,35,24,.08);
+    }
+
+    main{
+      max-width: 1100px;
+      margin: 18px auto 40px;
+      padding: 0 18px;
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-head{
+      padding: 18px 18px 12px;
+      background: linear-gradient(90deg, rgba(255,122,0,.08), rgba(255,255,255,1));
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h2{
+      margin:0;
+      font-size: 22px;
+      letter-spacing:.2px;
+    }
+    .card-head p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height:1.45;
+    }
+
+    form{
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+
+    .meta-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+    .meta-top .right{
+      text-align:right;
+      white-space:pre-line;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .row-3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .row-3{ grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px){
+      .row, .row-3{grid-template-columns:1fr}
+      .brand{min-width:auto}
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    input[type="text"], select, textarea{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline:none;
+      font-size: 14px;
+      background: #fff;
+      color: var(--ink);
+    }
+    input[type="text"]:focus, select:focus, textarea:focus{
+      border-color: rgba(255,122,0,.65);
+      box-shadow: 0 0 0 4px rgba(255,122,0,.10);
+    }
+    textarea{
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .required{
+      font-size: 12px;
+      font-weight: 900;
+      color: #b42318;
+      background: rgba(180,35,24,.08);
+      border: 1px solid rgba(180,35,24,.18);
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      display:inline-flex;
+      align-items:center;
+      margin-left: 6px;
+    }
+
+    .section{
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,122,0,.04), rgba(255,255,255,1));
+    }
+    .section-title{
+      margin:0 0 12px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+    .section-note{
+      margin:0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      font-style: italic;
+    }
+
+    .question-block{
+      margin: 14px 0 18px;
+    }
+    .question-text{
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      line-height:1.45;
+    }
+
+    .choices{
+      display:grid;
+      gap:10px;
+    }
+    .choices-2col{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 760px){
+      .choices-2col{ grid-template-columns: 1fr; }
+    }
+
+    .choice{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.96);
+      margin-bottom: 0;
+    }
+    .choice input{
+      margin-top: 3px;
+      flex-shrink:0;
+    }
+    .choice span{
+      font-size: 14px;
+      line-height: 1.35rem;
+      font-weight: 500;
+    }
+
+    .inline-choices{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom: 8px;
+    }
+
+    .signature-box{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:20px;
+    }
+    .signature-col{
+      min-height: 110px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      align-items:center;
+      text-align:center;
+      font-size: 14px;
+    }
+    .signature-col .muted{
+      color: var(--muted);
+      font-style: italic;
+      font-size: 13px;
+    }
+    @media (max-width: 760px){
+      .signature-box{ grid-template-columns: 1fr; }
+    }
+
+    .footer-note{
+      margin-top: 12px;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:flex-end;
+      padding-top: 6px;
+    }
+
+    .result{
+      display:none;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(16,185,129,.25);
+      background: rgba(16,185,129,.08);
+    }
+    .result h3{margin:0 0 6px}
+    .result p{margin:0; color: #064e3b; line-height:1.5}
+
+    .error{
+      display:none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(180,35,24,.22);
+      background: rgba(180,35,24,.06);
+      color:#7f1d1d;
+      font-weight: 900;
+      white-space: pre-wrap;
+      line-height:1.5;
+    }
+
+    .closed-panel{
+      max-width: 1100px;
+      margin: 18px auto 0;
+      padding: 0 18px;
+      display:none;
+    }
+    .closed-card{
+      background: #fff;
+      border: 1px solid rgba(229,231,235,.9);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      padding: 18px;
+    }
+    .closed-title{
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .visitor-message{
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,122,0,.22);
+      background: rgba(255,122,0,.06);
+      white-space: pre-wrap;
+      font-size: 14px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+    .admin-box{
+      padding-top: 8px;
+      border-top: 1px solid rgba(229,231,235,.9);
+      display:none;
+    }
+    .admin-label{
+      display:block;
+      font-size: 13px;
+      font-weight: 900;
+      margin: 10px 0 8px;
+    }
+    .admin-textarea{
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(229,231,235,.9);
+      outline: none;
+      resize: vertical;
+    }
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top: 10px;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 999;
+    }
+    .modal-card{
+      width: min(520px, 100%);
+      background:#fff;
+      border-radius: 16px;
+      border:1px solid rgba(229,231,235,.9);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(229,231,235,.9);
+    }
+    .modal-body{ padding: 14px; }
+    .xbtn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 6px 10px;
+    }
+    .admin-msg{
+      margin-top:10px;
+      font-weight: 900;
+      color:#7f1d1d;
+      min-height: 18px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">
+        <img src="images/logo.png" alt="TBS Logistics Logo">
+      </div>
+      <div class="titlewrap">
+        <div class="title">BẢNG CÂU HỎI PHỎNG VẤN KHI NGHỈ VIỆC</div>
+        <div class="subtitle">Ghi nhận ý kiến chân thành để cải thiện môi trường làm việc và giữ chân nhân sự tốt hơn</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
+        Survey: OFF
+      </button>
+      <button type="button" id="adminBtn" class="toggle-btn">Admin</button>
+    </div>
+  </div>
+</header>
+
+<section id="closedPanel" class="closed-panel">
+  <div class="closed-card">
+    <h2 class="closed-title">Biểu mẫu hiện đang đóng</h2>
+    <div id="visitorMessage" class="visitor-message"></div>
+
+    <div class="admin-box" id="adminBox">
+      <label for="adminMessage" class="admin-label">Thông báo khi biểu mẫu đang đóng</label>
+      <textarea id="adminMessage" class="admin-textarea" placeholder="Nhập nội dung thông báo..."></textarea>
+
+      <div class="admin-actions">
+        <button type="button" id="saveMessageBtn" class="btn-primary">Lưu thông báo</button>
+        <button type="button" id="clearMessageBtn" class="btn-ghost">Xóa</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main id="mainArea">
+  <div class="card">
+    <div class="card-head">
+      <div class="meta-top">
+        <div>MKH: TBSL-NS-QT03-BM05</div>
+        <div class="right">Lần ban hành: 02</div>
+      </div>
+      <h2>Bảng câu hỏi phỏng vấn khi nghỉ việc</h2>
+      <p>
+        Bảng câu hỏi này nhằm giúp TBS Logistics hiểu rõ hơn những lý do khiến bạn rời khỏi công ty.
+        Việc trả lời bảng câu hỏi này là trên cơ sở tự nguyện. Xin vui lòng ghi lại bằng câu hỏi đã được trả lời đầy đủ cho Bộ phận Nhân sự - TBS Logistics.
+        Chúng tôi trân trọng cảm ơn phần hồi đáp của bạn.
+      </p>
+    </div>
+
+    <form id="surveyForm" novalidate>
+      <div class="row-3">
+        <div>
+          <label for="fullName">Họ và tên <span class="required">Required</span></label>
+          <input id="fullName" name="fullName" type="text" placeholder="Nhập họ và tên" required />
+        </div>
+
+        <div>
+          <label for="employeeId">MSNV <span class="required">Required</span></label>
+          <input id="employeeId" name="employeeId" type="text" placeholder="Nhập mã số nhân viên" required />
+        </div>
+
+        <div>
+          <label for="workDate">Ngày vào làm <span class="required">Required</span></label>
+          <input id="workDate" name="workDate" type="text" placeholder="dd/mm/yyyy" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="department">Bộ phận / Chức danh <span class="required">Required</span></label>
+          <input id="department" name="department" type="text" placeholder="Ví dụ: HCNS / Nhân viên hành chính" required />
+        </div>
+
+        <div>
+          <label for="leaveDate">Ngày chính thức nghỉ việc <span class="required">Required</span></label>
+          <input id="leaveDate" name="leaveDate" type="text" placeholder="dd/mm/yyyy" required />
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section-title">I. Phần dành cho tất cả CB-CNV</h3>
+
+        <div class="question-block">
+          <div class="question-text">1) Nếu có thể thay đổi vài điều tại công ty, bạn sẽ chọn những gì? <span class="required">Required</span></div>
+          <div class="choices">
+            <label class="choice"><input type="checkbox" name="q1" value="luong_thuong"><span>Lương, thưởng</span></label>
+            <label class="choice"><input type="checkbox" name="q1" value="thoi_gian"><span>Thời gian làm việc, tăng ca</span></label>
+            <label class="choice"><input type="checkbox" name="q1" value="moi_truong"><span>Môi trường làm việc</span></label>
+            <label class="choice"><input type="checkbox" name="q1" value="lanh_dao"><span>Cách quản lý, lãnh đạo</span></label>
+            <label class="choice"><input type="checkbox" name="q1" value="phuc_loi"><span>Chế độ phúc lợi (Bảo hiểm sức khỏe, cơ hội phát triển nghề nghiệp, cơ hội được đào tạo,...)</span></label>
+          </div>
+          <textarea id="q1_other" placeholder="Khác..."></textarea>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">2) Bạn thích nhất điều gì ở công ty hiện tại? <span class="required">Required</span></div>
+          <div class="choices-2col">
+            <label class="choice"><input type="checkbox" name="q2" value="than_thien"><span>Môi trường thân thiện</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="co_hoi_phat_trien"><span>Cơ hội phát triển</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="luong_phu_hop"><span>Mức lương phù hợp với vị trí công việc</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="thoi_gian_lam_viec"><span>Thời gian làm việc</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="lanh_dao_tam_ly"><span>Lãnh đạo tâm lý</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="khac"><span>Khác</span></label>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">3) Bạn có nguyện vọng nào khác nếu ở lại TBS Logistics không?</div>
+          <textarea id="q3" name="q3" placeholder="Ví dụ: muốn chuyển công việc, chuyển đổi bộ phận làm việc, đào tạo thêm..."></textarea>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">4) Bạn có nghĩ sẽ quay lại làm việc tại TBS Logistics trong tương lai hoặc giới thiệu người quen làm việc tại TBS Logistics? <span class="required">Required</span></div>
+          <div class="inline-choices">
+            <label class="choice"><input type="radio" name="q4" value="co"><span>Có</span></label>
+            <label class="choice"><input type="radio" name="q4" value="khong"><span>Không</span></label>
+          </div>
+          <textarea id="q4_reason" name="q4_reason" placeholder="Lý do..."></textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section-title">II. Phần dành cho các vị trí Nhân viên và Quản lý</h3>
+
+        <div class="question-block">
+          <div class="question-text">5) Bạn có thể chia sẻ thêm điều gì để giúp cải thiện công việc hoặc bàn giao trong giai đoạn nghỉ việc?</div>
+          <textarea id="q5" name="q5"></textarea>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">6) Bạn đánh giá thế nào về năng lực quản lý tại TBS Logistics? (Khả năng quản lý, tầm nhìn, học hỏi, có giải pháp xử lý kiên quyết nhưng điềm tĩnh,...)</div>
+          <textarea id="q6" name="q6"></textarea>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">7) Bạn đã có một mối quan hệ công việc tốt với người quản lý trực tiếp chưa? <span class="required">Required</span></div>
+          <div class="inline-choices">
+            <label class="choice"><input type="radio" name="q7" value="co"><span>Có</span></label>
+            <label class="choice"><input type="radio" name="q7" value="khong"><span>Không</span></label>
+          </div>
+          <textarea id="q7_reason" name="q7_reason" placeholder="Nếu không, vui lòng ghi lý do"></textarea>
+        </div>
+
+        <div class="question-block">
+          <div class="question-text">Nhận xét chung của nhân viên</div>
+          <textarea id="finalComment" name="finalComment"></textarea>
+        </div>
+
+        <div class="signature-box">
+          <div></div>
+          <div class="signature-col">
+            <div>Người lao động</div>
+            <div class="muted">(Ký, ghi rõ họ tên)</div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          TBS Logistics cảm ơn những chia sẻ từ bạn. Chúng tôi luôn ghi nhận những ý kiến đóng góp của bạn để cải thiện và xây dựng một TBS Logistics chuyên nghiệp hơn.
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
+        <button type="submit" class="btn-primary" id="submitBtn">Nộp khảo sát</button>
+      </div>
+
+      <div class="error" id="errorBox"></div>
+
+      <div class="result" id="resultBox">
+        <h3>Đã gửi phiếu thành công ✅</h3>
+        <p id="resultLine">Cảm ơn Anh/Chị đã dành thời gian chia sẻ thông tin.</p>
+      </div>
+    </form>
+  </div>
+</main>
+
+<div id="adminModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <strong>Admin access</strong>
+      <button type="button" id="adminClose" class="xbtn">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="admin-label" for="adminEmail">Email</label>
+      <input id="adminEmail" type="text" placeholder="name@company.com" />
+
+      <label class="admin-label" for="adminPass">Passcode</label>
+      <input id="adminPass" type="password" placeholder="Enter passcode" />
+
+      <div class="admin-actions">
+        <button type="button" id="adminLogin" class="btn-primary">Login</button>
+        <button type="button" id="adminLogout" class="btn-ghost">Logout</button>
+      </div>
+
+      <div id="adminMsg" class="admin-msg"></div>
+      <small class="muted">Admin only can toggle ON/OFF + edit message.</small>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPBCJEUedTq1fHE9PnGiFaDTkTobQujFHj4P_VWMzlKs-0_Z11ek2w2qVjkJO8QRAPbw/exec";
+
+/* ===================== HELPERS ===================== */
+const $  = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+function getCheckedValues(name){
+  return $$(`input[name="${name}"]:checked`).map(i => i.value);
+}
+
+function escapeHtml(str){
+  return String(str ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* ===================== API ===================== */
+async function apiGetSettings(){
+  const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
+  const res = await fetch(url, { method: "GET" });
+  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+  if (!json.ok) throw new Error(json.error || "getSettings failed");
+  return json.settings;
+}
+
+async function apiSaveSettings({ email, passcode, isOn, message }){
+  const body = new URLSearchParams();
+  body.append("action", "saveSettings");
+  body.append("data", JSON.stringify({ email, passcode, isOn, message }));
+
+  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
+  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+  if (!json.ok) throw new Error(json.error || "saveSettings failed");
+  return json.settings;
+}
+
+async function apiSubmitSurvey(payload){
+  const body = new URLSearchParams();
+  body.append("action", "submitSurvey");
+  body.append("data", JSON.stringify(payload));
+
+  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
+  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+  if (!json.ok) throw new Error(json.error || "submitSurvey failed");
+  return json;
+}
+
+/* ===================== UI REFS ===================== */
+const toggleBtn       = $("#toggleSurveyBtn");
+const adminBtn        = $("#adminBtn");
+const closedPanel     = $("#closedPanel");
+const visitorMessage  = $("#visitorMessage");
+const adminBox        = $("#adminBox");
+const adminMessage    = $("#adminMessage");
+const saveMessageBtn  = $("#saveMessageBtn");
+const clearMessageBtn = $("#clearMessageBtn");
+const mainArea        = $("#mainArea");
+
+const adminModal  = $("#adminModal");
+const adminClose  = $("#adminClose");
+const adminEmail  = $("#adminEmail");
+const adminPass   = $("#adminPass");
+const adminLogin  = $("#adminLogin");
+const adminLogout = $("#adminLogout");
+const adminMsg    = $("#adminMsg");
+
+const form        = $("#surveyForm");
+const errorBox    = $("#errorBox");
+const resultBox   = $("#resultBox");
+const resultLine  = $("#resultLine");
+const resetBtn    = $("#resetBtn");
+const submitBtn   = $("#submitBtn");
+
+/* ===================== SHARED STATE ===================== */
+let sharedIsOn = false;
+let sharedMessage = "";
+let isAdminSession = false;
+let adminSession = { email:"", passcode:"" };
+
+function applySurveyState(isOn){
+  sharedIsOn = !!isOn;
+  if (sharedIsOn){
+    mainArea.style.display = "";
+    closedPanel.style.display = "none";
+  } else {
+    mainArea.style.display = "none";
+    closedPanel.style.display = "block";
+  }
+  toggleBtn.dataset.state = sharedIsOn ? "on" : "off";
+  toggleBtn.textContent = sharedIsOn ? "Survey: ON" : "Survey: OFF";
+  toggleBtn.setAttribute("aria-pressed", sharedIsOn ? "true" : "false");
+}
+
+function setMessage(msg){
+  sharedMessage = msg || "";
+  visitorMessage.innerHTML = escapeHtml(sharedMessage || "Biểu mẫu hiện đang tạm đóng. Vui lòng quay lại sau.");
+  adminMessage.value = sharedMessage;
+}
+
+function setAdminUI(on){
+  isAdminSession = !!on;
+  toggleBtn.style.display = isAdminSession ? "" : "none";
+  adminBox.style.display  = isAdminSession ? "" : "none";
+}
+
+async function refreshFromServer(){
+  const s = await apiGetSettings();
+  applySurveyState(!!s.isOn);
+  setMessage(s.message || "");
+}
+
+/* ===================== VALIDATION ===================== */
+function validateRequiredGroups(){
+  const errors = [];
+
+  if (!$("#fullName").value.trim()) errors.push("Vui lòng nhập Họ và tên.");
+  if (!$("#employeeId").value.trim()) errors.push("Vui lòng nhập MSNV.");
+  if (!$("#workDate").value.trim()) errors.push("Vui lòng nhập Ngày vào làm.");
+  if (!$("#department").value.trim()) errors.push("Vui lòng nhập Bộ phận / Chức danh.");
+  if (!$("#leaveDate").value.trim()) errors.push("Vui lòng nhập Ngày chính thức nghỉ việc.");
+
+  if (getCheckedValues("q1").length === 0){
+    errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 1.");
+  }
+
+  if (getCheckedValues("q2").length === 0){
+    errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 2.");
+  }
+
+  if (!document.querySelector('input[name="q4"]:checked')){
+    errors.push("Vui lòng chọn câu trả lời cho câu 4.");
+  }
+
+  if (!document.querySelector('input[name="q7"]:checked')){
+    errors.push("Vui lòng chọn câu trả lời cho câu 7.");
+  }
+
+  return errors;
+}
+
+/* ===================== ADMIN MODAL ===================== */
+function openAdminModal(){
+  adminMsg.textContent = "";
+  adminModal.style.display = "flex";
+  adminEmail.value = adminSession.email || "";
+  adminPass.value = adminSession.passcode || "";
+}
+function closeAdminModal(){
+  adminModal.style.display = "none";
+}
+
+adminBtn.addEventListener("click", openAdminModal);
+adminClose.addEventListener("click", closeAdminModal);
+adminModal.addEventListener("click", (e) => {
+  if (e.target === adminModal) closeAdminModal();
+});
+
+adminLogin.addEventListener("click", async () => {
+  adminMsg.textContent = "";
+
+  const email = (adminEmail.value || "").trim().toLowerCase();
+  const pass  = (adminPass.value || "").trim();
+
+  if (!email || !pass){
+    adminMsg.textContent = "Email & passcode are required.";
+    return;
+  }
+
+  adminSession = { email, passcode: pass };
+  setAdminUI(true);
+  closeAdminModal();
+
+  try { await refreshFromServer(); } catch(e){}
+});
+
+adminLogout.addEventListener("click", () => {
+  adminSession = { email:"", passcode:"" };
+  setAdminUI(false);
+  adminMsg.textContent = "Logged out.";
+});
+
+/* ===================== ADMIN ACTIONS ===================== */
+toggleBtn.addEventListener("click", async () => {
+  if (!isAdminSession) return;
+
+  const nextIsOn = (toggleBtn.dataset.state === "off");
+  const msg = adminMessage.value || sharedMessage || "";
+
+  try{
+    const s = await apiSaveSettings({ ...adminSession, isOn: nextIsOn, message: msg });
+    applySurveyState(!!s.isOn);
+    setMessage(s.message || "");
+  }catch(err){
+    alert("Save failed: " + err.message);
+    setAdminUI(false);
+  }
+});
+
+saveMessageBtn.addEventListener("click", async () => {
+  if (!isAdminSession) return;
+
+  const isOn = (toggleBtn.dataset.state !== "off");
+  const msg  = adminMessage.value || "";
+
+  try{
+    const s = await apiSaveSettings({ ...adminSession, isOn, message: msg });
+    applySurveyState(!!s.isOn);
+    setMessage(s.message || "");
+  }catch(err){
+    alert("Save failed: " + err.message);
+    setAdminUI(false);
+  }
+});
+
+clearMessageBtn.addEventListener("click", async () => {
+  if (!isAdminSession) return;
+
+  const isOn = (toggleBtn.dataset.state !== "off");
+
+  try{
+    const s = await apiSaveSettings({ ...adminSession, isOn, message: "" });
+    applySurveyState(!!s.isOn);
+    setMessage(s.message || "");
+  }catch(err){
+    alert("Save failed: " + err.message);
+    setAdminUI(false);
+  }
+});
+
+/* ===================== SUBMIT ===================== */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  errorBox.style.display = "none";
+  errorBox.textContent = "";
+  resultBox.style.display = "none";
+
+  if (!sharedIsOn){
+    errorBox.style.display = "block";
+    errorBox.textContent = "Biểu mẫu hiện đang đóng.";
+    return;
+  }
+
+  const errors = validateRequiredGroups();
+  if (errors.length){
+    errorBox.style.display = "block";
+    errorBox.textContent = errors[0];
+    return;
+  }
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    fullName: $("#fullName").value.trim(),
+    employeeId: $("#employeeId").value.trim(),
+    workDate: $("#workDate").value.trim(),
+    department: $("#department").value.trim(),
+    leaveDate: $("#leaveDate").value.trim(),
+    answers: {
+      q1: getCheckedValues("q1"),
+      q1_other: $("#q1_other")?.value.trim() || "",
+      q2: getCheckedValues("q2"),
+      q3: $("#q3")?.value.trim() || "",
+      q4: document.querySelector('input[name="q4"]:checked')?.value || "",
+      q4_reason: $("#q4_reason")?.value.trim() || "",
+      q5: $("#q5")?.value.trim() || "",
+      q6: $("#q6")?.value.trim() || "",
+      q7: document.querySelector('input[name="q7"]:checked')?.value || "",
+      q7_reason: $("#q7_reason")?.value.trim() || "",
+      finalComment: $("#finalComment")?.value.trim() || ""
+    },
+    userAgent: navigator.userAgent
+  };
+
+  submitBtn.disabled = true;
+
+  try{
+    await apiSubmitSurvey(payload);
+    resultLine.textContent = "Anh/Chị đã gửi phiếu phỏng vấn nghỉ việc thành công.";
+    resultBox.style.display = "block";
+    resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    lockFormUntilRefresh();
+  }catch(err){
+    errorBox.style.display = "block";
+    errorBox.textContent = "Không thể lưu vào hệ thống:\n" + (err?.message || err);
+    submitBtn.disabled = false;
+  }
+});
+
+resetBtn.addEventListener("click", () => location.reload());
+
+/* ===================== LOCK FORM ===================== */
+function lockFormUntilRefresh(){
+  form.querySelectorAll('input, select, textarea, button:not(#resetBtn)')
+    .forEach(el => { el.disabled = true; });
+
+  if (!document.getElementById("lockedNote")){
+    const note = document.createElement("div");
+    note.id = "lockedNote";
+    note.style.marginTop = "12px";
+    note.style.padding = "10px 12px";
+    note.style.borderRadius = "12px";
+    note.style.border = "1px solid rgba(255,122,0,.25)";
+    note.style.background = "rgba(255,122,0,.06)";
+    note.style.fontWeight = "900";
+    note.textContent = "Anh/Chị đã nộp phiếu thành công. Vui lòng tải lại trang (F5) nếu muốn nhập lại.";
+    resultBox.appendChild(note);
+  }
+}
+
+/* ===================== BOOT ===================== */
+(async function boot(){
+  setAdminUI(false);
+
+  try{
+    await refreshFromServer();
+  }catch(err){
+    applySurveyState(false);
+    setMessage("Không thể tải trạng thái biểu mẫu lúc này. Vui lòng thử lại sau.");
+    console.warn(err);
+  }
+
+  setInterval(() => {
+    refreshFromServer().catch(() => {});
+  }, 20000);
+})();
+</script>
+</body>
+</html>
