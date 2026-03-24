@@ -676,22 +676,22 @@ header, main, .closed-panel{
 
   <div class="choices">
     <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
-    <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
     <div class="choice"><input type="checkbox" id="s2" name="scenario" value="s2"><span><strong>Trách nhiệm</strong>.</span></div>
-    <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
     <div class="choice"><input type="checkbox" id="s3" name="scenario" value="s3"><span><strong>Đáng tin</strong>.</span></div>
-    <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
     <div class="choice"><input type="checkbox" id="s4" name="scenario" value="s4"><span><strong>Chính trực</strong>.</span></div>
-    <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
     <div class="choice"><input type="checkbox" id="s5" name="scenario" value="s5"><span><strong>Kỷ luật</strong>.</span></div>
-    <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
 
     <div class="choice"><input type="checkbox" id="s6" name="scenario" value="s6"><span><strong>Hiệu quả</strong>.</span></div>
-    <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+    <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
   </div>
 </div>
       <div class="actions">
@@ -740,7 +740,7 @@ header, main, .closed-panel{
 /* ===================== CONFIG ===================== */
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLlFEedKx2HUJUm-120Y2WDrpqy3WZSUkmcm2Twl-4UQ-jx3wpBPV1wZSsmZlJQWgB/exec";
 
-const MIN_MEANINGFUL_WORDS = 15;
+const MIN_MEANINGFUL_WORDS = 5;
 
 // tokens được phép tính dù ngắn (tuỳ bạn thêm)
 const ALLOW_TOKENS = new Set([
@@ -797,6 +797,57 @@ const scenarioRationales = {
 };
 
 /* ===================== HELPERS ===================== */
+
+function shuffleArray(arr){
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randomizeStandardChoices(qid){
+  const wrap = document.querySelector(`.qblock[data-qid="${qid}"] .choices`);
+  if (!wrap) return;
+
+  const items = Array.from(wrap.children).filter(el => el.classList.contains("choice"));
+  if (!items.length) return;
+
+  const shuffled = shuffleArray(items);
+  shuffled.forEach(el => wrap.appendChild(el));
+}
+
+/* 🔥 RANDOM CHO SCENARIO (cặp choice + explain) */
+function randomizeScenarioChoices(){
+  const wrap = document.querySelector(`.qblock[data-qid="scenario"] .choices`);
+  if (!wrap) return;
+
+  const children = Array.from(wrap.children);
+  const pairs = [];
+
+  for (let i = 0; i < children.length; i++){
+    const el = children[i];
+
+    if (el.classList.contains("choice")){
+      const pair = [el];
+
+      if (children[i + 1] && children[i + 1].classList.contains("explain")){
+        pair.push(children[i + 1]);
+        i++;
+      }
+
+      pairs.push(pair);
+    }
+  }
+
+  const shuffledPairs = shuffleArray(pairs);
+
+  wrap.innerHTML = "";
+  shuffledPairs.forEach(pair => {
+    pair.forEach(el => wrap.appendChild(el));
+  });
+}
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
@@ -817,7 +868,14 @@ function escapeHtml(str){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-
+function shuffleArray(arr){
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}  
 /* ====== DISABLE QUESTION ====== */
 function disableQuestion(qid){
   const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
@@ -1590,13 +1648,17 @@ function applyTetDecorByLunar(){
 /* ===================== BOOT ===================== */
 (async function boot(){
   setAdminUI(false);
+
+  randomizeStandardChoices("q1");
+  randomizeStandardChoices("q2");
+  randomizeStandardChoices("q3");
+  randomizeStandardChoices("q4");
+  randomizeStandardChoices("q5"); // nếu đang ẩn thì vẫn không sao
+  randomizeScenarioChoices();     // nếu muốn random luôn phần giá trị cốt lõi
+
   syncScenarioExplain();
   disableQuestion("q5");
-  
-// ✅ bật/tắt decor theo âm lịch
-  applyTetDecorByLunar();
-  setInterval(applyTetDecorByLunar, 60 * 60 * 1000); // mỗi 1 giờ check lại
-  
+
   try{
     await refreshFromServer();
   }catch(err){
