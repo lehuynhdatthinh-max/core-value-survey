@@ -1330,13 +1330,14 @@ form.addEventListener("submit", async (e) => {
   };
 
   // show local result
-  scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
-  resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
+scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
+resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
+resultBox.querySelectorAll("[data-scenario-action]").forEach(el => el.remove());
 
-  const extra = document.createElement("p");
-  extra.setAttribute("data-score-split", "1");
-  Script.google
-  resultBox.insertBefore(extra, scenarioReasons);
+const extra = document.createElement("p");
+extra.setAttribute("data-score-split", "1");
+extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
+resultBox.insertBefore(extra, scenarioReasons);
 
 const actionSummary = document.createElement("p");
 actionSummary.setAttribute("data-scenario-action", "1");
