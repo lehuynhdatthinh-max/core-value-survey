@@ -323,6 +323,16 @@
       padding: 12px 14px;
       border-bottom: 1px solid rgba(229,231,235,.9);
     }
+    .scenario-action-box{
+  margin: 12px 0 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,122,0,.22);
+  background: rgba(255,122,0,.05);
+}
+.scenario-action-box textarea{
+  min-height: 100px;
+}
     .modal-body{ padding: 14px; }
     .xbtn{
       border:none;
@@ -623,6 +633,19 @@ header, main, .closed-panel{
             <strong>Câu hỏi:</strong><br>
             Bạn sẽ chọn cách nào?Những giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
           </h3>
+
+          <div class="scenario-action-box">
+  <label for="scenarioAction">
+    7.1) Bạn sẽ làm gì trong tình huống này?
+    <span class="required">Required</span>
+  </label>
+  <textarea
+    id="scenarioAction"
+    name="scenarioAction"
+    placeholder="Anh/Chị hãy mô tả ngắn gọn cách mình sẽ xử lý tình huống này..."
+  ></textarea>
+</div>
+          
           <div class="required">Required</div>
         </div>
 
@@ -691,7 +714,7 @@ header, main, .closed-panel{
 
 <script>
 /* ===================== CONFIG ===================== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby18mRUJNW2TYnbb25LQ-IqtiCaJ4NokSGNXptkTgBbjjWN8OIhXnq81oNFtdPyQYdU/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLlFEedKx2HUJUm-120Y2WDrpqy3WZSUkmcm2Twl-4UQ-jx3wpBPV1wZSsmZlJQWgB/exec";
 
 const MIN_MEANINGFUL_WORDS = 15;
 
@@ -1086,7 +1109,15 @@ function validateRequiredGroups(){
       errors.push(`Câu hỏi ${idx + 5} chưa trả lời.`);
     }
   });
-
+const scenarioAction = ($("#scenarioAction")?.value || "").trim();
+if (!scenarioAction){
+  errors.push("Vui lòng trả lời câu: Bạn sẽ làm gì trong tình huống này?");
+} else {
+  const wc = countMeaningfulWords(scenarioAction);
+  if (wc < MIN_MEANINGFUL_WORDS){
+    errors.push(`Câu trả lời chung cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`);
+  }
+}
   const scenario = getCheckedValues("scenario");
   if (scenario.length === 0) errors.push("Câu hỏi tình huống chưa trả lời.");
 
@@ -1264,6 +1295,7 @@ form.addEventListener("submit", async (e) => {
       q3: getCheckedValues("q3"),
       q4: getCheckedValues("q4"),
       q5: getCheckedValues("q5"),
+      scenario_action: ($("#scenarioAction")?.value || "").trim(),
       scenario: getCheckedValues("scenario"),
       scenario_explain: {
         s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
@@ -1283,9 +1315,15 @@ form.addEventListener("submit", async (e) => {
 
   const extra = document.createElement("p");
   extra.setAttribute("data-score-split", "1");
-  extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
+  Script.google
   resultBox.insertBefore(extra, scenarioReasons);
 
+const actionSummary = document.createElement("p");
+actionSummary.setAttribute("data-scenario-action", "1");
+actionSummary.style.marginTop = "10px";
+actionSummary.textContent = `Cách xử lý tình huống của Anh/Chị: ${payload.answers.scenario_action || "(Chưa nhập)"}`;
+resultBox.insertBefore(actionSummary, scenarioReasons);
+  
   let intro = resultBox.querySelector("#scenarioIntro");
   if (!intro) {
     intro = document.createElement("p");
