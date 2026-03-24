@@ -323,15 +323,38 @@
       padding: 12px 14px;
       border-bottom: 1px solid rgba(229,231,235,.9);
     }
-    .scenario-action-box{
-  margin: 12px 0 14px;
+    .scenario-desc{
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.scenario-desc p{
+  margin: 0 0 8px;
+}
+
+.scenario-desc ul{
+  margin: 0 0 10px 20px;
+  padding-left: 18px;
+}
+
+.scenario-action-box{
+  margin: 14px 0 16px;
   padding: 12px;
   border-radius: 14px;
   border: 1px solid rgba(255,122,0,.22);
   background: rgba(255,122,0,.05);
 }
+
 .scenario-action-box textarea{
   min-height: 100px;
+}
+
+.scenario-values-title{
+  margin: 10px 0 10px;
+}
+
+.scenario-values-title label{
+  margin-bottom: 0;
 }
     .modal-body{ padding: 14px; }
     .xbtn{
@@ -608,68 +631,74 @@ header, main, .closed-panel{
       </div>
 
       <!-- Scenario -->
-      <div class="qblock" data-qid="scenario">
-        <div class="qtitle">
-          <h3>
-            7) Tình huống:
-            <br><br><strong>Hãy chọn những đáp án phù hợp</strong><br>
-            <br><br><strong>BỐI CẢNH</strong><br>
-            Trong quá trình làm việc bạn nhận thấy:
-            <ul>
-              <li>Quy trình công ty khá chặt chẽ, nhiều bước kiểm soát</li>
-              <li>Nếu “làm tắt” hoặc bỏ qua một vài bước:</li>
-              <ul>
-                <li>Công việc có thể xong nhanh hơn</li>
-                <li>Dễ được khen vì “linh hoạt”, “xử lý nhanh”</li>
-              </ul>
-              <li>Tuy nhiên, nếu không tuân thủ đúng quy trình có thể dẫn đến:</li>
-              <ul>
-                <li>Rủi ro sai sót, khó truy vết</li>
-                <li>Vi phạm quy định nội bộ hoặc pháp lý</li>
-                <li>Ảnh hưởng uy tín cá nhân và tập thể về lâu dài</li>
-              </ul>
-            </ul>
+     <div class="qblock" data-qid="scenario">
+  <div class="qtitle">
+    <h3>7) Tình huống</h3>
+    <div class="required">Required</div>
+  </div>
 
-            <strong>Câu hỏi:</strong><br>
-            Bạn sẽ chọn cách nào?Những giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
-          </h3>
+  <div class="scenario-desc">
+    <p><strong>BỐI CẢNH</strong></p>
+    <p>Trong quá trình làm việc bạn nhận thấy:</p>
+    <ul>
+      <li>Quy trình công ty khá chặt chẽ, nhiều bước kiểm soát</li>
+      <li>Nếu “làm tắt” hoặc bỏ qua một vài bước:
+        <ul>
+          <li>Công việc có thể xong nhanh hơn</li>
+          <li>Dễ được khen vì “linh hoạt”, “xử lý nhanh”</li>
+        </ul>
+      </li>
+      <li>Tuy nhiên, nếu không tuân thủ đúng quy trình có thể dẫn đến:
+        <ul>
+          <li>Rủi ro sai sót, khó truy vết</li>
+          <li>Vi phạm quy định nội bộ hoặc pháp lý</li>
+          <li>Ảnh hưởng uy tín cá nhân và tập thể về lâu dài</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
 
-          <div class="scenario-action-box">
-  <label for="scenarioAction">
-    7.1) Bạn sẽ làm gì trong tình huống này?
-    <span class="required">Required</span>
-  </label>
-  <textarea
-    id="scenarioAction"
-    name="scenarioAction"
-    placeholder="Anh/Chị hãy mô tả ngắn gọn cách mình sẽ xử lý tình huống này..."
-  ></textarea>
+  <!-- Câu 7 -->
+  <div class="scenario-action-box">
+    <label for="scenarioAction">
+      7.1) Bạn sẽ làm gì trong tình huống này?
+      <span class="required">Required</span>
+    </label>
+    <textarea
+      id="scenarioAction"
+      name="scenarioAction"
+      placeholder="Anh/Chị hãy mô tả ngắn gọn cách mình sẽ xử lý tình huống này..."
+    ></textarea>
+  </div>
+
+  <!-- Câu 8 -->
+  <div class="scenario-values-title">
+    <label>
+      7.2) Giá trị cốt lõi nào được thể hiện trong tình huống này?
+      <span class="required">Required</span>
+    </label>
+  </div>
+
+  <div class="choices">
+    <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
+    <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+
+    <div class="choice"><input type="checkbox" id="s2" name="scenario" value="s2"><span><strong>Trách nhiệm</strong>.</span></div>
+    <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+
+    <div class="choice"><input type="checkbox" id="s3" name="scenario" value="s3"><span><strong>Đáng tin</strong>.</span></div>
+    <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+
+    <div class="choice"><input type="checkbox" id="s4" name="scenario" value="s4"><span><strong>Chính trực</strong>.</span></div>
+    <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+
+    <div class="choice"><input type="checkbox" id="s5" name="scenario" value="s5"><span><strong>Kỷ luật</strong>.</span></div>
+    <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+
+    <div class="choice"><input type="checkbox" id="s6" name="scenario" value="s6"><span><strong>Hiệu quả</strong>.</span></div>
+    <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do(Tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
+  </div>
 </div>
-          
-          <div class="required">Required</div>
-        </div>
-
-        <div class="choices">
-          <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
-          <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-          <div class="choice"><input type="checkbox" id="s2" name="scenario" value="s2"><span><strong>Trách nhiệm</strong>.</span></div>
-          <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-          <div class="choice"><input type="checkbox" id="s3" name="scenario" value="s3"><span><strong>Đáng tin</strong>.</span></div>
-          <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-          <div class="choice"><input type="checkbox" id="s4" name="scenario" value="s4"><span><strong>Chính trực</strong>.</span></div>
-          <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-          <div class="choice"><input type="checkbox" id="s5" name="scenario" value="s5"><span><strong>Kỷ luật</strong>.</span></div>
-          <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-          <div class="choice"><input type="checkbox" id="s6" name="scenario" value="s6"><span><strong>Hiệu quả</strong>.</span></div>
-          <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do (tối thiểu 15 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-        </div>
-      </div>
-
       <div class="actions">
         <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
         <button type="submit" class="btn-primary" id="submitBtn">Nộp khảo sát</button>
@@ -1111,11 +1140,11 @@ function validateRequiredGroups(){
   });
 const scenarioAction = ($("#scenarioAction")?.value || "").trim();
 if (!scenarioAction){
-  errors.push("Vui lòng trả lời câu: Bạn sẽ làm gì trong tình huống này?");
+  errors.push("Vui lòng trả lời câu 7.1: Bạn sẽ làm gì trong tình huống này?");
 } else {
   const wc = countMeaningfulWords(scenarioAction);
   if (wc < MIN_MEANINGFUL_WORDS){
-    errors.push(`Câu trả lời chung cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`);
+    errors.push(`Câu 7.1 cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`);
   }
 }
   const scenario = getCheckedValues("scenario");
