@@ -16,6 +16,7 @@
       --shadow: 0 10px 30px rgba(0,0,0,.08);
       --radius:16px;
       --soft:#fff8f3;
+      --red:#d60000;
     }
     *{box-sizing:border-box}
     body{
@@ -182,7 +183,7 @@
       font-weight: 900;
       margin-bottom: 8px;
     }
-    input[type="text"], select, textarea{
+    input[type="text"], input[type="password"], select, textarea{
       width:100%;
       padding: 12px 12px;
       border-radius: 12px;
@@ -192,7 +193,7 @@
       background: #fff;
       color: var(--ink);
     }
-    input[type="text"]:focus, select:focus, textarea:focus{
+    input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus{
       border-color: rgba(255,122,0,.65);
       box-shadow: 0 0 0 4px rgba(255,122,0,.10);
     }
@@ -242,6 +243,24 @@
       font-weight: 900;
       margin-bottom: 10px;
       line-height:1.45;
+    }
+
+    .major-question-title{
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 900;
+      color: var(--red);
+      margin: 0 0 14px;
+    }
+
+    .sub-question{
+      margin: 14px 0;
+    }
+    .sub-question label{
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--red);
+      margin-bottom: 8px;
     }
 
     .choices{
@@ -559,6 +578,48 @@
         </div>
 
         <div class="question-block">
+          <div class="major-question-title">Vấn đề cụ thể trong công việc</div>
+
+          <div class="sub-question">
+            <label for="jobDifficulty">• Bạn gặp khó khăn gì khi làm việc?</label>
+            <textarea id="jobDifficulty" name="jobDifficulty" placeholder="Nhập câu trả lời..."></textarea>
+          </div>
+
+          <div class="sub-question">
+            <label for="jobStress">• Điều gì khiến bạn căng thẳng nhất?</label>
+            <textarea id="jobStress" name="jobStress" placeholder="Nhập câu trả lời..."></textarea>
+          </div>
+
+          <div class="sub-question">
+            <label>• Có thường xuyên bị tăng ca không?</label>
+            <div class="inline-choices">
+              <label class="choice"><input type="radio" name="overtimeFrequency" value="co"><span>Có</span></label>
+              <label class="choice"><input type="radio" name="overtimeFrequency" value="khong"><span>Không</span></label>
+              <label class="choice"><input type="radio" name="overtimeFrequency" value="thuong_xuyen"><span>Thường xuyên</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-block">
+          <div class="major-question-title">Đánh giá quản lý trực tiếp</div>
+
+          <div class="sub-question">
+            <label for="managerSupport">• Quản lý có hỗ trợ khi bạn gặp khó khăn không?</label>
+            <textarea id="managerSupport" name="managerSupport" placeholder="Nhập câu trả lời..."></textarea>
+          </div>
+
+          <div class="sub-question">
+            <label for="managerFairness">• Có đối xử công bằng không?</label>
+            <textarea id="managerFairness" name="managerFairness" placeholder="Nhập câu trả lời..."></textarea>
+          </div>
+
+          <div class="sub-question">
+            <label for="managerListening">• Có lắng nghe ý kiến không?</label>
+            <textarea id="managerListening" name="managerListening" placeholder="Nhập câu trả lời..."></textarea>
+          </div>
+        </div>
+
+        <div class="question-block">
           <div class="question-text">3) Bạn có nguyện vọng nào khác nếu ở lại TBS Logistics không?</div>
           <textarea id="q3" name="q3" placeholder="Ví dụ: muốn chuyển công việc, chuyển đổi bộ phận làm việc, đào tạo thêm..."></textarea>
         </div>
@@ -654,10 +715,8 @@
 </div>
 
 <script>
-/* ===================== CONFIG ===================== */
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnEGih6tDcCaG2gm24o7mqLVFDcSGRwRgZVnG4K401ggfqNv2EQyMrmbXPGVI97UQ9DQ/exec";
 
-/* ===================== HELPERS ===================== */
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
@@ -674,7 +733,6 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 
-/* ===================== API ===================== */
 async function apiGetSettings(){
   const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
   const res = await fetch(url, { method: "GET" });
@@ -705,7 +763,6 @@ async function apiSubmitSurvey(payload){
   return json;
 }
 
-/* ===================== UI REFS ===================== */
 const toggleBtn       = $("#toggleSurveyBtn");
 const adminBtn        = $("#adminBtn");
 const closedPanel     = $("#closedPanel");
@@ -731,7 +788,6 @@ const resultLine  = $("#resultLine");
 const resetBtn    = $("#resetBtn");
 const submitBtn   = $("#submitBtn");
 
-/* ===================== SHARED STATE ===================== */
 let sharedIsOn = false;
 let sharedMessage = "";
 let isAdminSession = false;
@@ -769,7 +825,6 @@ async function refreshFromServer(){
   setMessage(s.message || "");
 }
 
-/* ===================== VALIDATION ===================== */
 function validateRequiredGroups(){
   const errors = [];
 
@@ -798,7 +853,6 @@ function validateRequiredGroups(){
   return errors;
 }
 
-/* ===================== ADMIN MODAL ===================== */
 function openAdminModal(){
   adminMsg.textContent = "";
   adminModal.style.display = "flex";
@@ -839,7 +893,6 @@ adminLogout.addEventListener("click", () => {
   adminMsg.textContent = "Logged out.";
 });
 
-/* ===================== ADMIN ACTIONS ===================== */
 toggleBtn.addEventListener("click", async () => {
   if (!isAdminSession) return;
 
@@ -887,7 +940,6 @@ clearMessageBtn.addEventListener("click", async () => {
   }
 });
 
-/* ===================== SUBMIT ===================== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -919,6 +971,15 @@ form.addEventListener("submit", async (e) => {
       q1: getCheckedValues("q1"),
       q1_other: $("#q1_other")?.value.trim() || "",
       q2: getCheckedValues("q2"),
+
+      jobDifficulty: $("#jobDifficulty")?.value.trim() || "",
+      jobStress: $("#jobStress")?.value.trim() || "",
+      overtimeFrequency: document.querySelector('input[name="overtimeFrequency"]:checked')?.value || "",
+
+      managerSupport: $("#managerSupport")?.value.trim() || "",
+      managerFairness: $("#managerFairness")?.value.trim() || "",
+      managerListening: $("#managerListening")?.value.trim() || "",
+
       q3: $("#q3")?.value.trim() || "",
       q4: document.querySelector('input[name="q4"]:checked')?.value || "",
       q4_reason: $("#q4_reason")?.value.trim() || "",
@@ -948,7 +1009,6 @@ form.addEventListener("submit", async (e) => {
 
 resetBtn.addEventListener("click", () => location.reload());
 
-/* ===================== LOCK FORM ===================== */
 function lockFormUntilRefresh(){
   form.querySelectorAll('input, select, textarea, button:not(#resetBtn)')
     .forEach(el => { el.disabled = true; });
@@ -967,7 +1027,6 @@ function lockFormUntilRefresh(){
   }
 }
 
-/* ===================== BOOT ===================== */
 (async function boot(){
   setAdminUI(false);
 
