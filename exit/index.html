@@ -622,7 +622,7 @@
           <div class="question-text">6.1) Công ty cần cải thiện như thế nào để bạn cân nhắc ở lại làm việc?</div>
           <textarea id="q61_stay_improve" placeholder="Nhập nội dung..."></textarea>
 
-          <div class="question-text">6.2) Bạn có nghĩ sẽ quay lại làm việc tại TBS Logistics trong tương lai hoặc giới thiệu người quen làm việc tại TBS Logistics? <span class="required">Required</span></div>
+          <div class="question-text">6.2) Bạn có nghĩ sẽ quay lại làm việc tại TBS Logistics trong tương lai? <span class="required">Required</span></div>
           <div class="inline-choices">
             <label class="choice"><input type="radio" name="q62_return" value="Có"><span>Có</span></label>
             <label class="choice"><input type="radio" name="q62_return" value="Không"><span>Không</span></label>
@@ -630,42 +630,33 @@
           <div id="q62_return_reason_wrap" class="followup-box">
             <textarea id="q62_return_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
           </div>
+
+          <div class="question-text">6.3) Bạn có đề xuất người quen vào làm việc tại TBS Logistics không? <span class="required">Required</span></div>
+          <div class="inline-choices">
+            <label class="choice"><input type="radio" name="q63_refer" value="Có"><span>Có</span></label>
+            <label class="choice"><input type="radio" name="q63_refer" value="Không"><span>Không</span></label>
+          </div>
+          <div id="q63_refer_reason_wrap" class="followup-box">
+            <textarea id="q63_refer_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
+          </div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="question-block">
-          <div class="question-text">7) Bạn đánh giá thế nào về năng lực quản lý tại TBS Logistics? (Khả năng quản lý, tầm nhìn, học hỏi, có giải pháp xử lý kiên quyết nhưng điềm tĩnh,...)</div>
-          <textarea id="q7" name="q7"></textarea>
-        </div>
+      <div class="question-block">
+        <div class="question-text">Nhận xét chung của nhân viên</div>
+        <textarea id="finalComment" name="finalComment"></textarea>
+      </div>
 
-        <div class="question-block">
-          <div class="question-text">8) Bạn đã có một mối quan hệ công việc tốt với người quản lý trực tiếp chưa? <span class="required">Required</span></div>
-          <div class="inline-choices">
-            <label class="choice"><input type="radio" name="q8_relationship" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q8_relationship" value="Không"><span>Không</span></label>
-          </div>
-          <div id="q8_relationship_reason_wrap" class="followup-box">
-            <textarea id="q8_relationship_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
+      <div class="signature-box">
+        <div></div>
+        <div class="signature-col">
+          <div>Người lao động</div>
+          <div class="muted">(Ký, ghi rõ họ tên)</div>
         </div>
+      </div>
 
-        <div class="question-block">
-          <div class="question-text">Nhận xét chung của nhân viên</div>
-          <textarea id="finalComment" name="finalComment"></textarea>
-        </div>
-
-        <div class="signature-box">
-          <div></div>
-          <div class="signature-col">
-            <div>Người lao động</div>
-            <div class="muted">(Ký, ghi rõ họ tên)</div>
-          </div>
-        </div>
-
-        <div class="footer-note">
-          TBS Logistics cảm ơn những chia sẻ từ bạn. Chúng tôi luôn ghi nhận những ý kiến đóng góp của bạn để cải thiện và xây dựng một TBS Logistics chuyên nghiệp hơn.
-        </div>
+      <div class="footer-note">
+        TBS Logistics cảm ơn những chia sẻ từ bạn. Chúng tôi luôn ghi nhận những ý kiến đóng góp của bạn để cải thiện và xây dựng một TBS Logistics chuyên nghiệp hơn.
       </div>
 
       <div class="actions">
@@ -709,7 +700,7 @@
 </div>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR72nCGHDks726ufQt_MkIvx7RvfXEqo5WtDeI8sY4wVD9s-9KuBs1jYCacD0MyHKvvw/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQFc5E-vgYO9t3wt3mtOaB9y23FmAYDEFPflOX2eLqjofz5uvo7kJH1EO74yCyYMjIA/exec";
 
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -852,49 +843,17 @@ function validateRequiredGroups(){
   if (!$("#department").value.trim()) errors.push("Vui lòng nhập Bộ phận / Chức danh.");
   if (!$("#leaveDate").value.trim()) errors.push("Vui lòng nhập Ngày chính thức nghỉ việc.");
 
-  if (getCheckedValues("q1").length === 0){
-    errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 1.");
-  }
-
-  if (getCheckedValues("q2").length === 0){
-    errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 2.");
-  }
-
-  if (!document.querySelector('input[name="q3_overtime"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 3.1.");
-  }
-
-  if (!document.querySelector('input[name="q3_workload"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 3.2.");
-  }
-
-  if (!document.querySelector('input[name="q4_support"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 4.1.");
-  }
-
-  if (!document.querySelector('input[name="q4_fairness"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 4.2.");
-  }
-
-  if (!document.querySelector('input[name="q4_listening"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 4.3.");
-  }
-
-  if (!document.querySelector('input[name="q51_colleague"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 5.1.");
-  }
-
-  if (!document.querySelector('input[name="q52_environment"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 5.2.");
-  }
-
-  if (!document.querySelector('input[name="q62_return"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho mục 6.2.");
-  }
-
-  if (!document.querySelector('input[name="q8_relationship"]:checked')){
-    errors.push("Vui lòng chọn câu trả lời cho câu 8.");
-  }
+  if (getCheckedValues("q1").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 1.");
+  if (getCheckedValues("q2").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 2.");
+  if (!document.querySelector('input[name="q3_overtime"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 3.1.");
+  if (!document.querySelector('input[name="q3_workload"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 3.2.");
+  if (!document.querySelector('input[name="q4_support"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.1.");
+  if (!document.querySelector('input[name="q4_fairness"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.2.");
+  if (!document.querySelector('input[name="q4_listening"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.3.");
+  if (!document.querySelector('input[name="q51_colleague"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 5.1.");
+  if (!document.querySelector('input[name="q52_environment"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 5.2.");
+  if (!document.querySelector('input[name="q62_return"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.2.");
+  if (!document.querySelector('input[name="q63_refer"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.3.");
 
   return errors;
 }
@@ -1037,11 +996,8 @@ form.addEventListener("submit", async (e) => {
       q61_stay_improve: $("#q61_stay_improve")?.value.trim() || "",
       q62_return: document.querySelector('input[name="q62_return"]:checked')?.value || "",
       q62_return_reason: $("#q62_return_reason")?.value.trim() || "",
-
-      q7: $("#q7")?.value.trim() || "",
-
-      q8_relationship: document.querySelector('input[name="q8_relationship"]:checked')?.value || "",
-      q8_relationship_reason: $("#q8_relationship_reason")?.value.trim() || "",
+      q63_refer: document.querySelector('input[name="q63_refer"]:checked')?.value || "",
+      q63_refer_reason: $("#q63_refer_reason")?.value.trim() || "",
 
       finalComment: $("#finalComment")?.value.trim() || ""
     },
@@ -1087,13 +1043,11 @@ function lockFormUntilRefresh(){
   setAdminUI(false);
 
   setupFollowup("q3_overtime", "Có", "q3_overtime_reason_wrap", "q3_overtime_reason");
-
   setupFollowup("q4_support", "Không", "q4_support_reason_wrap", "q4_support_reason");
   setupFollowup("q4_fairness", "Không", "q4_fairness_reason_wrap", "q4_fairness_reason");
   setupFollowup("q4_listening", "Không", "q4_listening_reason_wrap", "q4_listening_reason");
-
   setupFollowup("q62_return", "Không", "q62_return_reason_wrap", "q62_return_reason");
-  setupFollowup("q8_relationship", "Không", "q8_relationship_reason_wrap", "q8_relationship_reason");
+  setupFollowup("q63_refer", "Không", "q63_refer_reason_wrap", "q63_refer_reason");
 
   try{
     await refreshFromServer();
