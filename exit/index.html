@@ -594,7 +594,7 @@
             <textarea id="q4_listening_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
           </div>
 
-          <div class="question-text">4.4) Bạn mong đợi người quản lý của bạn cải thiện điều gì?</div>
+          <div class="question-text">4.4) Bạn mong đợi người quản lý của bạn cải thiện điều gì? <span class="required">Required</span></div>
           <textarea id="q44_manager_improve" placeholder="Nhập nội dung..."></textarea>
         </div>
 
@@ -619,7 +619,7 @@
         <div class="question-block">
           <div class="question-text">6) Cân nhắc ở lại làm việc</div>
 
-          <div class="question-text">6.1) Công ty cần cải thiện như thế nào để bạn cân nhắc ở lại làm việc?</div>
+          <div class="question-text">6.1) Công ty cần cải thiện như thế nào để bạn cân nhắc ở lại làm việc? <span class="required">Required</span></div>
           <textarea id="q61_stay_improve" placeholder="Nhập nội dung..."></textarea>
 
           <div class="question-text">6.2) Bạn có nghĩ sẽ quay lại làm việc tại TBS Logistics trong tương lai? <span class="required">Required</span></div>
@@ -643,7 +643,7 @@
       </div>
 
       <div class="question-block">
-        <div class="question-text">Nhận xét chung của nhân viên</div>
+        <div class="question-text">Nhận xét chung của nhân viên <span class="required">Required</span></div>
         <textarea id="finalComment" name="finalComment"></textarea>
       </div>
 
@@ -700,7 +700,7 @@
 </div>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQFc5E-vgYO9t3wt3mtOaB9y23FmAYDEFPflOX2eLqjofz5uvo7kJH1EO74yCyYMjIA/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysamat12GtkF_wE2BIvLk2cEWQhz1Tvowu1njY5vq5iOk-IR7suGWVfg0nF1zl05rHmg/exec";
 
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -842,6 +842,7 @@ function validateRequiredGroups(){
   if (!$("#workDate").value.trim()) errors.push("Vui lòng nhập Ngày vào làm.");
   if (!$("#department").value.trim()) errors.push("Vui lòng nhập Bộ phận / Chức danh.");
   if (!$("#leaveDate").value.trim()) errors.push("Vui lòng nhập Ngày chính thức nghỉ việc.");
+  
 
   if (getCheckedValues("q1").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 1.");
   if (getCheckedValues("q2").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 2.");
@@ -854,7 +855,11 @@ function validateRequiredGroups(){
   if (!document.querySelector('input[name="q52_environment"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 5.2.");
   if (!document.querySelector('input[name="q62_return"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.2.");
   if (!document.querySelector('input[name="q63_refer"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.3.");
-
+    
+  if (!$("#q44_manager_improve").value.trim()){errors.push("Vui lòng nhập nội dung cho mục 4.4.");}
+  if (!$("#q61_stay_improve").value.trim()){errors.push("Vui lòng nhập nội dung cho mục 6.1.");}
+  if (!$("#finalComment").value.trim()){errors.push("Vui lòng nhập Nhận xét chung của nhân viên.");}
+  
   return errors;
 }
 
