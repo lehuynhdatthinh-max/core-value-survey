@@ -708,13 +708,13 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 
-function toggleFollowup(radioName, yesValue, wrapId, textareaId){
+function toggleFollowup(radioName, triggerValue, wrapId, textareaId){
   const checked = document.querySelector(`input[name="${radioName}"]:checked`);
   const wrap = document.getElementById(wrapId);
   const textarea = document.getElementById(textareaId);
   if (!wrap) return;
 
-  const show = checked && checked.value === yesValue;
+  const show = checked && checked.value === triggerValue;
   wrap.classList.toggle("show", show);
 
   if (!show && textarea){
@@ -1050,11 +1050,13 @@ function lockFormUntilRefresh(){
   setAdminUI(false);
 
   setupFollowup("q3_overtime", "Có", "q3_overtime_reason_wrap", "q3_overtime_reason");
-  setupFollowup("q4_support", "Có", "q4_support_reason_wrap", "q4_support_reason");
-  setupFollowup("q4_fairness", "Có", "q4_fairness_reason_wrap", "q4_fairness_reason");
-  setupFollowup("q4_listening", "Có", "q4_listening_reason_wrap", "q4_listening_reason");
-  setupFollowup("q5_return", "Có", "q5_return_reason_wrap", "q5_return_reason");
-  setupFollowup("q8_relationship", "Có", "q8_relationship_reason_wrap", "q8_relationship_reason");
+
+setupFollowup("q4_support", "Không", "q4_support_reason_wrap", "q4_support_reason");
+setupFollowup("q4_fairness", "Không", "q4_fairness_reason_wrap", "q4_fairness_reason");
+setupFollowup("q4_listening", "Không", "q4_listening_reason_wrap", "q4_listening_reason");
+
+setupFollowup("q5_return", "Có", "q5_return_reason_wrap", "q5_return_reason");
+setupFollowup("q8_relationship", "Có", "q8_relationship_reason_wrap", "q8_relationship_reason");
 
   try{
     await refreshFromServer();
