@@ -639,15 +639,15 @@ header, main, .closed-panel{
 
   <div class="scenario-desc">
     <p><strong>BỐI CẢNH</strong></p>
-    <p>Trong quá trình làm việc, bạn phát hiện:</p>
+    <p>Trong quá trình làm việc, bạn:</p>
     <ul>
-      <li>Bạn đã thực hiện sai một bước trong công việc</li>
-      <li>Sai sót này hiện tại chưa gây hậu quả nghiêm trọng</li>
-      <li>Và chưa có ai phát hiện ra</li>
+      <li>Đã cam kết với cấp trên về thời gian hoàn thành công việc</li>
+      <li>Tuy nhiên, phát sinh rủi ro ngoài dự kiến</li>
+      <li>Có khả năng không hoàn thành đúng deadline đã hứa</li>
       <li>Bạn đứng trước lựa chọn:
         <ul>
-          <li>· Im lặng, bỏ qua vì “chưa có vấn đề gì xảy ra”</li>
-          <li>· Hoặc chủ động báo cáo và xử lý sai sót</li>
+          <li>· Giữ im lặng, cố gắng “chạy nước rút” và hy vọng kịp tiến độ</li>
+          <li>· Hoặc chủ động báo cáo tình hình và đề xuất hướng xử lý</li>
         </ul>
       </li>
     </ul>
@@ -656,7 +656,7 @@ header, main, .closed-panel{
   <!-- Câu 7 -->
   <div class="scenario-action-box">
     <label for="scenarioAction">
-      7.1) Bạn sẽ làm gì trong tình huống này?
+      7.1) Bạn sẽ xử lý thế nào?
       <span class="required">Required</span>
     </label>
     <textarea
@@ -762,38 +762,42 @@ const scenarioLabels = {
 
 const scenarioRationales = {
   s1: ``,
-  s2: `• Người có trách nhiệm hiểu rằng:
-· Sai sót dù nhỏ vẫn có thể ảnh hưởng về sau
-· Công việc không chỉ của cá nhân mà liên quan đến hệ thống
-👉 Biểu hiện
-· Chủ động khắc phục lỗi
-· Báo cáo để ngăn ngừa rủi ro phát sinh
-🔑 Trách nhiệm là sửa sai ngay khi còn có thể`,
-  s3: `• Sự tin cậy không đến từ việc “không mắc lỗi”
-• Mà đến từ cách bạn xử lý khi có lỗi
-👉 Biểu hiện
-· Minh bạch trong công việc
-· Không để người khác phát hiện sai sót thay mình
-🔑 Người đáng tin là người dám nhận sai và sửa sai`,
-  s4: `• Chính trực là:
-· Trung thực với chính mình và công việc
-· Dám thừa nhận sai sót ngay cả khi không ai biết
+  s2: `• Cam kết không chỉ là lời nói
+• Mà là trách nhiệm với kết quả công việc
 👉 Biểu hiện rõ nhất
-· Chủ động báo cáo lỗi
-· Không che giấu hoặc bỏ qua sai sót
-🔑 Không có Chính trực → sai sót nhỏ có thể trở thành rủi ro lớn  `,
-  s5: `• Kỷ luật không chỉ là làm đúng quy trình
-• Mà còn là:
-· Tuân thủ nguyên tắc báo cáo và xử lý sự cố
+· Chủ động báo cáo khi có nguy cơ trễ tiến độ
+· Không né tránh hoặc đợi đến sát deadline mới nói
+🔑 Trách nhiệm là dám đối diện với việc “không đạt như cam kết”`,
+  s3: `Người đáng tin không phải là người luôn đúng deadline
+Mà là người:
+· Minh bạch
+· Có giải pháp khi có vấn đề
 👉 Biểu hiện
-· Không tự ý bỏ qua lỗi
-· Thực hiện đúng quy trình xử lý sai sót
-🔑 Thiếu kỷ luật → lỗi nhỏ sẽ lặp lại thành lỗi hệ thống`,
-  s6: `• Hiệu quả thực sự là:
-· Phát hiện sớm – xử lý sớm – tránh hậu quả lớn
+· Thông tin kịp thời cho cấp trên
+· Đề xuất phương án: gia hạn, hỗ trợ, điều chỉnh kế hoạch
+🔑 Đáng tin là khi cấp trên có thể dựa vào bạn trong mọi tình huống`,
+  s4: `• Chính trực là minh bạch:
+· Nói đúng sự thật về tiến độ
+· Không che giấu khó khăn
+👉 Biểu hiện rõ nhất
+· Báo cáo sớm rủi ro
+· Không “báo cáo đẹp” để giữ hình ảnh cá nhân
+🔑 Chính trực giúp xây dựng niềm tin lâu dài`,
+  s5: `• Kỷ luật trong công việc là:
+· Quản lý tiến độ
+· Theo dõi rủi ro
+👉 Biểu hiện
+· Đánh giá tiến độ thường xuyên
+· Không để đến khi “quá hạn mới xử lý”
+🔑 Kỷ luật giúp phát hiện vấn đề trước khi quá muộn`,
+  s6: `• Hiệu quả không phải là cố làm cho xong bằng mọi giá
+• Mà là:
+· Đảm bảo chất lượng
+· Có phương án tối ưu khi có thay đổi
 👉 Vai trò
-· Sửa lỗi ngay từ đầu giúp tiết kiệm thời gian, chi phí về sau
-🔑 Che giấu lỗi → chi phí sửa sai sẽ lớn hơn rất nhiều`
+· Chủ động điều chỉnh giúp giảm thiểu thiệt hại
+· Tránh ảnh hưởng dây chuyền đến các bộ phận khác
+🔑 Cố đúng deadline nhưng sai chất lượng → không phải hiệu quả`
 };
 
 /* ===================== HELPERS ===================== */
