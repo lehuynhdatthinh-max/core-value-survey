@@ -638,32 +638,75 @@ header, main, .closed-panel{
   </div>
 
   <div class="scenario-desc">
-    <p><strong>BỐI CẢNH</strong></p>
-    <p>Trong quá trình làm việc, bạn:</p>
-    <ul>
-      <li>Đã cam kết với cấp trên về thời gian hoàn thành công việc</li>
-      <li>Tuy nhiên, phát sinh rủi ro ngoài dự kiến</li>
-      <li>Có khả năng không hoàn thành đúng deadline đã hứa</li>
-      <li>Bạn đứng trước lựa chọn:
-        <ul>
-          <li>· Giữ im lặng, cố gắng “chạy nước rút” và hy vọng kịp tiến độ</li>
-          <li>· Hoặc chủ động báo cáo tình hình và đề xuất hướng xử lý</li>
-        </ul>
-      </li>
-    </ul>
-  </div>
+  <h3>🧩 TÌNH HUỐNG</h3>
+
+  <p><strong>Bối cảnh:</strong></p>
+  <p>
+    Tại kho logistics, nhân viên A phụ trách xử lý chứng từ nhận hàng theo thứ tự FIFO
+    (đến trước làm trước).
+  </p>
+
+  <p><strong>Diễn biến:</strong></p>
+  <ul>
+    <li>Khách hàng B đến làm thủ tục nhận hàng.</li>
+    <li>
+      Sau khi kiểm tra hồ sơ, nhân viên A nói nhỏ:
+      <p class="quote">
+        “Hiện tại đang có nhiều lô đang chờ xử lý theo thứ tự. Nhưng nếu anh hỗ trợ
+        thêm chi phí thì em có thể ưu tiên xử lý hồ sơ của anh trước các lô khác.”
+      </p>
+    </li>
+    <li>Khách hàng đồng ý và đưa tiền riêng cho A.</li>
+    <li>
+      Nhân viên A sau đó:
+      <ul>
+        <li>Đưa hồ sơ của khách B lên xử lý trước</li>
+        <li>Bỏ qua thứ tự FIFO đã quy định</li>
+      </ul>
+    </li>
+    <li>
+      Hậu quả:
+      <ul>
+        <li>Các khách hàng đến trước bị trễ</li>
+        <li>Một số khách khiếu nại vì không công bằng</li>
+        <li>Nội bộ phát sinh nghi ngờ, mất đoàn kết</li>
+      </ul>
+    </li>
+  </ul>
 
   <!-- Câu 7 -->
   <div class="scenario-action-box">
-    <label for="scenarioAction">
-      7.1) Bạn sẽ xử lý thế nào?
+    <label>
+      7.1) Theo anh/chị hành động đó có vi phạm kỷ luật Công ty không?
       <span class="required">Required</span>
     </label>
-    <textarea
-      id="scenarioAction"
-      name="scenarioAction"
-      placeholder="Anh/Chị hãy mô tả ngắn gọn cách mình sẽ xử lý tình huống này..."
-    ></textarea>
+
+    <div class="choices">
+      <label class="choice">
+        <input type="radio" name="disciplineCheck" value="Có">
+        <span>Có</span>
+      </label>
+
+      <label class="choice">
+        <input type="radio" name="disciplineCheck" value="Không">
+        <span>Không</span>
+      </label>
+    </div>
+
+    <div id="disciplineLevelBox" style="display:none; margin-top:14px;">
+      <label>
+        7.2) Hình thức xử lý theo quy định của Công ty là gì?
+        <span class="required">Required</span>
+      </label>
+
+      <div class="choices">
+        <label class="choice"><input type="radio" name="disciplineLevel" value="Nhắc nhở"><span>Nhắc nhở (miệng hoặc nội bộ)</span></label>
+        <label class="choice"><input type="radio" name="disciplineLevel" value="Khiển trách"><span>Khiển trách (bằng văn bản)</span></label>
+        <label class="choice"><input type="radio" name="disciplineLevel" value="Cảnh cáo"><span>Cảnh cáo</span></label>
+        <label class="choice"><input type="radio" name="disciplineLevel" value="Hạ bậc lương / Giáng chức"><span>Hạ bậc lương / Giáng chức</span></label>
+        <label class="choice"><input type="radio" name="disciplineLevel" value="Sa thải"><span>Sa thải (chấm dứt HĐLĐ)</span></label>
+      </div>
+    </div>
   </div>
 
   <!-- Câu 8 -->
@@ -738,7 +781,7 @@ header, main, .closed-panel{
 
 <script>
 /* ===================== CONFIG ===================== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnYQ19LG9DHARVgFjrxQ9fWR9_fCOGEMe07Jmo0zFGlS32gmtjq771akT-EXawga38/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdGcKxl3CMaFKOOFqMYMulmymya-q4ZDScYecbXULy9oa4ekunUbks9B9G9e9NqMJI/exec";
 
 const MIN_MEANINGFUL_WORDS = 5;
 
@@ -753,7 +796,7 @@ const correctSets = {
   q3: ["a","c","d","e","f","g"],
   q4: ["a","c","d","f","g"],
 };
-const scenarioCorrect = ["s2","s3","s4","s5","s6"];
+const scenarioCorrect = ["s1","s2","s3","s4","s5","s6"];
 
 const scenarioLabels = {
   s1:"Đoàn kết", s2:"Trách nhiệm", s3:"Đáng tin",
@@ -761,43 +804,28 @@ const scenarioLabels = {
 };
 
 const scenarioRationales = {
-  s1: ``,
-  s2: `• Cam kết không chỉ là lời nói
-• Mà là trách nhiệm với kết quả công việc
-👉 Biểu hiện rõ nhất
-· Chủ động báo cáo khi có nguy cơ trễ tiến độ
-· Không né tránh hoặc đợi đến sát deadline mới nói
-🔑 Trách nhiệm là dám đối diện với việc “không đạt như cam kết”`,
-  s3: `Người đáng tin không phải là người luôn đúng deadline
-Mà là người:
-· Minh bạch
-· Có giải pháp khi có vấn đề
-👉 Biểu hiện
-· Thông tin kịp thời cho cấp trên
-· Đề xuất phương án: gia hạn, hỗ trợ, điều chỉnh kế hoạch
-🔑 Đáng tin là khi cấp trên có thể dựa vào bạn trong mọi tình huống`,
-  s4: `• Chính trực là minh bạch:
-· Nói đúng sự thật về tiến độ
-· Không che giấu khó khăn
-👉 Biểu hiện rõ nhất
-· Báo cáo sớm rủi ro
-· Không “báo cáo đẹp” để giữ hình ảnh cá nhân
-🔑 Chính trực giúp xây dựng niềm tin lâu dài`,
-  s5: `• Kỷ luật trong công việc là:
-· Quản lý tiến độ
-· Theo dõi rủi ro
-👉 Biểu hiện
-· Đánh giá tiến độ thường xuyên
-· Không để đến khi “quá hạn mới xử lý”
-🔑 Kỷ luật giúp phát hiện vấn đề trước khi quá muộn`,
-  s6: `• Hiệu quả không phải là cố làm cho xong bằng mọi giá
-• Mà là:
-· Đảm bảo chất lượng
-· Có phương án tối ưu khi có thay đổi
-👉 Vai trò
-· Chủ động điều chỉnh giúp giảm thiểu thiệt hại
-· Tránh ảnh hưởng dây chuyền đến các bộ phận khác
-🔑 Cố đúng deadline nhưng sai chất lượng → không phải hiệu quả`
+  s1: `•	Tạo sự bất công giữa các khách hàng 
+       •	Đồng nghiệp bị ảnh hưởng do: 
+          o	Phải giải quyết khiếu nại 
+          o	Bị đánh giá chung là thiếu minh bạch 
+      👉 Làm giảm tinh thần đội nhóm`,
+  s2: `•	Không thực hiện đúng vai trò đảm bảo công bằng quy trình 
+       •	Đặt lợi ích cá nhân lên trên trách nhiệm công việc 
+         👉 Sai lệch mục tiêu phục vụ khách hàng`,
+  s3: `•	Khách hàng mất niềm tin vào nguyên tắc FIFO 
+       •	Công ty bị đánh giá “có tiền thì được ưu tiên” 
+         👉 Ảnh hưởng trực tiếp đến uy tín doanh nghiệp`,
+  s4: `•	Nhận tiền ngoài / vòi vĩnh để thay đổi thứ tự xử lý 
+       •	Hành vi không minh bạch, trái đạo đức nghề nghiệp 
+         👉 Đây là hành vi trục lợi cá nhân, không minh bạch`,
+  s5: `•	Không tuân thủ quy trình FIFO 
+       •	Tự ý thay đổi thứ tự xử lý mà không có phê duyệt 
+        👉 Phá vỡ kỷ luật vận hành`,
+  s6: `•	Một lô hàng được xử lý sớm hơn 
+       •	Nhưng: 
+         o	Nhiều lô khác bị chậm 
+         o	Tăng khiếu nại, tốn nguồn lực xử lý 
+        👉 Hiệu quả tổng thể bị giảm`
 };
 
 /* ===================== HELPERS ===================== */
@@ -1173,6 +1201,24 @@ function syncScenarioExplain(){
 }
 $$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScenarioExplain));
 
+function syncDisciplineLevel(){
+  const picked = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
+  const box = document.getElementById("disciplineLevelBox");
+
+  if (!box) return;
+
+  if (picked === "Có"){
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+    document.querySelectorAll('input[name="disciplineLevel"]').forEach(i => i.checked = false);
+  }
+}
+
+document.querySelectorAll('input[name="disciplineCheck"]').forEach(i => {
+  i.addEventListener("change", syncDisciplineLevel);
+});
+
 /* ===================== VALIDATION ===================== */
 function validateRequiredGroups(){
   const errors = [];
@@ -1191,13 +1237,16 @@ function validateRequiredGroups(){
       errors.push(`Câu hỏi ${idx + 5} chưa trả lời.`);
     }
   });
-const scenarioAction = ($("#scenarioAction")?.value || "").trim();
-if (!scenarioAction){
-  errors.push("Vui lòng trả lời câu 7.1: Bạn sẽ làm gì trong tình huống này?");
-} else {
-  const wc = countMeaningfulWords(scenarioAction);
-  if (wc < MIN_MEANINGFUL_WORDS){
-    errors.push(`Câu 7.1 cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`);
+const disciplineCheck = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
+
+if (!disciplineCheck){
+  errors.push("Vui lòng trả lời câu 7.1: Hành động đó có vi phạm kỷ luật Công ty không?");
+}
+
+if (disciplineCheck === "Có"){
+  const disciplineLevel = document.querySelector('input[name="disciplineLevel"]:checked')?.value;
+  if (!disciplineLevel){
+    errors.push("Vui lòng chọn hình thức xử lý ở câu 7.2.");
   }
 }
   const scenario = getCheckedValues("scenario");
@@ -1256,10 +1305,20 @@ function computeScoreSplit(){
 
   const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
   const totalUnderstand = scenarioCorrect.length;
-  const total = totalKnow + totalUnderstand;
-  const score = knowScore + understandScore;
 
-  return { knowScore, totalKnow, understandScore, totalUnderstand, score, total };
+  let extraScenarioScore = 0;
+
+  const disciplineCheck = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
+  const disciplineLevel = document.querySelector('input[name="disciplineLevel"]:checked')?.value;
+
+  if (disciplineCheck === "Có" && disciplineLevel === "Sa thải"){
+    extraScenarioScore = 1;
+  }
+
+  const total = totalKnow + totalUnderstand + 1;
+  const score = knowScore + understandScore + extraScenarioScore;
+
+  return { knowScore, totalKnow, understandScore, totalUnderstand, extraScenarioScore, score, total };
 }
 
 /* ===================== ADMIN MODAL ===================== */
@@ -1359,7 +1418,7 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
+  const { knowScore, totalKnow, understandScore, totalUnderstand, extraScenarioScore, score, total } = computeScoreSplit();
 
   const payload = {
     timestamp: new Date().toISOString(),
@@ -1369,6 +1428,7 @@ form.addEventListener("submit", async (e) => {
     totalKnow,
     understandScore,
     totalUnderstand,
+    extraScenarioScore,
     score,
     total,
     answers: {
@@ -1377,7 +1437,8 @@ form.addEventListener("submit", async (e) => {
       q3: getCheckedValues("q3"),
       q4: getCheckedValues("q4"),
       q5: getCheckedValues("q5"),
-      scenario_action: ($("#scenarioAction")?.value || "").trim(),
+      discipline_check: document.querySelector('input[name="disciplineCheck"]:checked')?.value || "",
+      discipline_level: document.querySelector('input[name="disciplineLevel"]:checked')?.value || "",
       scenario: getCheckedValues("scenario"),
       scenario_explain: {
         s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
@@ -1404,7 +1465,7 @@ resultBox.insertBefore(extra, scenarioReasons);
 const actionSummary = document.createElement("p");
 actionSummary.setAttribute("data-scenario-action", "1");
 actionSummary.style.marginTop = "10px";
-actionSummary.textContent = `Cách xử lý tình huống của Anh/Chị: ${payload.answers.scenario_action || "(Chưa nhập)"}`;
+actionSummary.textContent = `Câu 7.1: ${payload.answers.discipline_check || "(Chưa chọn)"} • Câu 7.2: ${payload.answers.discipline_level || "(Không áp dụng)"} • Điểm: ${extraScenarioScore}/1`;
 resultBox.insertBefore(actionSummary, scenarioReasons);
   
   let intro = resultBox.querySelector("#scenarioIntro");
@@ -1661,6 +1722,7 @@ function applyTetDecorByLunar(){
   randomizeScenarioChoices();     // nếu muốn random luôn phần giá trị cốt lõi
 
   syncScenarioExplain();
+  syncDisciplineLevel();
   disableQuestion("q5");
 
   try{
