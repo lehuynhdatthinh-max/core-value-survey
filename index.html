@@ -692,21 +692,6 @@ header, main, .closed-panel{
         <span>Không</span>
       </label>
     </div>
-
-    <div id="disciplineLevelBox" style="display:none; margin-top:14px;">
-      <label>
-        7.2) Hình thức xử lý theo quy định của Công ty là gì?
-        <span class="required">Required</span>
-      </label>
-
-      <div class="choices">
-        <label class="choice"><input type="radio" name="disciplineLevel" value="Nhắc nhở"><span>Nhắc nhở (miệng hoặc nội bộ)</span></label>
-        <label class="choice"><input type="radio" name="disciplineLevel" value="Khiển trách"><span>Khiển trách (bằng văn bản)</span></label>
-        <label class="choice"><input type="radio" name="disciplineLevel" value="Cảnh cáo"><span>Cảnh cáo</span></label>
-        <label class="choice"><input type="radio" name="disciplineLevel" value="Hạ bậc lương / Giáng chức"><span>Hạ bậc lương / Giáng chức</span></label>
-        <label class="choice"><input type="radio" name="disciplineLevel" value="Sa thải"><span>Sa thải (chấm dứt HĐLĐ)</span></label>
-      </div>
-    </div>
   </div>
 
   <!-- Câu 8 -->
@@ -781,7 +766,7 @@ header, main, .closed-panel{
 
 <script>
 /* ===================== CONFIG ===================== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdGcKxl3CMaFKOOFqMYMulmymya-q4ZDScYecbXULy9oa4ekunUbks9B9G9e9NqMJI/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvizyW1H2m8QRBMvnalL8edEbLAT8inKuCvsh6VmD-xB4mMUZlVvHi-o1yuobGiI2Y/exec";
 
 const MIN_MEANINGFUL_WORDS = 5;
 
@@ -1201,24 +1186,6 @@ function syncScenarioExplain(){
 }
 $$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScenarioExplain));
 
-function syncDisciplineLevel(){
-  const picked = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
-  const box = document.getElementById("disciplineLevelBox");
-
-  if (!box) return;
-
-  if (picked === "Có"){
-    box.style.display = "block";
-  } else {
-    box.style.display = "none";
-    document.querySelectorAll('input[name="disciplineLevel"]').forEach(i => i.checked = false);
-  }
-}
-
-document.querySelectorAll('input[name="disciplineCheck"]').forEach(i => {
-  i.addEventListener("change", syncDisciplineLevel);
-});
-
 /* ===================== VALIDATION ===================== */
 function validateRequiredGroups(){
   const errors = [];
@@ -1243,12 +1210,6 @@ if (!disciplineCheck){
   errors.push("Vui lòng trả lời câu 7.1: Hành động đó có vi phạm kỷ luật Công ty không?");
 }
 
-if (disciplineCheck === "Có"){
-  const disciplineLevel = document.querySelector('input[name="disciplineLevel"]:checked')?.value;
-  if (!disciplineLevel){
-    errors.push("Vui lòng chọn hình thức xử lý ở câu 7.2.");
-  }
-}
   const scenario = getCheckedValues("scenario");
   if (scenario.length === 0) errors.push("Câu hỏi tình huống chưa trả lời.");
 
@@ -1305,22 +1266,11 @@ function computeScoreSplit(){
 
   const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
   const totalUnderstand = scenarioCorrect.length;
+  const total = totalKnow + totalUnderstand;
+  const score = knowScore + understandScore;
 
-  let extraScenarioScore = 0;
-
-  const disciplineCheck = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
-  const disciplineLevel = document.querySelector('input[name="disciplineLevel"]:checked')?.value;
-
-  if (disciplineCheck === "Có" && disciplineLevel === "Sa thải"){
-    extraScenarioScore = 1;
-  }
-
-  const total = totalKnow + totalUnderstand + 1;
-  const score = knowScore + understandScore + extraScenarioScore;
-
-  return { knowScore, totalKnow, understandScore, totalUnderstand, extraScenarioScore, score, total };
+  return { knowScore, totalKnow, understandScore, totalUnderstand, score, total };
 }
-
 /* ===================== ADMIN MODAL ===================== */
 function openAdminModal(){
   adminMsg.textContent = "";
@@ -1418,7 +1368,7 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const { knowScore, totalKnow, understandScore, totalUnderstand, extraScenarioScore, score, total } = computeScoreSplit();
+ const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
 
   const payload = {
     timestamp: new Date().toISOString(),
@@ -1438,7 +1388,6 @@ form.addEventListener("submit", async (e) => {
       q4: getCheckedValues("q4"),
       q5: getCheckedValues("q5"),
       discipline_check: document.querySelector('input[name="disciplineCheck"]:checked')?.value || "",
-      discipline_level: document.querySelector('input[name="disciplineLevel"]:checked')?.value || "",
       scenario: getCheckedValues("scenario"),
       scenario_explain: {
         s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
@@ -1465,7 +1414,7 @@ resultBox.insertBefore(extra, scenarioReasons);
 const actionSummary = document.createElement("p");
 actionSummary.setAttribute("data-scenario-action", "1");
 actionSummary.style.marginTop = "10px";
-actionSummary.textContent = `Câu 7.1: ${payload.answers.discipline_check || "(Chưa chọn)"} • Câu 7.2: ${payload.answers.discipline_level || "(Không áp dụng)"} • Điểm: ${extraScenarioScore}/1`;
+actionSummary.textContent = `Câu 7.1: ${payload.answers.discipline_check || "(Chưa chọn)"}`;
 resultBox.insertBefore(actionSummary, scenarioReasons);
   
   let intro = resultBox.querySelector("#scenarioIntro");
@@ -1722,7 +1671,6 @@ function applyTetDecorByLunar(){
   randomizeScenarioChoices();     // nếu muốn random luôn phần giá trị cốt lõi
 
   syncScenarioExplain();
-  syncDisciplineLevel();
   disableQuestion("q5");
 
   try{
