@@ -502,12 +502,21 @@ header, main, .closed-panel{
     <form id="surveyForm" novalidate>
       <div class="row">
         <div>
-          <label for="fullName">1) Họ và Tên <span class="required">Required</span></label>
-          <input id="fullName" name="fullName" type="text" placeholder="Hãy điền tên của Anh/Chị vào đây" required />
+          <label for="employeeId">1) MSNV của Anh/Chị là gì? <span class="required">Không bắt buộc</span></label>
+          <input id="employeeId" name="employeeId" type="text" placeholder="Nhập MSNV nếu Anh/Chị nhớ" />
+          <small class="muted" id="employeeLookupNote" style="display:block; margin-top:6px; color:#b42318; font-weight:900;">Điền MSNV sẽ tự động điền Họ và tên và Bộ Phận của bạn. Nếu bạn không nhớ MSNV thì xin điền Họ và Tên và Bộ Phận thủ công như lúc trước</small>
+          <small class="muted" id="employeeLookupMsg" style="display:block; margin-top:6px;"></small>
         </div>
 
         <div>
-          <label for="department">2) Bộ phận <span class="required">Required</span></label>
+          <label for="fullName">2) Họ và Tên <span class="required">Required</span></label>
+          <input id="fullName" name="fullName" type="text" placeholder="Hãy điền tên của Anh/Chị vào đây" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="departmentManualBox">
+          <label for="department">3) Bộ phận <span class="required">Required</span></label>
           <select id="department" name="department" required>
             <option value="" selected disabled>Anh/Chị hãy chọn phòng ban của Anh/chị</option>
             <option>HCNS</option>
@@ -531,6 +540,23 @@ header, main, .closed-panel{
             <option>BẢO VỆ KHO 6</option>
             <option>BẢO VỆ KHO 7-8</option>
             <option>BẢO VỆ KHO ST</option>
+          </select>
+        </div>
+
+        <div id="departmentAutoBox" style="display:none;">
+          <label for="departmentAuto">3) Bộ phận <span class="required">Auto</span></label>
+          <input id="departmentAuto" name="departmentAuto" type="text" placeholder="Tự động điền theo MSNV" readonly />
+        </div>
+
+        <div id="departmentWorkerBox" style="display:none;">
+          <label for="departmentWorker">3) Bộ phận <span class="required">Required</span></label>
+          <select id="departmentWorker" name="departmentWorker">
+            <option value="" selected disabled>Anh/Chị hãy chọn kho</option>
+            <option>KHO 1-4</option>
+            <option>KHO 5</option>
+            <option>KHO 6</option>
+            <option>KHO 7-8</option>
+            <option>KHO ST</option>
           </select>
         </div>
       </div>
@@ -762,7 +788,7 @@ header, main, .closed-panel{
 
 <script>
 /* ===================== CONFIG ===================== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvizyW1H2m8QRBMvnalL8edEbLAT8inKuCvsh6VmD-xB4mMUZlVvHi-o1yuobGiI2Y/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuVsEa8WRS6pOx8oflXPr9kw9luQ-vbmr0Iytz7rdZ7E0F0_UrDfILLqIybKfJQrjd/exec";
 
 const MIN_MEANINGFUL_WORDS = 5;
 
@@ -833,7 +859,7 @@ function randomizeStandardChoices(qid){
 
 /* 🔥 RANDOM CHO SCENARIO (cặp choice + explain) */
 function randomizeScenarioChoices(){
-  const wrap = document.querySelector(`.qblock[data-qid="scenario"] .choices`);
+  const wrap = document.querySelector(`.scenario-values-title + .choices`);
   if (!wrap) return;
 
   const children = Array.from(wrap.children);
@@ -1082,6 +1108,14 @@ async function apiGetSettings(){
   return json.settings;
 }
 
+async function apiLookupEmployee(msnv){
+  const url = `${GOOGLE_SCRIPT_URL}?action=lookupEmployee&msnv=${encodeURIComponent(msnv)}&ts=${Date.now()}`;
+  const res = await fetch(url, { method: "GET" });
+  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+  if (!json.ok) throw new Error(json.error || 'Không tìm thấy Họ và tên của bạn dựa trên MSNV, bạn hãy kiểm tra MSNV của bạn có điền đúng không. Nếu đúng mà vẫn không hiện thì hãy liên hệ ban VHDN qua Zalo theo SĐT "0334059814"');
+  return json.employee;
+}
+
 async function apiSaveSettings({ email, passcode, isOn, message }){
   const body = new URLSearchParams();
   body.append("action", "saveSettings");
@@ -1128,6 +1162,110 @@ const scoreLine     = $("#scoreLine");
 const scenarioReasons = $("#scenarioReasons");
 const resetBtn      = $("#resetBtn");
 const submitBtn     = $("#submitBtn");
+
+const employeeIdInput = $("#employeeId");
+const employeeLookupMsg = $("#employeeLookupMsg");
+const departmentManualBox = $("#departmentManualBox");
+const departmentAutoBox = $("#departmentAutoBox");
+const departmentWorkerBox = $("#departmentWorkerBox");
+const departmentAuto = $("#departmentAuto");
+const departmentWorker = $("#departmentWorker");
+
+let employeeLookupOk = false;
+let currentEmployee = null;
+let employeeLookupTimer = null;
+
+/* ===================== EMPLOYEE LOOKUP ===================== */
+function resetEmployeeLookupToManual(message=""){
+  employeeLookupOk = false;
+  currentEmployee = null;
+
+  if (departmentManualBox) departmentManualBox.style.display = "";
+  if (departmentAutoBox) departmentAutoBox.style.display = "none";
+  if (departmentWorkerBox) departmentWorkerBox.style.display = "none";
+  if (departmentAuto) departmentAuto.value = "";
+  if (departmentWorker) departmentWorker.value = "";
+
+  const nameInput = $("#fullName");
+  if (nameInput) nameInput.readOnly = false;
+
+  if (employeeLookupMsg){
+    employeeLookupMsg.textContent = message;
+    employeeLookupMsg.style.color = message ? "#7f1d1d" : "#6b7280";
+  }
+}
+
+function applyEmployeeLookup(emp){
+  currentEmployee = emp || null;
+  employeeLookupOk = !!emp;
+
+  const nameInput = $("#fullName");
+  if (nameInput){
+    nameInput.value = emp?.name || "";
+    nameInput.readOnly = !!emp;
+  }
+
+  if (emp?.isWorker){
+    departmentManualBox.style.display = "none";
+    departmentAutoBox.style.display = "none";
+    departmentWorkerBox.style.display = "";
+    departmentAuto.value = "";
+    departmentWorker.value = "";
+    employeeLookupMsg.textContent = "Đã xác nhận MSNV. Anh/Chị vui lòng chọn kho.";
+  } else {
+    departmentManualBox.style.display = "none";
+    departmentAutoBox.style.display = "";
+    departmentWorkerBox.style.display = "none";
+    departmentAuto.value = emp?.department || "";
+    departmentWorker.value = "";
+    employeeLookupMsg.textContent = "Đã xác nhận MSNV.";
+  }
+
+  employeeLookupMsg.style.color = "#0f5132";
+}
+
+async function lookupEmployeeFromInput(){
+  const msnv = employeeIdInput?.value.trim() || "";
+
+  if (!msnv){
+    resetEmployeeLookupToManual("");
+    return;
+  }
+
+  employeeLookupOk = false;
+  currentEmployee = null;
+  employeeLookupMsg.textContent = "Đang kiểm tra MSNV...";
+  employeeLookupMsg.style.color = "#6b7280";
+
+  try{
+    const emp = await apiLookupEmployee(msnv);
+    applyEmployeeLookup(emp);
+  }catch(err){
+    resetEmployeeLookupToManual(err.message || 'Không tìm thấy Họ và tên của bạn dựa trên MSNV, bạn hãy kiểm tra MSNV của bạn có điền đúng không. Nếu đúng mà vẫn không hiện thì hãy liên hệ ban VHDN qua Zalo theo SĐT "0334059814"');
+  }
+}
+
+function scheduleEmployeeLookup(){
+  clearTimeout(employeeLookupTimer);
+  employeeLookupTimer = setTimeout(lookupEmployeeFromInput, 500);
+}
+
+if (employeeIdInput){
+  employeeIdInput.addEventListener("input", scheduleEmployeeLookup);
+  employeeIdInput.addEventListener("blur", lookupEmployeeFromInput);
+  employeeIdInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter"){
+      e.preventDefault();
+      lookupEmployeeFromInput();
+    }
+  });
+}
+
+function getFinalDepartment(){
+  if (currentEmployee?.isWorker) return departmentWorker?.value || "";
+  if (employeeLookupOk && currentEmployee && !currentEmployee.isWorker) return departmentAuto?.value.trim() || "";
+  return $("#department")?.value || "";
+}
 
 /* ===================== SHARED STATE ===================== */
 let sharedIsOn = false;
@@ -1187,7 +1325,11 @@ function validateRequiredGroups(){
   const errors = [];
 
   if (!$("#fullName").value.trim()) errors.push("Chưa điền tên.");
-  if (!$("#department").value) errors.push("Chưa chọn bộ phận.");
+
+  const finalDepartment = getFinalDepartment();
+  if (!finalDepartment){
+    errors.push(currentEmployee?.isWorker ? "Vui lòng chọn kho." : "Chưa chọn bộ phận.");
+  }
 
   ["q1","q2"].forEach((q, idx) => {
     if (!document.querySelector(`input[name="${q}"]:checked`)) {
@@ -1366,10 +1508,15 @@ form.addEventListener("submit", async (e) => {
 
  const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
 
+  const finalDepartment = getFinalDepartment();
+
   const payload = {
     timestamp: new Date().toISOString(),
+    employeeId: $("#employeeId").value.trim(),
     name: $("#fullName").value.trim(),
-    department: $("#department").value,
+    department: finalDepartment,
+    position: currentEmployee?.position || "",
+    employeeLookupStatus: employeeLookupOk ? "FOUND" : ($("#employeeId").value.trim() ? "NOT_FOUND_OR_MANUAL" : "MANUAL"),
     knowScore,
     totalKnow,
     understandScore,
