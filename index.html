@@ -266,6 +266,22 @@
       font-size:21px;
     }
 
+
+    .recommendation-wrap{margin-top:18px}
+    .recommendation-title{margin:18px 0 10px;color:#8b2f17;font-weight:900}
+    .recommendation-card{margin:10px 0;padding:14px;border:1px solid #f0c59d;border-radius:13px;background:linear-gradient(135deg,#fffaf2,#eef9f1)}
+    .recommendation-head{font-weight:900;color:var(--navy)}
+    .recommendation-card ul{margin:9px 0 0;padding-left:22px;line-height:1.5;color:#7f2d16;font-weight:700}
+    .answer-note{margin-top:8px;font-size:12px;color:var(--muted)}
+    .question-manager{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px}
+    .question-list-item{padding:12px;border:1px solid var(--border);border-radius:11px;margin-bottom:9px;background:#fff}
+    .question-list-item.selected{border-color:var(--orange);background:#fff8f0}
+    .option-editor-row{display:grid;grid-template-columns:90px minmax(0,1fr) 100px;gap:8px;margin:8px 0;align-items:start}
+    .option-editor-row textarea{min-height:70px}
+    .switch-row{display:flex;align-items:center;gap:9px;margin:9px 0}
+    .switch-row input{width:auto}
+    @media(max-width:820px){.question-manager{grid-template-columns:1fr}.option-editor-row{grid-template-columns:1fr}}
+
     .admin-tabs{
       display:flex;
       gap:8px;
@@ -373,7 +389,7 @@
           <img src="images/logo.png" alt="TBS Logistics" onerror="this.style.display='none'">
         </div>
         <div>
-          <h1>Khảo sát VHDN “Hiểu” và “Biết”</h1>
+          <h1>Khảo sát VHDN “Hiểu” và “Biết” tháng 7</h1>
           <p>Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</p>
         </div>
       </div>
@@ -394,14 +410,14 @@
       <section class="card">
         <h2>Thông tin người tham gia</h2>
         <p class="subtitle">
-          Nhập MSNV để hệ thống tự điền thông tin. MSNV đã kiểm tra sẽ được lưu cache nhằm giảm tải Google Sheet.
+          Nhập MSNV để hệ thống tự điền thông tin.
         </p>
 
         <div class="grid">
           <div>
             <label class="field-label" for="employeeId">MSNV</label>
             <input id="employeeId" type="text" autocomplete="off" placeholder="Nhập MSNV">
-            <small class="note">Không bắt buộc. Hệ thống kiểm tra sau khi bạn ngừng nhập khoảng 0,8 giây.</small>
+            <small class="note">Không bắt buộc.</small>
             <div id="lookupStatus" class="lookup-status"></div>
           </div>
 
@@ -532,6 +548,9 @@
         <button class="btn btn-light admin-tab" data-panel="resultsPanel" type="button">
           Kết quả khảo sát
         </button>
+        <button class="btn btn-light admin-tab" data-panel="questionsPanel" type="button" onclick="loadAdminQuestions()">
+          Câu hỏi & đáp án
+        </button>
       </div>
 
       <section id="settingsPanel" class="admin-panel active">
@@ -631,6 +650,63 @@
           </table>
         </div>
       </section>
+
+      <section id="questionsPanel" class="admin-panel">
+        <div class="question-manager">
+          <div class="card" style="box-shadow:none;margin:0">
+            <div class="actions" style="justify-content:space-between;margin-top:0">
+              <h3 style="margin:0">Danh sách câu hỏi</h3>
+              <button class="btn btn-primary" type="button" onclick="newQuestionEditor()">+ Thêm</button>
+            </div>
+            <div id="adminQuestionList" style="margin-top:12px"></div>
+          </div>
+          <div class="card" style="box-shadow:none;margin:0">
+            <h3 id="questionEditorTitle">Thêm câu hỏi</h3>
+            <input id="editQuestionId" type="hidden">
+            <div class="grid">
+              <div>
+                <label class="field-label">Thứ tự</label>
+                <input id="editQuestionOrder" type="number" min="1" value="1">
+              </div>
+              <div>
+                <label class="field-label">Phần</label>
+                <select id="editQuestionSection"><option value="know">Biết</option><option value="understand">Hiểu</option></select>
+              </div>
+              <div class="full">
+                <label class="field-label">Nội dung câu hỏi</label>
+                <textarea id="editQuestionTitle"></textarea>
+              </div>
+              <div>
+                <label class="field-label">Loại câu hỏi</label>
+                <select id="editQuestionType"><option value="single">Chọn 1 đáp án</option><option value="multi">Chọn nhiều đáp án</option></select>
+              </div>
+              <div>
+                <label class="field-label">Cách tính điểm</label>
+                <select id="editScoreMode"><option value="exact">Đúng toàn bộ mới có điểm</option><option value="perOption">Tính theo từng đáp án đúng</option></select>
+              </div>
+              <div>
+                <label class="field-label">Điểm câu hỏi</label>
+                <input id="editQuestionPoints" type="number" min="0" step="0.5" value="1">
+              </div>
+            </div>
+            <h3>Câu trả lời</h3>
+            <p class="note">Đánh dấu ô “Đúng” cho đáp án đúng. Nội dung đề xuất sẽ xuất hiện sau khi nộp bài.</p>
+            <div id="optionEditor"></div>
+            <button class="btn btn-light" type="button" onclick="addOptionEditorRow()">+ Thêm câu trả lời</button>
+            <div style="margin-top:14px">
+              <label class="switch-row"><input id="editRequireExplanation" type="checkbox"> Bật phần giải thích khi người dùng chọn đáp án</label>
+              <label class="switch-row"><input id="editShowRecommendation" type="checkbox"> Hiển thị đề xuất sau khi nộp bài</label>
+              <label class="switch-row"><input id="editQuestionRequired" type="checkbox" checked> Câu hỏi bắt buộc</label>
+              <label class="switch-row"><input id="editQuestionActive" type="checkbox" checked> Đang sử dụng</label>
+            </div>
+            <div class="actions">
+              <button class="btn btn-danger" id="deleteQuestionButton" type="button" onclick="deleteCurrentQuestion()" style="display:none">Xóa câu hỏi</button>
+              <button class="btn btn-primary" type="button" onclick="saveCurrentQuestion()">Lưu câu hỏi</button>
+            </div>
+            <div id="questionAdminMessage" class="message"></div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -652,89 +728,28 @@
       lookupTimer: null,
       admin: { email: '', passcode: '' },
       dashboard: null,
+      adminQuestions: [],
+      selectedAdminQuestionId: '',
       settingsPollTimer: null
     };
 
-    const QUESTIONS = [
-      {
-        id:'q1',
-        type:'single',
-        title:'Tầm nhìn của TBS Logistics: “Đến 2035, TBS Logistics trở thành [1] ___ hàng đầu Việt Nam về [2] ___ và [3] ___.”',
-        options:[
-          ['a','[1] trung tâm dịch vụ / [2] vận tải đường bộ / [3] quản lý chuỗi cung ứng'],
-          ['b','[1] công ty vận tải / [2] giao nhận hàng hóa / [3] dịch vụ kho bãi'],
-          ['c','[1] doanh nghiệp hậu cần / [2] quản lý kho / [3] giao hàng tận nơi'],
-          ['d','[1] trung tâm logistics / [2] cung cấp dịch vụ / [3] giải pháp chuỗi cung ứng'],
-          ['f','[1] nhà cung cấp giải pháp / [2] dịch vụ logistics / [3] kho vận thông minh'],
-          ['g','[1] cảng cạn ICD / [2] xử lý hàng hóa / [3] phân phối nội địa']
-        ],
-        correct:'d'
-      },
-      {
-        id:'q2',
-        type:'single',
-        title:'Sứ mệnh của TBS Logistics: “Góp phần nâng cao [1] ___ cho ngành Logistics Việt Nam, tạo [2] ___ phát triển bền vững cho khách hàng, [3] ___ đời sống người lao động.”',
-        options:[
-          ['a','[1] năng suất / [2] lợi ích / [3] chăm sóc'],
-          ['b','[1] hiệu suất / [2] giá trị / [3] bảo vệ'],
-          ['c','[1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo'],
-          ['d','[1] năng lực / [2] giá trị / [3] hỗ trợ'],
-          ['e','[1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo'],
-          ['f','[1] hiệu quả / [2] cơ hội / [3] cải thiện']
-        ],
-        correct:'c'
-      },
-      {
-        id:'q3',
-        type:'multi',
-        title:'Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics?',
-        options:[
-          ['a','Đoàn kết'],
-          ['b','Sáng tạo'],
-          ['c','Chính trực'],
-          ['d','Trách nhiệm'],
-          ['e','Kỷ luật'],
-          ['f','Hiệu quả'],
-          ['g','Đáng tin'],
-          ['h','Tôn trọng']
-        ],
-        correct:['a','c','d','e','f','g']
-      },
-      {
-        id:'q4',
-        type:'multi',
-        title:'Trong triết lý kinh doanh của TBS Logistics, cân bằng lợi ích 5 bên gồm những bên nào?',
-        options:[
-          ['a','Khách hàng'],
-          ['b','Cơ quan nhà nước'],
-          ['c','Đối tác / Nhà cung cấp'],
-          ['d','Cổ đông'],
-          ['e','Cạnh tranh thị trường'],
-          ['f','Người lao động'],
-          ['g','Cộng đồng'],
-          ['h','Công nghệ và đổi mới sáng tạo']
-        ],
-        correct:['a','c','d','f','g']
-      }
-    ];
-
-    const SCENARIO_VALUES = [
-      ['s1','Đoàn kết'],
-      ['s2','Trách nhiệm'],
-      ['s3','Đáng tin'],
-      ['s4','Chính trực'],
-      ['s5','Kỷ luật'],
-      ['s6','Hiệu quả']
-    ];
+    let QUESTIONS = [];
+    let ADMIN_QUESTIONS = [];
 
     document.addEventListener('DOMContentLoaded', initialize);
 
     async function initialize(){
+      await loadQuestionConfig();
       renderQuestions();
       bindEmployeeLookup();
       bindAdminTabs();
       await refreshSettings();
       startSettingsPolling();
+    }
+
+    async function loadQuestionConfig(){
+      const response = await apiGet('getQuestionConfig');
+      QUESTIONS = response.questions || [];
     }
 
     async function fetchJson(url, options = {}, timeoutMs = 15000){
@@ -955,82 +970,41 @@
 
     function renderQuestions(){
       const container = document.getElementById('questionContainer');
-
-      const standardHtml = QUESTIONS.map((question,index) => {
-        const options = shuffle(question.options);
-
+      container.innerHTML = QUESTIONS.map((question,index) => {
+        const options = shuffle(question.options || []);
+        const scenarioIntro = question.id === 'scenario' ? `
+          <div class="scenario-box">
+            <p><strong>🧩 TÌNH HUỐNG:</strong> Nhân viên làm việc tại khu vực xe nâng hoạt động nhưng không mang đầy đủ PPE dù đã được nhắc nhở, làm tăng nguy cơ tai nạn và ảnh hưởng văn hóa tuân thủ của Công ty.</p>
+          </div>` : '';
         return `
           <section class="question" data-question="${escapeAttribute(question.id)}">
-            <h3>${index + 1}. ${escapeHtml(question.title)} <span class="required">Bắt buộc</span></h3>
+            ${scenarioIntro}
+            <h3>${index + 1}. ${escapeHtml(question.title)} ${question.required ? '<span class="required">Bắt buộc</span>' : ''}</h3>
             <div class="choices">
-              ${options.map(([value,label]) => `
-                <label class="choice">
-                  <input
-                    type="${question.type === 'single' ? 'radio' : 'checkbox'}"
-                    name="${escapeAttribute(question.id)}"
-                    value="${escapeAttribute(value)}">
-                  <span>${escapeHtml(label)}</span>
-                </label>
-              `).join('')}
+              ${options.map(option => `
+                <div>
+                  <label class="choice">
+                    <input type="${question.type === 'single' ? 'radio' : 'checkbox'}"
+                      name="${escapeAttribute(question.id)}" value="${escapeAttribute(option.id)}"
+                      onchange="toggleDynamicExplanation('${escapeAttribute(question.id)}','${escapeAttribute(option.id)}',this.checked)">
+                    <span>${escapeHtml(option.label)}</span>
+                  </label>
+                  ${question.requireExplanation ? `
+                    <div id="explanation_${escapeAttribute(question.id)}_${escapeAttribute(option.id)}" class="explanation">
+                      <label class="field-label">Giải thích lý do, tối thiểu ${MIN_MEANINGFUL_WORDS} từ</label>
+                      <textarea data-explanation-key="${escapeAttribute(question.id)}::${escapeAttribute(option.id)}"></textarea>
+                    </div>` : ''}
+                </div>`).join('')}
             </div>
-          </section>
-        `;
+          </section>`;
       }).join('');
-
-      const scenarioHtml = `
-        <section class="question">
-          <h3>5. Tình huống an toàn PPE <span class="required">Bắt buộc</span></h3>
-
-          <p>
-            Nhân viên A làm việc tại khu vực xuất nhập hàng nhưng không mang giày bảo hộ và áo phản quang.
-            Tổ trưởng đã nhắc nhở nhưng A vẫn tiếp tục làm việc trong khu vực xe nâng đang hoạt động.
-          </p>
-
-          <h3 style="margin-top:18px">5.1. Hành động trên có vi phạm kỷ luật Công ty không?</h3>
-          <div class="choices">
-            <label class="choice">
-              <input type="radio" name="disciplineCheck" value="Có">
-              <span>Có</span>
-            </label>
-            <label class="choice">
-              <input type="radio" name="disciplineCheck" value="Không">
-              <span>Không</span>
-            </label>
-          </div>
-
-          <h3 style="margin-top:18px">5.2. Những giá trị cốt lõi nào được thể hiện rõ nhất?</h3>
-          <div id="scenarioChoices" class="choices">
-            ${shuffle(SCENARIO_VALUES).map(([value,label]) => `
-              <div>
-                <label class="choice">
-                  <input
-                    type="checkbox"
-                    name="scenario"
-                    value="${escapeAttribute(value)}"
-                    onchange="toggleScenarioExplanation('${escapeAttribute(value)}',this.checked)">
-                  <span>${escapeHtml(label)}</span>
-                </label>
-                <div id="explanation_${escapeAttribute(value)}" class="explanation">
-                  <label class="field-label">Giải thích lý do, tối thiểu ${MIN_MEANINGFUL_WORDS} từ</label>
-                  <textarea data-scenario-explanation="${escapeAttribute(value)}"></textarea>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </section>
-      `;
-
-      container.innerHTML = standardHtml + scenarioHtml;
     }
 
-    function toggleScenarioExplanation(value,checked){
-      const box = document.getElementById('explanation_' + value);
+    function toggleDynamicExplanation(questionId,optionId,checked){
+      const box = document.getElementById('explanation_' + questionId + '_' + optionId);
+      if (!box) return;
       box.classList.toggle('active',checked);
-
-      if (!checked){
-        const textarea = box.querySelector('textarea');
-        if (textarea) textarea.value = '';
-      }
+      if (!checked){ const textarea=box.querySelector('textarea'); if(textarea) textarea.value=''; }
     }
 
     function shuffle(items){
@@ -1065,7 +1039,7 @@
       try{
         const response = await apiPost('submitSurvey',payload);
 
-        renderLocalResult(scores,response.queueId);
+        renderLocalResult(response.scores || scores,response.queueId);
         lockSurveyForm();
       }catch(error){
         showFormMessage('Không thể lưu vào hệ thống: ' + error.message,'error');
@@ -1076,142 +1050,92 @@
     }
 
     function validateSurvey(){
-      if (!document.getElementById('fullName').value.trim()){
-        return { ok:false,message:'Vui lòng nhập họ và tên.' };
-      }
-
-      if (!getFinalDepartment()){
-        return { ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.' };
-      }
-
+      if (!document.getElementById('fullName').value.trim()) return {ok:false,message:'Vui lòng nhập họ và tên.'};
+      if (!getFinalDepartment()) return {ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.'};
       for (const question of QUESTIONS){
-        const selected = getSelectedValues(question.id);
-
-        if (!selected.length){
-          return { ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.' };
+        const selected=getSelectedValues(question.id);
+        if (question.required && !selected.length) return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
+        if (question.requireExplanation){
+          for (const optionId of selected){
+            const textarea=document.querySelector(`[data-explanation-key="${cssEscape(question.id+'::'+optionId)}"]`);
+            const text=textarea?textarea.value.trim():'';
+            if(countMeaningfulWords(text)<MIN_MEANINGFUL_WORDS) return {ok:false,message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`};
+            if(isTooRepetitive(text)) return {ok:false,message:'Nội dung giải thích đang lặp lại quá nhiều.'};
+          }
         }
       }
-
-      if (!document.querySelector('input[name="disciplineCheck"]:checked')){
-        return { ok:false,message:'Vui lòng trả lời câu hỏi vi phạm kỷ luật.' };
-      }
-
-      const scenarioValues = getSelectedValues('scenario');
-
-      if (!scenarioValues.length){
-        return { ok:false,message:'Vui lòng chọn ít nhất một giá trị cốt lõi.' };
-      }
-
-      for (const value of scenarioValues){
-        const textarea = document.querySelector(
-          `[data-scenario-explanation="${cssEscape(value)}"]`
-        );
-        const text = textarea ? textarea.value.trim() : '';
-
-        if (countMeaningfulWords(text) < MIN_MEANINGFUL_WORDS){
-          return {
-            ok:false,
-            message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`
-          };
-        }
-
-        if (isTooRepetitive(text)){
-          return {
-            ok:false,
-            message:'Nội dung giải thích đang lặp lại quá nhiều.'
-          };
-        }
-      }
-
-      return { ok:true };
+      return {ok:true};
     }
 
     function calculateScores(){
-      let knowScore = 0;
-
-      QUESTIONS.forEach(question => {
-        const selected = getSelectedValues(question.id);
-
-        if (question.type === 'single'){
-          if (selected[0] === question.correct) knowScore += 1;
-        }else if (setsEqual(selected,question.correct)){
-          knowScore += 1;
+      let knowScore=0,totalKnow=0,understandScore=0,totalUnderstand=0;
+      QUESTIONS.forEach(question=>{
+        const selected=getSelectedValues(question.id).map(String);
+        const correct=(question.correct||[]).map(String);
+        let earned=0,possible=0;
+        if(question.scoreMode==='perOption'){
+          possible=correct.length;
+          earned=selected.filter(value=>correct.includes(value)).length;
+        }else{
+          possible=Number(question.points||1);
+          earned=setsEqual(selected,correct)?possible:0;
         }
+        if(question.section==='understand'){understandScore+=earned;totalUnderstand+=possible;}
+        else{knowScore+=earned;totalKnow+=possible;}
       });
-
-      const selectedScenario = getSelectedValues('scenario');
-      const correctScenarioValues = SCENARIO_VALUES.map(item => item[0]);
-      const understandScore = selectedScenario.filter(
-        value => correctScenarioValues.includes(value)
-      ).length;
-
-      const totalKnow = QUESTIONS.length;
-      const totalUnderstand = correctScenarioValues.length;
-
-      return {
-        knowScore:knowScore,
-        totalKnow:totalKnow,
-        understandScore:understandScore,
-        totalUnderstand:totalUnderstand,
-        score:knowScore + understandScore,
-        total:totalKnow + totalUnderstand
-      };
+      return {knowScore,totalKnow,understandScore,totalUnderstand,score:knowScore+understandScore,total:totalKnow+totalUnderstand};
     }
 
     function buildPayload(scores){
-      const scenarioExplain = {};
-
-      SCENARIO_VALUES.forEach(([value]) => {
-        const textarea = document.querySelector(
-          `[data-scenario-explanation="${cssEscape(value)}"]`
-        );
-        scenarioExplain[value] = textarea ? textarea.value.trim() : '';
+      const answers={}, explanations={};
+      QUESTIONS.forEach(question=>{
+        const selected=getSelectedValues(question.id);
+        answers[question.id]=question.type==='single'?(selected[0]||''):selected;
+        (question.options||[]).forEach(option=>{
+          const key=question.id+'::'+option.id;
+          const textarea=document.querySelector(`[data-explanation-key="${cssEscape(key)}"]`);
+          if(textarea) explanations[key]=textarea.value.trim();
+        });
       });
-
       return {
-        timestamp:new Date().toISOString(),
-        employeeId:normalizeMSNV(document.getElementById('employeeId').value),
-        name:document.getElementById('fullName').value.trim(),
-        fullName:document.getElementById('fullName').value.trim(),
-        department:getFinalDepartment(),
-        position:state.employee ? state.employee.position || '' : '',
-        employeeLookupStatus:state.employeeLookupOk
-          ? 'FOUND'
-          : normalizeMSNV(document.getElementById('employeeId').value)
-            ? 'NOT_FOUND_OR_MANUAL'
-            : 'MANUAL',
-        ...scores,
-        answers:{
-          q1:getSelectedValues('q1')[0] || '',
-          q2:getSelectedValues('q2')[0] || '',
-          q3:getSelectedValues('q3'),
-          q4:getSelectedValues('q4'),
-          discipline_check:
-            document.querySelector('input[name="disciplineCheck"]:checked')?.value || '',
-          scenario:getSelectedValues('scenario'),
-          scenario_explain:scenarioExplain
-        },
-        userAgent:navigator.userAgent
+        timestamp:new Date().toISOString(),employeeId:normalizeMSNV(document.getElementById('employeeId').value),
+        name:document.getElementById('fullName').value.trim(),fullName:document.getElementById('fullName').value.trim(),
+        department:getFinalDepartment(),position:state.employee?state.employee.position||'':'',
+        employeeLookupStatus:state.employeeLookupOk?'FOUND':normalizeMSNV(document.getElementById('employeeId').value)?'NOT_FOUND_OR_MANUAL':'MANUAL',
+        ...scores,answers,explanations,userAgent:navigator.userAgent
       };
     }
 
     function renderLocalResult(scores,queueId){
-      const percent = scores.total > 0
-        ? Math.round(scores.score / scores.total * 10000) / 100
-        : 0;
-
-      const result = document.getElementById('resultBox');
+      const percent=scores.total>0?Math.round(scores.score/scores.total*10000)/100:0;
+      const result=document.getElementById('resultBox');
+      const recommendations=buildRecommendations();
       result.classList.add('active');
-      result.innerHTML = `
-        <h3 style="margin-top:0">Đã nộp khảo sát thành công ✅</h3>
-        <p><strong>Điểm tổng:</strong> ${scores.score}/${scores.total} (${formatNumber(percent)}%)</p>
-        <p><strong>Phần Biết:</strong> ${scores.knowScore}/${scores.totalKnow}</p>
-        <p><strong>Phần Hiểu:</strong> ${scores.understandScore}/${scores.totalUnderstand}</p>
-        <p><strong>Mã hàng đợi:</strong> ${escapeHtml(queueId || '')}</p>
-        <p style="font-size:12px">Kết quả sẽ được chuyển vào sheet Responses bởi trigger xử lý Queue.</p>
-      `;
-
+      result.innerHTML=`
+        <h3 style="margin-top:0">Đã hoàn thành khảo sát ✅</h3>
+        <p><strong>Tổng điểm:</strong> ${scores.score}/${scores.total}</p>
+        <p><strong>Phần biết:</strong> ${scores.knowScore}/${scores.totalKnow} · <strong>Phần hiểu:</strong> ${scores.understandScore}/${scores.totalUnderstand}</p>
+        ${recommendations}
+        <p class="answer-note">Mã hàng đợi: ${escapeHtml(queueId||'')} · Kết quả sẽ được chuyển vào sheet Responses.</p>`;
       result.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function buildRecommendations(){
+      const cards=[];
+      QUESTIONS.filter(q=>q.showRecommendation).forEach(question=>{
+        const selected=getSelectedValues(question.id);
+        (question.options||[]).filter(option=>option.suggestion).forEach(option=>{
+          const chosen=selected.includes(option.id);
+          const correct=(question.correct||[]).includes(option.id);
+          const icon=chosen?(correct?'✅':'❌'):'❌';
+          const status=chosen?'Bạn đã chọn':'Bạn chưa chọn';
+          const explanationKey=question.id+'::'+option.id;
+          const textarea=document.querySelector(`[data-explanation-key="${cssEscape(explanationKey)}"]`);
+          const userExplanation=textarea&&textarea.value.trim()?escapeHtml(textarea.value.trim()):'(Bạn không chọn mục này nên không có giải thích)';
+          cards.push(`<div class="recommendation-card"><div class="recommendation-head">${escapeHtml(option.label)} ${icon} (${status})</div><ul>${escapeHtml(option.suggestion).split(/\n|\.\s+/).filter(Boolean).map(x=>`<li>${x}${/[.!?]$/.test(x)?'':'.'}</li>`).join('')}</ul><div class="answer-note">Giải thích của Anh/Chị:<br>${userExplanation}</div></div>`);
+        });
+      });
+      return cards.length?`<div class="recommendation-wrap"><div class="recommendation-title">Dưới đây là đề xuất các giá trị cốt lõi phù hợp với tình huống này:</div>${cards.join('')}</div>`:'';
     }
 
     function lockSurveyForm(){
@@ -1286,6 +1210,7 @@
 
       try{
         await loadDashboard(false);
+        await loadAdminQuestions();
         document.getElementById('adminSurveyStatus').value =
           String(Boolean(state.settings.isOn));
         document.getElementById('adminSurveyMessage').value =
@@ -1411,6 +1336,82 @@
       document.getElementById('filterMinPercent').value = '';
       document.getElementById('filterMaxPercent').value = '';
       loadDashboard();
+    }
+
+    async function loadAdminQuestions(){
+      if(!state.admin.email)return;
+      try{
+        const response=await apiPost('adminQuestions',{...state.admin});
+        state.adminQuestions=response.questions||[];
+        renderAdminQuestionList();
+        if(!state.selectedAdminQuestionId)newQuestionEditor();
+      }catch(error){showMessageElement('questionAdminMessage',error.message,'error');}
+    }
+
+    function renderAdminQuestionList(){
+      const box=document.getElementById('adminQuestionList');
+      box.innerHTML=state.adminQuestions.length?state.adminQuestions.map(q=>`<div class="question-list-item ${state.selectedAdminQuestionId===q.id?'selected':''}" onclick="editAdminQuestion('${escapeAttribute(q.id)}')"><strong>${q.sortOrder}. ${escapeHtml(q.title)}</strong><div class="note">${q.type==='single'?'Chọn 1':'Chọn nhiều'} · ${q.active?'Đang dùng':'Tắt'}</div></div>`).join(''):'<div class="note">Chưa có câu hỏi.</div>';
+    }
+
+    function newQuestionEditor(){
+      state.selectedAdminQuestionId='';
+      document.getElementById('questionEditorTitle').textContent='Thêm câu hỏi';
+      document.getElementById('editQuestionId').value='';
+      document.getElementById('editQuestionOrder').value=state.adminQuestions.length+1;
+      document.getElementById('editQuestionSection').value='know';
+      document.getElementById('editQuestionTitle').value='';
+      document.getElementById('editQuestionType').value='single';
+      document.getElementById('editScoreMode').value='exact';
+      document.getElementById('editQuestionPoints').value=1;
+      document.getElementById('editRequireExplanation').checked=false;
+      document.getElementById('editShowRecommendation').checked=false;
+      document.getElementById('editQuestionRequired').checked=true;
+      document.getElementById('editQuestionActive').checked=true;
+      document.getElementById('optionEditor').innerHTML='';
+      addOptionEditorRow();addOptionEditorRow();
+      document.getElementById('deleteQuestionButton').style.display='none';
+      renderAdminQuestionList();
+    }
+
+    function editAdminQuestion(id){
+      const q=state.adminQuestions.find(item=>item.id===id);if(!q)return;
+      state.selectedAdminQuestionId=id;
+      document.getElementById('questionEditorTitle').textContent='Sửa câu hỏi';
+      document.getElementById('editQuestionId').value=q.id;
+      document.getElementById('editQuestionOrder').value=q.sortOrder;
+      document.getElementById('editQuestionSection').value=q.section;
+      document.getElementById('editQuestionTitle').value=q.title;
+      document.getElementById('editQuestionType').value=q.type;
+      document.getElementById('editScoreMode').value=q.scoreMode;
+      document.getElementById('editQuestionPoints').value=q.points;
+      document.getElementById('editRequireExplanation').checked=q.requireExplanation;
+      document.getElementById('editShowRecommendation').checked=q.showRecommendation;
+      document.getElementById('editQuestionRequired').checked=q.required;
+      document.getElementById('editQuestionActive').checked=q.active;
+      const box=document.getElementById('optionEditor');box.innerHTML='';
+      (q.options||[]).forEach(option=>addOptionEditorRow(option,(q.correct||[]).includes(option.id)));
+      document.getElementById('deleteQuestionButton').style.display='inline-block';
+      renderAdminQuestionList();
+    }
+
+    function addOptionEditorRow(option={id:'',label:'',suggestion:''},isCorrect=false){
+      const box=document.getElementById('optionEditor');
+      const row=document.createElement('div');row.className='option-editor-row';
+      row.innerHTML=`<input class="option-id" type="text" placeholder="Mã" value="${escapeAttribute(option.id||('o'+(box.children.length+1)))}"><div><input class="option-label" type="text" placeholder="Nội dung câu trả lời" value="${escapeAttribute(option.label||'')}"><textarea class="option-suggestion" placeholder="Đề xuất hiển thị sau khi nộp bài">${escapeHtml(option.suggestion||'')}</textarea></div><div><label class="switch-row"><input class="option-correct" type="checkbox" ${isCorrect?'checked':''}> Đúng</label><button class="btn btn-danger" type="button" onclick="this.closest('.option-editor-row').remove()">Xóa</button></div>`;
+      box.appendChild(row);
+    }
+
+    async function saveCurrentQuestion(){
+      const rows=Array.from(document.querySelectorAll('#optionEditor .option-editor-row'));
+      const options=rows.map((row,index)=>({id:row.querySelector('.option-id').value.trim()||('o'+(index+1)),label:row.querySelector('.option-label').value.trim(),suggestion:row.querySelector('.option-suggestion').value.trim()}));
+      const correct=rows.map((row,index)=>row.querySelector('.option-correct').checked?options[index].id:null).filter(Boolean);
+      const question={id:document.getElementById('editQuestionId').value.trim(),sortOrder:Number(document.getElementById('editQuestionOrder').value||1),section:document.getElementById('editQuestionSection').value,title:document.getElementById('editQuestionTitle').value.trim(),type:document.getElementById('editQuestionType').value,scoreMode:document.getElementById('editScoreMode').value,points:Number(document.getElementById('editQuestionPoints').value||1),requireExplanation:document.getElementById('editRequireExplanation').checked,showRecommendation:document.getElementById('editShowRecommendation').checked,required:document.getElementById('editQuestionRequired').checked,active:document.getElementById('editQuestionActive').checked,options,correct};
+      setLoading(true);try{const response=await apiPost('saveQuestion',{...state.admin,question});state.selectedAdminQuestionId=response.question.id;await loadAdminQuestions();await loadQuestionConfig();renderQuestions();editAdminQuestion(state.selectedAdminQuestionId);showMessageElement('questionAdminMessage','Đã lưu câu hỏi.','success');}catch(error){showMessageElement('questionAdminMessage',error.message,'error');}finally{setLoading(false);}
+    }
+
+    async function deleteCurrentQuestion(){
+      const id=document.getElementById('editQuestionId').value.trim();if(!id||!confirm('Bạn chắc chắn muốn xóa câu hỏi này?'))return;
+      setLoading(true);try{await apiPost('deleteQuestion',{...state.admin,questionId:id});state.selectedAdminQuestionId='';await loadAdminQuestions();await loadQuestionConfig();renderQuestions();newQuestionEditor();}catch(error){showMessageElement('questionAdminMessage',error.message,'error');}finally{setLoading(false);}
     }
 
     function bindAdminTabs(){
