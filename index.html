@@ -542,13 +542,19 @@
       </div>
 
       <div class="admin-tabs">
-        <button class="btn btn-light admin-tab active" data-panel="settingsPanel" type="button">
+        <button class="btn btn-light admin-tab active"
+          data-panel="settingsPanel" type="button"
+          onclick="switchAdminPanel('settingsPanel', this)">
           Cập nhật thông tin
         </button>
-        <button class="btn btn-light admin-tab" data-panel="resultsPanel" type="button">
+        <button class="btn btn-light admin-tab"
+          data-panel="resultsPanel" type="button"
+          onclick="switchAdminPanel('resultsPanel', this); loadDashboard()">
           Kết quả khảo sát
         </button>
-        <button class="btn btn-light admin-tab" data-panel="questionsPanel" type="button" onclick="loadAdminQuestions()">
+        <button class="btn btn-light admin-tab"
+          data-panel="questionsPanel" type="button"
+          onclick="switchAdminPanel('questionsPanel', this); loadAdminQuestions()">
           Câu hỏi & đáp án
         </button>
       </div>
@@ -712,7 +718,7 @@
 
   <script>
     const GOOGLE_SCRIPT_URL =
-      'https://script.google.com/macros/s/AKfycbzCeQTUiOiF5kyV4WoF8oeD0ADknsqLGiufUybe7QZ06ubaOrUIt5o0jYm8GOXdhNno/exec';
+      'https://script.google.com/macros/s/AKfycbzbO02_S3qzpO2xRfZ5JQgcmEmCk8UiDJnpwcXMNbza_83KIyYh8G7qwq73xFcbS5l7/exec';
 
     const LOOKUP_DEBOUNCE_MS = 800;
     const SETTINGS_POLL_MS = 120000;
@@ -739,17 +745,70 @@
     document.addEventListener('DOMContentLoaded', initialize);
 
     async function initialize(){
-      await loadQuestionConfig();
-      renderQuestions();
+      // Các sự kiện giao diện phải được gắn trước khi gọi Apps Script.
+      // Nhờ vậy tab quản trị vẫn hoạt động ngay cả khi API câu hỏi gặp lỗi.
       bindEmployeeLookup();
       bindAdminTabs();
-      await refreshSettings();
+
+      try{
+        await refreshSettings();
+      }catch(error){
+        console.error('Không tải được trạng thái khảo sát:', error);
+      }
+
+      try{
+        await loadQuestionConfig();
+        renderQuestions();
+      }catch(error){
+        console.error('Không tải được ngân hàng câu hỏi:', error);
+        showQuestionLoadError(error);
+      }
+
       startSettingsPolling();
     }
 
     async function loadQuestionConfig(){
       const response = await apiGet('getQuestionConfig');
-      QUESTIONS = response.questions || [];
+      QUESTIONS = Array.isArray(response.questions) ? response.questions : [];
+
+      if(!QUESTIONS.length){
+        throw new Error(
+          'Ngân hàng câu hỏi đang trống. Hãy chạy setupQuestionBank() hoặc setupSystem() trong Apps Script.'
+        );
+      }
+    }
+
+    function showQuestionLoadError(error){
+      const container = document.getElementById('questionContainer');
+      if(!container) return;
+
+      container.innerHTML = `
+        <div class="message error" style="display:block">
+          <strong>Không tải được câu hỏi.</strong><br>
+          ${escapeHtml(error && error.message ? error.message : 'Lỗi không xác định.')}<br><br>
+          <span>
+            Kiểm tra lại Apps Script, chạy <b>setupQuestionBank()</b>,
+            sau đó cập nhật deployment thành <b>New version</b>.
+          </span>
+          <div style="margin-top:12px">
+            <button class="btn btn-navy" type="button" onclick="retryLoadQuestions()">
+              Tải lại câu hỏi
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function retryLoadQuestions(){
+      setLoading(true);
+      try{
+        await loadQuestionConfig();
+        renderQuestions();
+      }catch(error){
+        showQuestionLoadError(error);
+      }finally{
+        setLoading(false);
+      }
     }
 
     async function fetchJson(url, options = {}, timeoutMs = 15000){
@@ -1339,13 +1398,34 @@
     }
 
     async function loadAdminQuestions(){
-      if(!state.admin.email)return;
+      if(!state.admin.email) return;
+
+      const listBox = document.getElementById('adminQuestionList');
+
       try{
-        const response=await apiPost('adminQuestions',{...state.admin});
-        state.adminQuestions=response.questions||[];
+        const response = await apiPost('adminQuestions',{...state.admin});
+        state.adminQuestions = Array.isArray(response.questions)
+          ? response.questions
+          : [];
+
         renderAdminQuestionList();
-        if(!state.selectedAdminQuestionId)newQuestionEditor();
-      }catch(error){showMessageElement('questionAdminMessage',error.message,'error');}
+
+        if(!state.selectedAdminQuestionId){
+          newQuestionEditor();
+        }
+
+        showMessageElement('questionAdminMessage','','');
+      }catch(error){
+        if(listBox){
+          listBox.innerHTML = `
+            <div class="message error" style="display:block">
+              Không tải được câu hỏi: ${escapeHtml(error.message)}<br>
+              Hãy chạy setupQuestionBank() và triển khai Apps Script bằng New version.
+            </div>
+          `;
+        }
+        showMessageElement('questionAdminMessage',error.message,'error');
+      }
     }
 
     function renderAdminQuestionList(){
@@ -1414,19 +1494,28 @@
       setLoading(true);try{await apiPost('deleteQuestion',{...state.admin,questionId:id});state.selectedAdminQuestionId='';await loadAdminQuestions();await loadQuestionConfig();renderQuestions();newQuestionEditor();}catch(error){showMessageElement('questionAdminMessage',error.message,'error');}finally{setLoading(false);}
     }
 
-    function bindAdminTabs(){
-      document.querySelectorAll('.admin-tab').forEach(button => {
-        button.addEventListener('click',() => {
-          document.querySelectorAll('.admin-tab').forEach(item =>
-            item.classList.remove('active')
-          );
-          document.querySelectorAll('.admin-panel').forEach(panel =>
-            panel.classList.remove('active')
-          );
+    function switchAdminPanel(panelId, button){
+      document.querySelectorAll('.admin-tab').forEach(item =>
+        item.classList.remove('active')
+      );
+      document.querySelectorAll('.admin-panel').forEach(panel =>
+        panel.classList.remove('active')
+      );
 
-          button.classList.add('active');
-          document.getElementById(button.dataset.panel).classList.add('active');
-        });
+      const panel = document.getElementById(panelId);
+      if(panel) panel.classList.add('active');
+
+      const selectedButton = button ||
+        document.querySelector(`.admin-tab[data-panel="${panelId}"]`);
+
+      if(selectedButton) selectedButton.classList.add('active');
+    }
+
+    function bindAdminTabs(){
+      // Các nút đã có onclick trực tiếp để không phụ thuộc quá trình tải API.
+      // Hàm này giữ lại để tương thích với các bản HTML cũ.
+      document.querySelectorAll('.admin-tab').forEach(button => {
+        button.dataset.bound = 'true';
       });
     }
 
