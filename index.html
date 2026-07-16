@@ -1,1844 +1,1494 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Core Value Survey Month 1</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Khảo sát VHDN TBS Logistics</title>
 
   <style>
     :root{
       --orange:#ff7a00;
-      --orange2:#ffb26b;
+      --orange2:#ff9a3d;
+      --navy:#123b5d;
       --ink:#1f2937;
       --muted:#6b7280;
+      --bg:#f4f7fa;
       --card:#ffffff;
-      --border:#e5e7eb;
-      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --border:#dfe6ec;
+      --success:#16865c;
+      --danger:#c9363e;
+      --shadow:0 12px 30px rgba(18,59,93,.10);
       --radius:16px;
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
-      background: linear-gradient(135deg, #fff 0%, #fff 45%, rgba(255,122,0,.12) 100%);
+      background:
+        radial-gradient(circle at top right,rgba(255,122,0,.12),transparent 30%),
+        linear-gradient(180deg,#f0f5f8,var(--bg));
+      font-family:Arial,Helvetica,sans-serif;
       min-height:100vh;
     }
 
-    header{
-      position:sticky; top:0; z-index:10;
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,.75);
-      border-bottom: 1px solid rgba(229,231,235,.8);
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    img{max-width:100%}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      color:#fff;
+      background:linear-gradient(135deg,var(--navy),#1f5f8b);
+      box-shadow:0 8px 24px rgba(18,59,93,.20);
     }
-    .header-inner{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 14px 18px;
+
+    .topbar-inner{
+      width:min(1080px,calc(100% - 28px));
+      margin:auto;
+      padding:14px 0;
       display:flex;
-      gap:14px;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
+      gap:16px;
     }
-    .brand{
-      display:flex; gap:12px; align-items:center;
-      min-width: 240px;
-    }
+
+    .brand{display:flex;align-items:center;gap:12px}
     .logo{
-      width:84px; height:84px;
+      width:64px;height:64px;
       border-radius:12px;
       background:#fff;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .logo img{width:100%;height:100%;object-fit:contain}
+    .brand h1{font-size:18px;margin:0;text-transform:uppercase}
+    .brand p{font-size:12px;margin:5px 0 0;opacity:.82}
+
+    .page{
+      width:min(1080px,calc(100% - 28px));
+      margin:22px auto 50px;
+    }
+
+    .card{
+      margin-bottom:18px;
+      padding:22px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:var(--card);
+      box-shadow:var(--shadow);
+    }
+
+    .card h2,.card h3{color:var(--navy)}
+    .card h2{margin:0 0 8px}
+    .subtitle{margin:0 0 20px;color:var(--muted);line-height:1.55}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .full{grid-column:1/-1}
+
+    label.field-label{
+      display:block;
+      margin-bottom:7px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea{
+      width:100%;
+      padding:12px 13px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:#fff;
+      outline:none;
+    }
+
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--orange);
+      box-shadow:0 0 0 4px rgba(255,122,0,.12);
+    }
+
+    textarea{min-height:105px;resize:vertical}
+
+    .required{
+      display:inline-block;
+      margin-left:4px;
+      padding:3px 7px;
+      color:#9b2530;
+      background:#fde7e9;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .note{display:block;margin-top:7px;color:var(--muted);font-size:12px;line-height:1.45}
+
+    .lookup-status{
       display:flex;
       align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      border: 1px solid rgba(229,231,235,.9);
+      gap:8px;
+      min-height:20px;
+      margin-top:7px;
+      font-size:12px;
+      font-weight:800;
     }
-    .logo img{ width:100%; height:100%; object-fit:contain; display:block; }
-    .titlewrap{ display:flex; flex-direction:column; line-height:1.1; }
-    .title{ font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: .4px; }
-    .subtitle{ font-size: 12px; color: var(--muted); }
+    .lookup-status.ok{color:var(--success)}
+    .lookup-status.error{color:var(--danger)}
+    .lookup-status.loading{color:var(--muted)}
 
-    button{
-      border:none;
-      cursor:pointer;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      font-size: 14px;
-    }
-    .btn-primary{
-      color:white;
-      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
-      box-shadow: 0 10px 20px rgba(255,122,0,.22);
-    }
-    .btn-ghost{
-      color: var(--ink);
-      background: #fff;
-      border: 1px solid var(--border);
-    }
-    .toggle-btn{
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,122,0,.35);
-      background: #fff;
-      font-weight: 900;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .toggle-btn[data-state="on"]{
-      color: #0f5132;
-      border-color: rgba(16,185,129,.35);
-      background: rgba(16,185,129,.08);
-    }
-    .toggle-btn[data-state="off"]{
-      color: #7f1d1d;
-      border-color: rgba(180,35,24,.28);
-      background: rgba(180,35,24,.08);
+    .question{
+      margin-top:16px;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:linear-gradient(180deg,rgba(255,122,0,.04),#fff);
     }
 
-    main{
-      max-width: 980px;
-      margin: 18px auto 40px;
-      padding: 0 18px;
-    }
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card-head{
-      padding: 18px 18px 10px;
-      background: linear-gradient(90deg, rgba(255,122,0,.10), rgba(255,255,255,1));
-      border-bottom: 1px solid var(--border);
-    }
-    .card-head h2{ margin:0; font-size: 18px; letter-spacing:.2px; }
-    .card-head p{ margin: 6px 0 0; color: var(--muted); font-size: 13px; }
-    form{
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 16px;
-    }
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 760px){
-      .row{grid-template-columns:1fr}
-      .brand{min-width:auto}
-    }
-    label{
-      display:block;
-      font-size: 13px;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-    input[type="text"], select, textarea{
-      width:100%;
-      padding: 12px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      outline:none;
-      font-size: 14px;
-      background: #fff;
-    }
-    input[type="text"]:focus, select:focus, textarea:focus{
-      border-color: rgba(255,122,0,.65);
-      box-shadow: 0 0 0 4px rgba(255,122,0,.12);
-    }
-    textarea{min-height: 88px; resize: vertical;}
-    .qblock{
-      padding: 14px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: linear-gradient(180deg, rgba(255,122,0,.05), rgba(255,255,255,1));
-    }
-    .qtitle{
-      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
-      margin-bottom: 10px;
-    }
-    .qtitle h3{ margin:0; font-size: 15px; }
-    .required{
-      font-size: 12px; font-weight: 900;
-      color: #b42318;
-      background: rgba(180,35,24,.08);
-      border: 1px solid rgba(180,35,24,.18);
-      padding: 4px 8px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    .choices{ display:grid; gap:10px; }
+    .question h3{margin:0 0 13px;font-size:15px;line-height:1.55}
+    .choices{display:grid;gap:9px}
     .choice{
-      display:flex; gap:10px; align-items:flex-start;
-      padding: 10px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(229,231,235,.9);
-      background: rgba(255,255,255,.9);
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:11px 12px;
+      border:1px solid #e4e9ee;
+      border-radius:11px;
+      background:#fff;
+      cursor:pointer;
     }
-    .choice input{ margin-top:3px; }
-    .choice span{ font-size: 14px; line-height: 1.25rem; }
+    .choice:hover{background:#f8fafc}
+    .choice input{margin-top:3px}
 
-    .explain{
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px dashed rgba(255,122,0,.45);
-      background: rgba(255,122,0,.06);
+    .explanation{
       display:none;
+      margin:8px 0 4px 28px;
+      padding:11px;
+      border:1px dashed rgba(255,122,0,.45);
+      border-radius:11px;
+      background:rgba(255,122,0,.05);
     }
-    .explain .hint{
-      font-size: 12px; color: var(--muted);
-      margin: 0 0 6px;
-      font-weight: 800;
-    }
+    .explanation.active{display:block}
 
     .actions{
-      display:flex; gap:12px; align-items:center; justify-content:flex-end;
-      padding-top: 6px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
     }
+
+    .btn{
+      border:0;
+      border-radius:11px;
+      padding:11px 16px;
+      font-weight:800;
+    }
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{color:#fff;background:linear-gradient(135deg,var(--orange),var(--orange2))}
+    .btn-navy{color:#fff;background:var(--navy)}
+    .btn-light{color:var(--navy);background:#eaf0f4}
+    .btn-danger{color:#fff;background:var(--danger)}
+    .btn-success{color:#fff;background:var(--success)}
+    .btn-outline{color:var(--navy);background:#fff;border:1px solid var(--border)}
+
+    .closed{display:none;text-align:center}
+    .closed.active{display:block}
+    .survey-area.hidden{display:none}
+
+    .message{
+      display:none;
+      margin-top:14px;
+      padding:13px;
+      border-radius:11px;
+      line-height:1.5;
+      white-space:pre-wrap;
+    }
+    .message.error{display:block;color:#8a2530;background:#fdebed;border:1px solid #f5c9ce}
+    .message.success{display:block;color:#0f6847;background:#e1f6ed;border:1px solid #bde8d7}
+
     .result{
       display:none;
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(16,185,129,.25);
-      background: rgba(16,185,129,.08);
+      margin-top:18px;
+      padding:18px;
+      border-radius:14px;
+      color:#0f6847;
+      background:#e1f6ed;
+      border:1px solid #bde8d7;
     }
-    .result h3{margin:0 0 6px}
-    .result p{margin:0; color: #064e3b}
-    .reason-card{
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,122,0,.22);
-      background: rgba(255,122,0,.06);
-    }
-    .reason-card h4{margin:0 0 6px; font-size: 14px}
-    .reason-card .expected{
-      color:#7c2d12; font-size: 13px;
-      margin: 0 0 8px;
-      white-space: pre-wrap;
-      font-weight: 900;
-    }
-    .reason-card .user{
-      color:#111827; font-size: 13px;
-      margin:0;
-      white-space: pre-wrap;
-    }
-    .error{
-      display:none;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(180,35,24,.22);
-      background: rgba(180,35,24,.06);
-      color:#7f1d1d;
-      font-weight: 900;
-      white-space: pre-wrap;
-    }
-    small.muted{color:var(--muted)}
-
-    .closed-panel{
-      max-width: 980px;
-      margin: 18px auto 0;
-      padding: 0 18px;
-      display:none;
-    }
-    .closed-card{
-      background: #fff;
-      border: 1px solid rgba(229,231,235,.9);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      padding: 18px;
-    }
-    .closed-title{
-      margin: 0 0 10px;
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-    .visitor-message{
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,122,0,.22);
-      background: rgba(255,122,0,.06);
-      white-space: pre-wrap;
-      font-size: 14px;
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
-    .admin-box{
-      padding-top: 8px;
-      border-top: 1px solid rgba(229,231,235,.9);
-      display:none;
-    }
-    .admin-label{
-      display:block;
-      font-size: 13px;
-      font-weight: 900;
-      margin: 10px 0 8px;
-    }
-    .admin-textarea{
-      width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(229,231,235,.9);
-      outline: none;
-      resize: vertical;
-    }
-    .admin-actions{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      margin-top: 10px;
-    }
+    .result.active{display:block}
 
     .modal{
       position:fixed;
       inset:0;
-      background: rgba(0,0,0,.35);
+      z-index:100;
       display:none;
       align-items:center;
       justify-content:center;
-      padding: 18px;
-      z-index: 999;
+      padding:18px;
+      background:rgba(15,23,42,.60);
     }
+    .modal.active{display:flex}
     .modal-card{
-      width: min(520px, 100%);
+      width:min(1120px,100%);
+      max-height:94vh;
+      overflow:auto;
+      padding:22px;
+      border-radius:18px;
       background:#fff;
-      border-radius: 16px;
-      border:1px solid rgba(229,231,235,.9);
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
-      overflow:hidden;
+      box-shadow:0 25px 70px rgba(0,0,0,.30);
     }
+    .modal-small{width:min(480px,100%)}
+
     .modal-head{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(229,231,235,.9);
+      gap:12px;
+      margin-bottom:16px;
     }
-    .scenario-desc{
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
-
-.scenario-desc p{
-  margin: 0 0 8px;
-}
-
-.scenario-desc ul{
-  margin: 0 0 10px 20px;
-  padding-left: 18px;
-}
-
-.scenario-action-box{
-  margin: 14px 0 16px;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,122,0,.22);
-  background: rgba(255,122,0,.05);
-}
-
-.scenario-action-box textarea{
-  min-height: 100px;
-}
-
-.scenario-values-title{
-  margin: 10px 0 10px;
-}
-
-.scenario-values-title label{
-  margin-bottom: 0;
-}
-    .modal-body{ padding: 14px; }
-    .xbtn{
-      border:none;
-      background:transparent;
-      cursor:pointer;
-      font-size: 16px;
-      font-weight: 900;
-      padding: 6px 10px;
-    }
-    .admin-msg{
-      margin-top:10px;
-      font-weight: 900;
-      color:#7f1d1d;
-      min-height: 18px;
+    .modal-head h2{margin:0;color:var(--navy)}
+    .close{
+      width:38px;height:38px;
+      border:0;border-radius:50%;
+      color:var(--navy);background:#eaf0f4;
+      font-size:21px;
     }
 
-    /* Tạm ẩn câu hỏi 5 */
-    .qblock[data-qid="q5"]{ display:none; }
-    /* ===== TẾT SIDE DECOR (2 bên) ===== */
-:root{
-  --sideW: 280px;     /* độ rộng mảng Tết 2 bên */
-  --sideOpacity: .95; /* độ đậm/nhạt nền Tết */
-}
+    .admin-tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+    .admin-tab.active{color:#fff;background:var(--navy)}
 
-/* Chừa khoảng trống 2 bên để không đè lên nội dung */
-body{
-  padding-left: var(--sideW);
-  padding-right: var(--sideW);
-}
+    .admin-panel{display:none}
+    .admin-panel.active{display:block}
 
-/* Hai panel Tết cố định */
-.tet-side{
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: var(--sideW);
-  z-index: 0;                 /* nằm dưới nội dung */
-  pointer-events: none;
-  opacity: var(--sideOpacity);
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin:16px 0;
+    }
+    .metric{
+      padding:17px;
+      border:1px solid var(--border);
+      border-radius:13px;
+      background:linear-gradient(135deg,#f8fbfd,#eef5f9);
+    }
+    .metric-label{font-size:12px;color:var(--muted);font-weight:800}
+    .metric-value{margin-top:5px;color:var(--navy);font-size:30px;font-weight:900}
 
-  background-image: url("images/tet-bg.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  filter: saturate(1.05) contrast(1.05);
-}
+    .dashboard-filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:11px;
+      align-items:end;
+    }
 
-/* Bên trái: lấy phần trái của ảnh */
-.tet-left{
-  left: 0;
-  background-position: left center;
-}
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    table{
+      width:100%;
+      min-width:1050px;
+      border-collapse:collapse;
+      background:#fff;
+    }
+    th,td{
+      padding:11px 12px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      vertical-align:middle;
+      font-size:13px;
+    }
+    th{
+      position:sticky;
+      top:0;
+      color:#fff;
+      background:var(--navy);
+      white-space:nowrap;
+    }
+    tbody tr:hover{background:#f7fafc}
+    td.num{text-align:right;font-variant-numeric:tabular-nums}
 
-/* Bên phải: lấy phần phải của ảnh */
-.tet-right{
-  right: 0;
-  background-position: right center;
-}
+    .loader{
+      position:fixed;
+      inset:0;
+      z-index:200;
+      display:none;
+      place-items:center;
+      background:rgba(255,255,255,.72);
+      backdrop-filter:blur(3px);
+    }
+    .loader.active{display:grid}
+    .spinner{
+      width:48px;height:48px;
+      border:5px solid #dce5eb;
+      border-top-color:var(--orange);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Đảm bảo nội dung nằm trên nền */
-header, main, .closed-panel{
-  position: relative;
-  z-index: 2;
-}
+    @media(max-width:920px){
+      .dashboard-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .metrics{grid-template-columns:1fr}
+    }
 
-/* Nếu muốn “blend” cho dịu hơn (tuỳ chọn) */
-.tet-side::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: linear-gradient(
-    to right,
-    rgba(255,255,255,.15),
-    rgba(255,255,255,.05),
-    rgba(255,255,255,.15)
-  );
-}
-
-/* Responsive: màn nhỏ thì tắt 2 bên cho gọn */
-@media (max-width: 1100px){
-  :root{ --sideW: 160px; }
-}
-@media (max-width: 820px){
-  body{ padding-left: 0; padding-right: 0; }
-  .tet-side{ display:none; }
-}
+    @media(max-width:720px){
+      .grid,.dashboard-filters{grid-template-columns:1fr}
+      .full{grid-column:auto}
+      .brand p{display:none}
+      .logo{width:52px;height:52px}
+      .topbar-inner{width:min(100% - 18px,1080px)}
+      .page{width:min(100% - 18px,1080px);margin-top:12px}
+      .card{padding:17px}
+    }
   </style>
 </head>
 
 <body>
-  <div class="tet-side tet-left" aria-hidden="true"></div>
-  <div class="tet-side tet-right" aria-hidden="true"></div>
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="logo">
-        <img src="images/logo.png" alt="Company Logo">
-      </div>
-      <div class="titlewrap">
-        <div class="title">Khảo sát VHDN "Hiểu" và "Biết" Tháng 5</div>
-        <div class="subtitle">Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</div>
-      </div>
-    </div>
+  <div id="loader" class="loader"><div class="spinner"></div></div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
-        Survey: OFF
-      </button>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">
+          <img src="images/logo.png" alt="TBS Logistics" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <h1>Khảo sát VHDN “Hiểu” và “Biết”</h1>
+          <p>Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</p>
+        </div>
+      </div>
 
-      <button type="button" id="adminBtn" class="toggle-btn">
-        Admin
+      <button class="btn btn-outline" type="button" onclick="openAdminLogin()">
+        Quản trị
       </button>
     </div>
-  </div>
-</header>
+  </header>
 
-<section id="closedPanel" class="closed-panel">
-  <div class="closed-card">
-    <h2 class="closed-title">Survey is currently OFF</h2>
-    <div id="visitorMessage" class="visitor-message"></div>
+  <main class="page">
+    <section id="closedCard" class="card closed">
+      <h2>Khảo sát hiện đang tạm đóng</h2>
+      <p id="closedMessage" class="subtitle"></p>
+    </section>
 
-    <div class="admin-box" id="adminBox">
-      <label for="adminMessage" class="admin-label">Your message (when survey is OFF)</label>
-      <textarea id="adminMessage" class="admin-textarea" placeholder="Type your message here..."></textarea>
+    <section id="surveyArea" class="survey-area">
+      <section class="card">
+        <h2>Thông tin người tham gia</h2>
+        <p class="subtitle">
+          Nhập MSNV để hệ thống tự điền thông tin. MSNV đã kiểm tra sẽ được lưu cache nhằm giảm tải Google Sheet.
+        </p>
 
-      <div class="admin-actions">
-        <button type="button" id="saveMessageBtn" class="btn-primary">Save message</button>
-        <button type="button" id="clearMessageBtn" class="btn-ghost">Clear</button>
-      </div>
+        <div class="grid">
+          <div>
+            <label class="field-label" for="employeeId">MSNV</label>
+            <input id="employeeId" type="text" autocomplete="off" placeholder="Nhập MSNV">
+            <small class="note">Không bắt buộc. Hệ thống kiểm tra sau khi bạn ngừng nhập khoảng 0,8 giây.</small>
+            <div id="lookupStatus" class="lookup-status"></div>
+          </div>
 
-      <small class="muted">Shared-state is stored on Google Sheet via Apps Script.</small>
-    </div>
-  </div>
-</section>
+          <div>
+            <label class="field-label" for="fullName">
+              Họ và tên <span class="required">Bắt buộc</span>
+            </label>
+            <input id="fullName" type="text" placeholder="Nhập họ và tên">
+          </div>
 
-<main id="mainArea">
-  <div class="card">
-    <div class="card-head">
-      <h2>Bảng khảo sát</h2>
-      <p>Các anh/chị hãy hoàn thành khảo sát. Điểm sẽ tự chấm sau khi nộp khảo sát</p>
-      <p class="muted" id="bannedStatus" style="margin-top:6px;"></p>
-    </div>
+          <div id="manualDepartmentBox">
+            <label class="field-label" for="department">
+              Bộ phận <span class="required">Bắt buộc</span>
+            </label>
+            <select id="department">
+              <option value="">Chọn bộ phận</option>
+              <option>HCNS</option>
+              <option>P.MUA</option>
+              <option>HSSE</option>
+              <option>BẢO TRÌ</option>
+              <option>KINH DOANH</option>
+              <option>KẾ HOẠCH</option>
+              <option>VẬN TẢI</option>
+              <option>CTTT</option>
+              <option>GIAO NHẬN QUỐC TẾ (FORWARDING)</option>
+              <option>XNK</option>
+              <option>KẾ TOÁN</option>
+              <option>IT</option>
+              <option>KHO 1-4</option>
+              <option>KHO 5</option>
+              <option>KHO 6</option>
+              <option>KHO 7-8 DEPOT</option>
+              <option>KHO ST</option>
+              <option>BẢO VỆ ICD 30</option>
+              <option>BẢO VỆ KHO 6</option>
+              <option>BẢO VỆ KHO 7-8</option>
+              <option>BẢO VỆ KHO ST</option>
+            </select>
+          </div>
 
-    <form id="surveyForm" novalidate>
-      <div class="row">
+          <div id="autoDepartmentBox" style="display:none">
+            <label class="field-label" for="departmentAuto">Bộ phận</label>
+            <input id="departmentAuto" type="text" readonly>
+          </div>
+
+          <div id="workerDepartmentBox" style="display:none">
+            <label class="field-label" for="departmentWorker">
+              Kho làm việc <span class="required">Bắt buộc</span>
+            </label>
+            <select id="departmentWorker">
+              <option value="">Chọn kho</option>
+              <option>KHO 1-4</option>
+              <option>KHO 5</option>
+              <option>KHO 6</option>
+              <option>KHO 7-8</option>
+              <option>KHO ST</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="field-label" for="position">Chức vụ</label>
+            <input id="position" type="text" readonly placeholder="Tự động điền nếu tìm thấy MSNV">
+          </div>
+        </div>
+      </section>
+
+      <form id="surveyForm" class="card" novalidate>
+        <h2>Bảng khảo sát</h2>
+        <p class="subtitle">Đáp án được xáo trộn khi tải trang. Điểm được tính ngay sau khi nộp.</p>
+
+        <div id="questionContainer"></div>
+
+        <div id="formMessage" class="message"></div>
+
+        <div class="actions">
+          <button class="btn btn-light" type="button" onclick="location.reload()">Làm lại</button>
+          <button id="submitButton" class="btn btn-primary" type="submit">Nộp khảo sát</button>
+        </div>
+
+        <div id="resultBox" class="result"></div>
+      </form>
+    </section>
+  </main>
+
+  <div id="adminLoginModal" class="modal">
+    <div class="modal-card modal-small">
+      <div class="modal-head">
         <div>
-          <label for="employeeId">1) MSNV của Anh/Chị là gì? <span class="required">Không bắt buộc</span></label>
-          <input id="employeeId" name="employeeId" type="text" placeholder="Nhập MSNV nếu Anh/Chị nhớ" />
-          <small class="muted" id="employeeLookupNote" style="display:block; margin-top:6px; color:#b42318; font-weight:900;">Điền MSNV sẽ tự động điền Họ và tên và Bộ Phận của bạn. Nếu bạn không nhớ MSNV thì xin điền Họ và Tên và Bộ Phận thủ công như lúc trước</small>
-          <small class="muted" id="employeeLookupMsg" style="display:block; margin-top:6px;"></small>
+          <h2>Đăng nhập quản trị</h2>
+          <p class="subtitle">Thông tin đăng nhập được xác minh ở Apps Script.</p>
         </div>
+        <button class="close" type="button" onclick="closeModal('adminLoginModal')">×</button>
+      </div>
 
-        <div>
-          <label for="fullName">2) Họ và Tên <span class="required">Required</span></label>
-          <input id="fullName" name="fullName" type="text" placeholder="Hãy điền tên của Anh/Chị vào đây" required />
+      <div class="grid">
+        <div class="full">
+          <label class="field-label" for="adminEmail">Email</label>
+          <input id="adminEmail" type="text">
+        </div>
+        <div class="full">
+          <label class="field-label" for="adminPasscode">Passcode</label>
+          <input id="adminPasscode" type="password">
         </div>
       </div>
 
-      <div class="row">
-        <div id="departmentManualBox">
-          <label for="department">3) Bộ phận <span class="required">Required</span></label>
-          <select id="department" name="department" required>
-            <option value="" selected disabled>Anh/Chị hãy chọn phòng ban của Anh/chị</option>
-            <option>HCNS</option>
-            <option>P.MUA</option>
-            <option>HSSE</option>
-            <option>BẢO TRÌ</option>
-            <option>KINH DOANH</option>
-            <option>KẾ HOẠCH</option>
-            <option>VẬN TẢI</option>
-            <option>CTTT</option>
-            <option>GIAO NHẬN QUỐC TẾ (FORWARDING)</option>
-            <option>XNK</option>
-            <option>KẾ TOÁN</option>
-            <option>IT</option>
-            <option>KHO 1-4</option>
-            <option>KHO 5</option>
-            <option>KHO 6</option>
-            <option>KHO 7-8 DEPOT</option>
-            <option>KHO ST</option>
-            <option>BẢO VỆ ICD 30</option>
-            <option>BẢO VỆ KHO 6</option>
-            <option>BẢO VỆ KHO 7-8</option>
-            <option>BẢO VỆ KHO ST</option>
-          </select>
-        </div>
+      <div id="adminLoginMessage" class="message"></div>
 
-        <div id="departmentAutoBox" style="display:none;">
-          <label for="departmentAuto">3) Bộ phận <span class="required">Auto</span></label>
-          <input id="departmentAuto" name="departmentAuto" type="text" placeholder="Tự động điền theo MSNV" readonly />
-        </div>
-
-        <div id="departmentWorkerBox" style="display:none;">
-          <label for="departmentWorker">3) Bộ phận <span class="required">Required</span></label>
-          <select id="departmentWorker" name="departmentWorker">
-            <option value="" selected disabled>Anh/Chị hãy chọn kho</option>
-            <option>KHO 1-4</option>
-            <option>KHO 5</option>
-            <option>KHO 6</option>
-            <option>KHO 7-8</option>
-            <option>KHO ST</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Q1 -->
-      <div class="qblock" data-qid="q1">
-        <div class="qtitle">
-          <h3>
-            <p><strong>3) Hãy điền vào chỗ trống</strong></p>
-            <p>Tầm nhìn của TBS Logistics ?</p>
-            <p>"Đến 2035, TBS Logistics trở thành [1]__________ hàng đầu Việt Nam về [2] __________ và [3] __________ ."</p>
-          </h3>
-          <div class="required">Required</div>
-        </div>
-        <div class="choices">
-          <label class="choice"><input type="radio" name="q1" value="a"><span>[1] trung tâm dịch vụ [2] vận tải đường bộ [3] quản lý chuỗi cung ứng</span></label>
-          <label class="choice"><input type="radio" name="q1" value="b"><span>[1] công ty vận tải [2] giao nhận hàng hóa [3] dịch vụ kho bãi</span></label>
-          <label class="choice"><input type="radio" name="q1" value="c"><span>[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span></label>
-          <label class="choice"><input type="radio" name="q1" value="d"><span>[1] trung tâm logistics [2] cung cấp dịch vụ [3] giải pháp chuỗi cung ứng</span></label>
-          <label class="choice"><input type="radio" name="q1" value="e"><span>[1] doanh nghiệp hậu cần [2] quản lý kho [3] giao hàng tận nơi</span></label>
-          <label class="choice"><input type="radio" name="q1" value="f"><span>[1] nhà cung cấp giải pháp [2] dịch vụ logistics [3] kho vận thông minh</span></label>
-          <label class="choice"><input type="radio" name="q1" value="g"><span>[1] cảng cạn ICD [2] xử lý hàng hóa [3] phân phối nội địa</span></label>
-        </div>
-      </div>
-
-      <!-- Q2 -->
-      <div class="qblock" data-qid="q2">
-        <div class="qtitle">
-          <h3>
-            <p><strong>4) Hãy điền vào chỗ trống</strong></p>
-            <p>Sứ mệnh của TBS Logistics là?</p>
-            <p>"Góp phần nâng cao [1]__________ cho ngành Logistics Việt Nam, tạo [2]__________ phát triển bền vững cho khách hàng, [3]__________ đời sống người lao động."</p>
-          </h3>
-          <div class="required">Required</div>
-        </div>
-        <div class="choices">
-          <label class="choice"><input type="radio" name="q2" value="a"><span>A. [1] năng suất / [2] lợi ích / [3] chăm sóc</span></label>
-          <label class="choice"><input type="radio" name="q2" value="b"><span>[1] hiệu suất / [2] giá trị / [3] bảo vệ</span></label>
-          <label class="choice"><input type="radio" name="q2" value="c"><span>[1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo</span></label>
-          <label class="choice"><input type="radio" name="q2" value="d"><span>[1] năng lực / [2] giá trị / [3] hỗ trợ</span></label>
-          <label class="choice"><input type="radio" name="q2" value="e"><span>[1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo</span></label>
-          <label class="choice"><input type="radio" name="q2" value="f"><span>[1] hiệu quả / [2] cơ hội / [3] cải thiện</span></label>
-        </div>
-      </div>
-
-      <!-- Q3 -->
-      <div class="qblock" data-qid="q3">
-        <div class="qtitle">
-          <h3>5) Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics?</h3>
-          <div class="required">Required</div>
-        </div>
-        <div class="choices">
-          <label class="choice"><input type="checkbox" name="q3" value="a"> <span>Đoàn kết.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="b"> <span>Sáng tạo.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="c"> <span>Chính trực.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="d"> <span>Trách nhiệm.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="e"> <span>Kỷ luật.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="f"> <span>Hiệu quả.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="g"> <span>Đáng tin.</span></label>
-          <label class="choice"><input type="checkbox" name="q3" value="h"> <span>Tôn trọng.</span></label>
-        </div>
-      </div>
-
-      <!-- Q4 -->
-      <div class="qblock" data-qid="q4">
-        <div class="qtitle">
-          <h3>6) Trong triết lý kinh doanh của TBS Logistics: Cân bằng lợi ích 5 bên gồm: (Chọn nhiều đáp án)</h3>
-          <div class="required">Required</div>
-        </div>
-        <div class="choices">
-          <label class="choice"><input type="checkbox" name="q4" value="a"> <span>Khách hàng.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="b"> <span>Cơ quan nhà nước.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="c"> <span>Đối tác/Nhà cung cấp.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="d"> <span>Cổ đông.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="e"> <span>Cạnh tranh thị trường.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="f"> <span>Người lao động.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="g"> <span>Cộng đồng.</span></label>
-          <label class="choice"><input type="checkbox" name="q4" value="h"> <span>Công nghệ và đổi mới sáng tạo.</span></label>
-        </div>
-      </div>
-
-      <!-- Q5 hidden -->
-      <div class="qblock" data-qid="q5">
-        <div class="qtitle">
-          <h3>7) Chọn các mục tiêu ĐÚNG trong năm 2026 của TBS Logistics</h3>
-          <div class="required">Required</div>
-        </div>
-        <div class="choices">
-          <label class="choice"><input type="checkbox" name="q5" value="a"> <span>Chuyển đổi số.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="b"> <span>Chi phí.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="c"> <span>Xây dựng thêm 2 kho: kho 9 và kho 10.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="d"> <span>Doanh thu.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="e"> <span>Văn hóa doanh nghiệp.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="f"> <span>Phát triển thêm dịch vụ mới.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="g"> <span>Nâng cao chất lượng dịch vụ.</span></label>
-          <label class="choice"><input type="checkbox" name="q5" value="h"> <span>Đào tạo phát triển nhân sự kế thừa.</span></label>
-        </div>
-      </div>
-
-      <!-- Scenario -->
-     <div class="qblock" data-qid="scenario">
-  <div class="qtitle">
-    <h3>7) Tình huống</h3>
-    <div class="required">Required</div>
-  </div>
-
-  <div class="scenario-desc">
-  <h3>🧩 TÌNH HUỐNG</h3>
-
-  <p><strong>Bối cảnh:</strong></p>
-  <p>
-    Tại kho logistics, Công ty đã quy định bắt buộc người lao động phải mang đầy đủ trang bị bảo hộ lao động (PPE) khi làm việc, bao gồm: giày bảo hộ, áo phản quang và các trang bị khác theo từng khu vực và từng vị trí công việc.
-  </p>
-
-  <p><strong>Diễn biến:</strong></p>
-  <ul>
-    <li>Nhân viên A làm việc tại khu vực xuất nhập hàng. </li>
-    <li>
-       Khi vào ca làm việc, A không mang giày bảo hộ và áo phản quang theo quy định. 
-    </li>
-    <li>•	Tổ trưởng đã nhắc nhở nhưng A trả lời: 
-      <p class="quote">
-        "Em làm một chút thôi, không sao đâu, mang đồ bảo hộ vướng víu và nóng lắm."
-      </p>
-    </li>
-    <li>
-      Sau đó, A tiếp tục làm việc trong khu vực xe nâng đang hoạt động mà không sử dụng đầy đủ PPE. 
-    </li>
-    <li>
-      Hậu quả:
-      <ul>
-        <li>Tăng nguy cơ tai nạn lao động cho bản thân và đồng nghiệp. </li>
-        <li>Vi phạm nội quy an toàn lao động của Công ty.</li>
-        <li>Gây ảnh hưởng đến hình ảnh chuyên nghiệp và văn hóa tuân thủ của doanh nghiệp. </li>
-        <li>Nếu xảy ra sự cố có thể gây thiệt hại về người và tài sản.  </li>
-      </ul>
-    </li>
-  </ul>
-
-  <!-- Câu 7 -->
-  <div class="scenario-action-box">
-    <label>
-      7.1) Theo anh/chị hành động đó có vi phạm kỷ luật Công ty không?
-      <span class="required">Required</span>
-    </label>
-
-    <div class="choices">
-      <label class="choice">
-        <input type="radio" name="disciplineCheck" value="Có">
-        <span>Có</span>
-      </label>
-
-      <label class="choice">
-        <input type="radio" name="disciplineCheck" value="Không">
-        <span>Không</span>
-      </label>
-    </div>
-  </div>
-
-  <!-- Câu 8 -->
-  <div class="scenario-values-title">
-    <label>
-      7.2) Những giá trị cốt lõi nào được thể hiện rõ nhất trong tình huống này?
-      <span class="required">Required</span>
-    </label>
-  </div>
-
-  <div class="choices">
-    <div class="choice"><input type="checkbox" id="s1" name="scenario" value="s1"><span><strong>Đoàn kết</strong>.</span></div>
-    <div class="explain" data-explain-for="s1"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-    <div class="choice"><input type="checkbox" id="s2" name="scenario" value="s2"><span><strong>Trách nhiệm</strong>.</span></div>
-    <div class="explain" data-explain-for="s2"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-    <div class="choice"><input type="checkbox" id="s3" name="scenario" value="s3"><span><strong>Đáng tin</strong>.</span></div>
-    <div class="explain" data-explain-for="s3"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-    <div class="choice"><input type="checkbox" id="s4" name="scenario" value="s4"><span><strong>Chính trực</strong>.</span></div>
-    <div class="explain" data-explain-for="s4"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-    <div class="choice"><input type="checkbox" id="s5" name="scenario" value="s5"><span><strong>Kỷ luật</strong>.</span></div>
-    <div class="explain" data-explain-for="s5"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-
-    <div class="choice"><input type="checkbox" id="s6" name="scenario" value="s6"><span><strong>Hiệu quả</strong>.</span></div>
-    <div class="explain" data-explain-for="s6"><p class="hint">Giải thích lý do(Tối thiểu 5 từ):</p><textarea placeholder="Viết lý do của Anh/Chị..."></textarea></div>
-  </div>
-</div>
       <div class="actions">
-        <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
-        <button type="submit" class="btn-primary" id="submitBtn">Nộp khảo sát</button>
+        <button class="btn btn-navy" type="button" onclick="adminLogin()">Đăng nhập</button>
       </div>
-
-      <div class="error" id="errorBox"></div>
-
-      <div class="result" id="resultBox">
-        <h3>Đã hoàn thành khảo sát ✅</h3>
-        <p id="scoreLine"></p>
-        <div id="scenarioReasons"></div>
-      </div>
-    </form>
-  </div>
-</main>
-
-<!-- Admin modal -->
-<div id="adminModal" class="modal">
-  <div class="modal-card">
-    <div class="modal-head">
-      <strong>Admin access</strong>
-      <button type="button" id="adminClose" class="xbtn">✕</button>
-    </div>
-
-    <div class="modal-body">
-      <label class="admin-label" for="adminEmail">Email</label>
-      <input id="adminEmail" type="text" placeholder="name@company.com" />
-
-      <label class="admin-label" for="adminPass">Passcode</label>
-      <input id="adminPass" type="password" placeholder="Enter passcode" />
-
-      <div class="admin-actions">
-        <button type="button" id="adminLogin" class="btn-primary">Login</button>
-        <button type="button" id="adminLogout" class="btn-ghost">Logout</button>
-      </div>
-
-      <div id="adminMsg" class="admin-msg"></div>
-      <small class="muted">Admin only can toggle ON/OFF + edit message.</small>
     </div>
   </div>
-</div>
 
-<script>
-/* ===================== CONFIG ===================== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuVsEa8WRS6pOx8oflXPr9kw9luQ-vbmr0Iytz7rdZ7E0F0_UrDfILLqIybKfJQrjd/exec";
+  <div id="adminDashboardModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2>Dashboard quản trị</h2>
+          <p class="subtitle">Cập nhật trạng thái khảo sát và lọc kết quả theo bộ phận, ngày, điểm đạt được.</p>
+        </div>
+        <button class="close" type="button" onclick="closeAdminDashboard()">×</button>
+      </div>
 
-const MIN_MEANINGFUL_WORDS = 5;
+      <div class="admin-tabs">
+        <button class="btn btn-light admin-tab active" data-panel="settingsPanel" type="button">
+          Cập nhật thông tin
+        </button>
+        <button class="btn btn-light admin-tab" data-panel="resultsPanel" type="button">
+          Kết quả khảo sát
+        </button>
+      </div>
 
-// tokens được phép tính dù ngắn (tuỳ bạn thêm)
-const ALLOW_TOKENS = new Set([
-  "tbs","vfr","it","hr","hsse","icd","erp","crm"
-]);
+      <section id="settingsPanel" class="admin-panel active">
+        <div class="card" style="box-shadow:none">
+          <h3>Cài đặt khảo sát</h3>
 
-/* Scoring rules */
-const correctSingle = { q1: "d", q2: "c" };
-const correctSets = {
-  q3: ["a","c","d","e","f","g"],
-  q4: ["a","c","d","f","g"],
-};
-const scenarioCorrect = ["s1","s2","s3","s4","s5","s6"];
+          <div class="grid">
+            <div>
+              <label class="field-label" for="adminSurveyStatus">Trạng thái</label>
+              <select id="adminSurveyStatus">
+                <option value="true">Survey ON</option>
+                <option value="false">Survey OFF</option>
+              </select>
+            </div>
 
-const scenarioLabels = {
-  s1:"Đoàn kết", s2:"Trách nhiệm", s3:"Đáng tin",
-  s4:"Chính trực", s5:"Kỷ luật", s6:"Hiệu quả"
-};
+            <div class="full">
+              <label class="field-label" for="adminSurveyMessage">Thông báo khi Survey OFF</label>
+              <textarea id="adminSurveyMessage"></textarea>
+            </div>
+          </div>
 
-const scenarioRationales = {
-  s1: `•	Việc không tuân thủ PPE tạo tâm lý chủ quan cho những người khác. 
-       •	Đồng nghiệp phải nhắc nhở, giám sát và chịu ảnh hưởng nếu xảy ra tai nạn. 
-       •	Làm giảm ý thức chấp hành nội quy chung của tập thể. 
-          👉 Ảnh hưởng đến tinh thần đoàn kết và văn hóa an toàn trong doanh nghiệp.`,
-  s2: `•	Người lao động không thực hiện đầy đủ trách nhiệm bảo vệ an toàn cho bản thân và đồng nghiệp. 
-       •	Không tuân thủ các quy định đã được đào tạo và cam kết thực hiện. 
-          👉 Đặt sự tiện lợi cá nhân lên trên trách nhiệm công việc.`,
-  s3: `•	Khách hàng và đối tác đánh giá Công ty thiếu chuyên nghiệp nếu nhân viên không tuân thủ an toàn lao động. 
-       •	Làm giảm niềm tin vào hệ thống quản lý an toàn của doanh nghiệp. 
-          👉 Ảnh hưởng đến uy tín và hình ảnh đáng tin cậy của Công ty.`,
-  s4: `•	Đã biết quy định nhưng cố tình không thực hiện. 
-       •	Không nghiêm túc chấp hành các cam kết an toàn lao động của Công ty. 
-          👉 Thiếu sự chính trực và tinh thần gương mẫu trong công việc.`,
-  s5: `•	Không tuân thủ nội quy và quy định bắt buộc về PPE. 
-       •	Không chấp hành sự nhắc nhở của cấp quản lý trực tiếp. 
-          👉 Vi phạm kỷ luật lao động và quy định an toàn của Công ty.`,
-  s6: `•	Có thể tiết kiệm vài phút hoặc cảm thấy thuận tiện hơn khi làm việc. 
-       •	Nhưng nếu xảy ra tai nạn sẽ: 
-            o	Gây gián đoạn hoạt động sản xuất kinh doanh. 
-            o	Tăng chi phí y tế, bồi thường và điều tra sự cố. 
-            o	Ảnh hưởng đến năng suất và hình ảnh doanh nghiệp. 
-         👉 Hiệu quả tổng thể của tổ chức bị suy giảm nghiêm trọng.`
-};
+          <div class="actions">
+            <button class="btn btn-primary" type="button" onclick="saveAdminSettings()">
+              Cập nhật thông tin
+            </button>
+          </div>
+        </div>
+      </section>
 
-/* ===================== HELPERS ===================== */
+      <section id="resultsPanel" class="admin-panel">
+        <div class="dashboard-filters">
+          <div>
+            <label class="field-label" for="filterFromDate">Từ ngày</label>
+            <input id="filterFromDate" type="date">
+          </div>
+          <div>
+            <label class="field-label" for="filterToDate">Đến ngày</label>
+            <input id="filterToDate" type="date">
+          </div>
+          <div>
+            <label class="field-label" for="filterDepartment">Bộ phận</label>
+            <select id="filterDepartment">
+              <option value="">Tất cả bộ phận</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="filterMinPercent">Điểm từ (%)</label>
+            <input id="filterMinPercent" type="number" min="0" max="100" placeholder="0">
+          </div>
+          <div>
+            <label class="field-label" for="filterMaxPercent">Đến (%)</label>
+            <input id="filterMaxPercent" type="number" min="0" max="100" placeholder="100">
+          </div>
+        </div>
 
-function shuffleArray(arr){
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+        <div class="actions">
+          <button class="btn btn-light" type="button" onclick="resetDashboardFilters()">Xóa lọc</button>
+          <button class="btn btn-navy" type="button" onclick="loadDashboard()">Lọc / Cập nhật</button>
+        </div>
 
-function randomizeStandardChoices(qid){
-  const wrap = document.querySelector(`.qblock[data-qid="${qid}"] .choices`);
-  if (!wrap) return;
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Số bài phù hợp bộ lọc</div>
+            <div id="metricTotal" class="metric-value">0</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Điểm trung bình (%)</div>
+            <div id="metricAveragePercent" class="metric-value">0%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Điểm trung bình thô</div>
+            <div id="metricAverageRaw" class="metric-value">0</div>
+          </div>
+        </div>
 
-  const items = Array.from(wrap.children).filter(el => el.classList.contains("choice"));
-  if (!items.length) return;
+        <div id="dashboardNotice" class="message"></div>
 
-  const shuffled = shuffleArray(items);
-  shuffled.forEach(el => wrap.appendChild(el));
-}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Thời gian</th>
+                <th>MSNV</th>
+                <th>Họ và tên</th>
+                <th>Chức vụ</th>
+                <th>Bộ phận</th>
+                <th>Điểm Biết</th>
+                <th>Điểm Hiểu</th>
+                <th>Điểm tổng</th>
+                <th>Tỷ lệ</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardRows">
+              <tr><td colspan="10" style="text-align:center;color:var(--muted)">Chưa tải dữ liệu.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
 
-/* 🔥 RANDOM CHO SCENARIO (cặp choice + explain) */
-function randomizeScenarioChoices(){
-  const wrap = document.querySelector(`.scenario-values-title + .choices`);
-  if (!wrap) return;
+  <script>
+    const GOOGLE_SCRIPT_URL =
+      'https://script.google.com/macros/s/AKfycbxMENIYR5TLb2sbKenf7qDjYIghT49bz1MIyIk-Zj-65IpTt88sT8tWPijfxDlOH90x/exec';
 
-  const children = Array.from(wrap.children);
-  const pairs = [];
+    const LOOKUP_DEBOUNCE_MS = 800;
+    const SETTINGS_POLL_MS = 120000;
+    const MIN_MEANINGFUL_WORDS = 5;
 
-  for (let i = 0; i < children.length; i++){
-    const el = children[i];
+    const state = {
+      settings: { isOn: false, message: '' },
+      employee: null,
+      employeeLookupOk: false,
+      employeeCache: new Map(),
+      lastLookupMSNV: '',
+      lookupSequence: 0,
+      lookupTimer: null,
+      admin: { email: '', passcode: '' },
+      dashboard: null,
+      settingsPollTimer: null
+    };
 
-    if (el.classList.contains("choice")){
-      const pair = [el];
+    const QUESTIONS = [
+      {
+        id:'q1',
+        type:'single',
+        title:'Tầm nhìn của TBS Logistics: “Đến 2035, TBS Logistics trở thành [1] ___ hàng đầu Việt Nam về [2] ___ và [3] ___.”',
+        options:[
+          ['a','[1] trung tâm dịch vụ / [2] vận tải đường bộ / [3] quản lý chuỗi cung ứng'],
+          ['b','[1] công ty vận tải / [2] giao nhận hàng hóa / [3] dịch vụ kho bãi'],
+          ['c','[1] doanh nghiệp hậu cần / [2] quản lý kho / [3] giao hàng tận nơi'],
+          ['d','[1] trung tâm logistics / [2] cung cấp dịch vụ / [3] giải pháp chuỗi cung ứng'],
+          ['f','[1] nhà cung cấp giải pháp / [2] dịch vụ logistics / [3] kho vận thông minh'],
+          ['g','[1] cảng cạn ICD / [2] xử lý hàng hóa / [3] phân phối nội địa']
+        ],
+        correct:'d'
+      },
+      {
+        id:'q2',
+        type:'single',
+        title:'Sứ mệnh của TBS Logistics: “Góp phần nâng cao [1] ___ cho ngành Logistics Việt Nam, tạo [2] ___ phát triển bền vững cho khách hàng, [3] ___ đời sống người lao động.”',
+        options:[
+          ['a','[1] năng suất / [2] lợi ích / [3] chăm sóc'],
+          ['b','[1] hiệu suất / [2] giá trị / [3] bảo vệ'],
+          ['c','[1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo'],
+          ['d','[1] năng lực / [2] giá trị / [3] hỗ trợ'],
+          ['e','[1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo'],
+          ['f','[1] hiệu quả / [2] cơ hội / [3] cải thiện']
+        ],
+        correct:'c'
+      },
+      {
+        id:'q3',
+        type:'multi',
+        title:'Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics?',
+        options:[
+          ['a','Đoàn kết'],
+          ['b','Sáng tạo'],
+          ['c','Chính trực'],
+          ['d','Trách nhiệm'],
+          ['e','Kỷ luật'],
+          ['f','Hiệu quả'],
+          ['g','Đáng tin'],
+          ['h','Tôn trọng']
+        ],
+        correct:['a','c','d','e','f','g']
+      },
+      {
+        id:'q4',
+        type:'multi',
+        title:'Trong triết lý kinh doanh của TBS Logistics, cân bằng lợi ích 5 bên gồm những bên nào?',
+        options:[
+          ['a','Khách hàng'],
+          ['b','Cơ quan nhà nước'],
+          ['c','Đối tác / Nhà cung cấp'],
+          ['d','Cổ đông'],
+          ['e','Cạnh tranh thị trường'],
+          ['f','Người lao động'],
+          ['g','Cộng đồng'],
+          ['h','Công nghệ và đổi mới sáng tạo']
+        ],
+        correct:['a','c','d','f','g']
+      }
+    ];
 
-      if (children[i + 1] && children[i + 1].classList.contains("explain")){
-        pair.push(children[i + 1]);
-        i++;
+    const SCENARIO_VALUES = [
+      ['s1','Đoàn kết'],
+      ['s2','Trách nhiệm'],
+      ['s3','Đáng tin'],
+      ['s4','Chính trực'],
+      ['s5','Kỷ luật'],
+      ['s6','Hiệu quả']
+    ];
+
+    document.addEventListener('DOMContentLoaded', initialize);
+
+    async function initialize(){
+      renderQuestions();
+      bindEmployeeLookup();
+      bindAdminTabs();
+      await refreshSettings();
+      startSettingsPolling();
+    }
+
+    async function fetchJson(url, options = {}, timeoutMs = 15000){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try{
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache:'no-store'
+        });
+
+        return await response.json();
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+
+    async function apiGet(action, params = {}){
+      const url = new URL(GOOGLE_SCRIPT_URL);
+      url.searchParams.set('action', action);
+      url.searchParams.set('ts', Date.now());
+
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
+      });
+
+      const json = await fetchJson(url.toString());
+
+      if (!json.ok) throw new Error(json.error || 'Yêu cầu thất bại.');
+      return json;
+    }
+
+    async function apiPost(action, data){
+      const body = new URLSearchParams();
+      body.set('action', action);
+      body.set('data', JSON.stringify(data || {}));
+
+      const json = await fetchJson(GOOGLE_SCRIPT_URL, {
+        method:'POST',
+        body:body
+      }, 30000);
+
+      if (!json.ok) throw new Error(json.error || 'Yêu cầu thất bại.');
+      return json;
+    }
+
+    async function refreshSettings(){
+      try{
+        const response = await apiGet('getSettings');
+        state.settings = response.settings;
+        applySurveyState();
+      }catch(error){
+        showClosedState('Không thể tải trạng thái khảo sát. Vui lòng thử lại sau.');
+      }
+    }
+
+    function applySurveyState(){
+      const isOn = Boolean(state.settings.isOn);
+      document.getElementById('surveyArea').classList.toggle('hidden', !isOn);
+      document.getElementById('closedCard').classList.toggle('active', !isOn);
+      document.getElementById('closedMessage').textContent =
+        state.settings.message || 'Khảo sát đang tạm đóng.';
+    }
+
+    function showClosedState(message){
+      state.settings = { isOn:false, message:message };
+      applySurveyState();
+    }
+
+    function startSettingsPolling(){
+      clearInterval(state.settingsPollTimer);
+
+      state.settingsPollTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          refreshSettings().catch(() => {});
+        }
+      }, SETTINGS_POLL_MS);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          refreshSettings().catch(() => {});
+        }
+      });
+    }
+
+    function bindEmployeeLookup(){
+      const input = document.getElementById('employeeId');
+
+      input.addEventListener('input', () => {
+        clearTimeout(state.lookupTimer);
+        state.lookupTimer = setTimeout(
+          lookupEmployeeFromInput,
+          LOOKUP_DEBOUNCE_MS
+        );
+      });
+
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter'){
+          event.preventDefault();
+          clearTimeout(state.lookupTimer);
+          lookupEmployeeFromInput();
+        }
+      });
+
+      input.addEventListener('blur', () => {
+        const msnv = normalizeMSNV(input.value);
+        if (msnv && msnv !== state.lastLookupMSNV) {
+          clearTimeout(state.lookupTimer);
+          lookupEmployeeFromInput();
+        }
+      });
+    }
+
+    async function lookupEmployeeFromInput(){
+      const msnv = normalizeMSNV(document.getElementById('employeeId').value);
+
+      if (!msnv){
+        resetEmployeeToManual('');
+        return;
       }
 
-      pairs.push(pair);
-    }
-  }
-
-  const shuffledPairs = shuffleArray(pairs);
-
-  wrap.innerHTML = "";
-  shuffledPairs.forEach(pair => {
-    pair.forEach(el => wrap.appendChild(el));
-  });
-}
-const $  = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-function getCheckedValues(name){
-  return $$(`input[name="${name}"]:checked`).map(i => i.value);
-}
-function setsEqual(a, b){
-  if (a.length !== b.length) return false;
-  const sa = [...a].sort().join("|");
-  const sb = [...b].sort().join("|");
-  return sa === sb;
-}
-function escapeHtml(str){
-  return String(str ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function shuffleArray(arr){
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}  
-/* ====== DISABLE QUESTION ====== */
-function disableQuestion(qid){
-  const block = document.querySelector(`.qblock[data-qid="${qid}"]`);
-  if (!block) return;
-  block.querySelectorAll("input, select, textarea").forEach(el => {
-    el.disabled = true;
-    el.required = false;
-  });
-}
-
-/* ===== normalize + tokenize + meaningful word count ===== */
-function normalizeForCheck(s){
-  return String(s || "")
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/[-_]/g, " ")
-    // JS browser có unicode property \p{L}, nhưng để chắc ăn thì dùng ASCII sau khi bỏ dấu
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function tokenizeWords(s){
-  const t = normalizeForCheck(s);
-  if (!t) return [];
-  return t.split(" ").filter(Boolean);
-}
-
-function countMeaningfulWords(s){
-  const words = tokenizeWords(s);
-  const filtered = words.filter(w => {
-    if (ALLOW_TOKENS.has(w)) return true;
-    if (/^\d+$/.test(w)) return true;
-    return w.length >= 2;
-  });
-  return filtered.length;
-}
-
-/* ========= keyboard mash detector ========= */
-function isKeyboardMashToken(w){
-  if (!/^[a-z]+$/.test(w)) return false;
-  if (w.length < 8) return false;
-
-  const rows = ["qwertyuiop","asdfghjkl","zxcvbnm"];
-  for (const row of rows){
-    if (row.includes(w)) return true;
-    const rev = row.split("").reverse().join("");
-    if (rev.includes(w)) return true;
-
-    for (let i=0;i<=row.length-6;i++){
-      const sub = row.slice(i,i+6);
-      const subRev = sub.split("").reverse().join("");
-      if (w.includes(sub) || w.includes(subRev)) return true;
-    }
-  }
-
-  const mashBigrams = new Set([
-    "qw","we","er","rt","ty","yu","ui","io","op",
-    "as","sd","df","fg","gh","hj","jk","kl",
-    "zx","xc","cv","vb","bn","nm",
-    "qa","az","ws","sx","ed","dc","rf","fv","tg","gb","yh","hn","uj","jm",
-  ]);
-  let hit = 0;
-  for (let i=0;i<w.length-1;i++){
-    if (mashBigrams.has(w.slice(i,i+2))) hit++;
-  }
-  return (hit / Math.max(w.length-1,1)) >= 0.45;
-}
-
-/* ========= n-gram score ========= */
-const COMMON_VI_BIGRAMS = new Set([
-  "ng","nh","ch","th","tr","ph","kh","qu","gi",
-  "an","am","ai","ao","ap","at","au",
-  "ba","be","bi","bo","bu",
-  "ca","co","cu","da","de","di","do","du",
-  "em","en","et","eu",
-  "ha","he","hi","ho","hu",
-  "ia","ie","im","in","it",
-  "la","le","li","lo","lu",
-  "ma","me","mi","mo","mu",
-  "na","ne","ni","no","nu",
-  "oa","oi","on","op","ot",
-  "ra","re","ri","ro","ru",
-  "sa","se","si","so","su",
-  "ta","te","ti","to","tu",
-  "ua","ui","un","ut",
-  "va","ve","vi","vo","vu"
-]);
-const COMMON_EN_BIGRAMS = new Set([
-  "th","he","in","er","an","re","on","at","en","nd",
-  "ti","es","or","te","of","ed","is","it","al","ar",
-  "st","to","nt","ng","se","ha","as","ou","io","le"
-]);
-
-function bigramHumanScore(token){
-  if (!/^[a-z]+$/.test(token)) return 1;
-  if (token.length < 6) return 1;
-
-  let good = 0;
-  const total = token.length - 1;
-  for (let i=0;i<token.length-1;i++){
-    const bg = token.slice(i,i+2);
-    if (COMMON_VI_BIGRAMS.has(bg) || COMMON_EN_BIGRAMS.has(bg)) good++;
-  }
-  return good / Math.max(total,1);
-}
-
-function looksLikeGibberish(text){
-  const tokens = tokenizeWords(text);
-  if (!tokens.length) return false;
-
-  const vowels = new Set(["a","e","i","o","u","y"]);
-  let suspicious = 0;
-
-  for (const w0 of tokens){
-    const w = w0.toLowerCase();
-    if (ALLOW_TOKENS.has(w)) continue;
-    if (/^\d+$/.test(w) && w.length <= 6) continue;
-
-    const alpha = /^[a-z]+$/.test(w);
-
-    // cực dài
-    if (w.length >= 14) suspicious++;
-
-    // ít nguyên âm (nhưng có nguyên âm vẫn có thể spam -> chỉ là 1 tín hiệu)
-    let vCount = 0;
-    for (const ch of w) if (vowels.has(ch)) vCount++;
-    const vRatio = vCount / Math.max(w.length,1);
-    if (w.length >= 8 && vRatio < 0.2) suspicious++;
-
-    // chuỗi phụ âm dài
-    let consec = 0, maxConsec = 0;
-    for (const ch of w){
-      const isLetter = /[a-z]/.test(ch);
-      const isConsonant = isLetter && !vowels.has(ch);
-      if (isConsonant){ consec++; maxConsec = Math.max(maxConsec, consec); }
-      else consec = 0;
-    }
-    if (w.length >= 8 && maxConsec >= 5) suspicious++;
-
-    // ký tự lặp
-    if (/(.)\1\1\1/.test(w)) suspicious++;
-
-    // mash bàn phím
-    if (alpha && isKeyboardMashToken(w)) suspicious += 2;
-
-    // bigram score thấp
-    if (alpha && w.length >= 8){
-      const score = bigramHumanScore(w);
-      if (score < 0.18) suspicious += 2;
-      else if (score < 0.25) suspicious += 1;
-    }
-  }
-
-  return suspicious >= 3;
-}
-
-/* ========= advanced validate ========= */
-function validateExplainAdvanced(text){
-  const meaningfulCount = countMeaningfulWords(text);
-  if (meaningfulCount < MIN_MEANINGFUL_WORDS){
-    return { ok:false, reason:`Phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ.` };
-  }
-
-  // chặn spam vô nghĩa
-  if (looksLikeGibberish(text)){
-    return { ok:false, reason:"Phát hiện nội dung có dấu hiệu vô nghĩa/spam. Vui lòng viết rõ ràng hơn." };
-  }
-
-  // chặn lặp 1 từ/cụm quá nhiều (vd: "doan ket" x 15)
-  const toks = tokenizeWords(text);
-  if (toks.length >= MIN_MEANINGFUL_WORDS){
-    const freq = {};
-    toks.forEach(t => freq[t] = (freq[t]||0) + 1);
-    const top = Object.values(freq).sort((a,b)=>b-a)[0] || 0;
-    if (top >= Math.ceil(toks.length * 0.7)){
-      return { ok:false, reason:"Nội dung đang lặp lại quá nhiều, vui lòng viết thành câu có lý do cụ thể." };
-    }
-  }
-
-  return { ok:true };
-}
-
-/* ===================== API ===================== */
-async function apiGetSettings(){
-  const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
-  const res = await fetch(url, { method: "GET" });
-  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
-  if (!json.ok) throw new Error(json.error || "getSettings failed");
-  return json.settings;
-}
-
-async function apiLookupEmployee(msnv){
-  const url = `${GOOGLE_SCRIPT_URL}?action=lookupEmployee&msnv=${encodeURIComponent(msnv)}&ts=${Date.now()}`;
-  const res = await fetch(url, { method: "GET" });
-  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
-  if (!json.ok) throw new Error(json.error || 'Không tìm thấy Họ và tên của bạn dựa trên MSNV, bạn hãy kiểm tra MSNV của bạn có điền đúng không. Nếu đúng mà vẫn không hiện thì hãy liên hệ ban VHDN qua Zalo theo SĐT "0334059814"');
-  return json.employee;
-}
-
-async function apiSaveSettings({ email, passcode, isOn, message }){
-  const body = new URLSearchParams();
-  body.append("action", "saveSettings");
-  body.append("data", JSON.stringify({ email, passcode, isOn, message }));
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
-  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
-  if (!json.ok) throw new Error(json.error || "saveSettings failed");
-  return json.settings;
-}
-
-async function apiSubmitSurvey(payload){
-  const body = new URLSearchParams();
-  body.append("action", "submitSurvey");
-  body.append("data", JSON.stringify(payload));
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
-  const json = await res.json().catch(() => ({ ok:false, error:"Bad JSON" }));
-  if (!json.ok) throw new Error(json.error || "submitSurvey failed");
-  return json;
-}
-
-/* ===================== UI REFS ===================== */
-const toggleBtn       = $("#toggleSurveyBtn");
-const adminBtn        = $("#adminBtn");
-const closedPanel     = $("#closedPanel");
-const visitorMessage  = $("#visitorMessage");
-const adminBox        = $("#adminBox");
-const adminMessage    = $("#adminMessage");
-const saveMessageBtn  = $("#saveMessageBtn");
-const clearMessageBtn = $("#clearMessageBtn");
-const mainArea        = $("#mainArea");
-
-const adminModal  = $("#adminModal");
-const adminClose  = $("#adminClose");
-const adminEmail  = $("#adminEmail");
-const adminPass   = $("#adminPass");
-const adminLogin  = $("#adminLogin");
-const adminLogout = $("#adminLogout");
-const adminMsg    = $("#adminMsg");
-
-const form          = $("#surveyForm");
-const errorBox      = $("#errorBox");
-const resultBox     = $("#resultBox");
-const scoreLine     = $("#scoreLine");
-const scenarioReasons = $("#scenarioReasons");
-const resetBtn      = $("#resetBtn");
-const submitBtn     = $("#submitBtn");
-
-const employeeIdInput = $("#employeeId");
-const employeeLookupMsg = $("#employeeLookupMsg");
-const departmentManualBox = $("#departmentManualBox");
-const departmentAutoBox = $("#departmentAutoBox");
-const departmentWorkerBox = $("#departmentWorkerBox");
-const departmentAuto = $("#departmentAuto");
-const departmentWorker = $("#departmentWorker");
-
-let employeeLookupOk = false;
-let currentEmployee = null;
-let employeeLookupTimer = null;
-
-/* ===================== EMPLOYEE LOOKUP ===================== */
-function resetEmployeeLookupToManual(message=""){
-  employeeLookupOk = false;
-  currentEmployee = null;
-
-  if (departmentManualBox) departmentManualBox.style.display = "";
-  if (departmentAutoBox) departmentAutoBox.style.display = "none";
-  if (departmentWorkerBox) departmentWorkerBox.style.display = "none";
-  if (departmentAuto) departmentAuto.value = "";
-  if (departmentWorker) departmentWorker.value = "";
-
-  const nameInput = $("#fullName");
-  if (nameInput) nameInput.readOnly = false;
-
-  if (employeeLookupMsg){
-    employeeLookupMsg.textContent = message;
-    employeeLookupMsg.style.color = message ? "#7f1d1d" : "#6b7280";
-  }
-}
-
-function applyEmployeeLookup(emp){
-  currentEmployee = emp || null;
-  employeeLookupOk = !!emp;
-
-  const nameInput = $("#fullName");
-  if (nameInput){
-    nameInput.value = emp?.name || "";
-    nameInput.readOnly = !!emp;
-  }
-
-  if (emp?.isWorker){
-    departmentManualBox.style.display = "none";
-    departmentAutoBox.style.display = "none";
-    departmentWorkerBox.style.display = "";
-    departmentAuto.value = "";
-    departmentWorker.value = "";
-    employeeLookupMsg.textContent = "Đã xác nhận MSNV. Anh/Chị vui lòng chọn kho.";
-  } else {
-    departmentManualBox.style.display = "none";
-    departmentAutoBox.style.display = "";
-    departmentWorkerBox.style.display = "none";
-    departmentAuto.value = emp?.department || "";
-    departmentWorker.value = "";
-    employeeLookupMsg.textContent = "Đã xác nhận MSNV.";
-  }
-
-  employeeLookupMsg.style.color = "#0f5132";
-}
-
-async function lookupEmployeeFromInput(){
-  const msnv = employeeIdInput?.value.trim() || "";
-
-  if (!msnv){
-    resetEmployeeLookupToManual("");
-    return;
-  }
-
-  employeeLookupOk = false;
-  currentEmployee = null;
-  employeeLookupMsg.textContent = "Đang kiểm tra MSNV...";
-  employeeLookupMsg.style.color = "#6b7280";
-
-  try{
-    const emp = await apiLookupEmployee(msnv);
-    applyEmployeeLookup(emp);
-  }catch(err){
-    resetEmployeeLookupToManual(err.message || 'Không tìm thấy Họ và tên của bạn dựa trên MSNV, bạn hãy kiểm tra MSNV của bạn có điền đúng không. Nếu đúng mà vẫn không hiện thì hãy liên hệ ban VHDN qua Zalo theo SĐT "0334059814"');
-  }
-}
-
-function scheduleEmployeeLookup(){
-  clearTimeout(employeeLookupTimer);
-  employeeLookupTimer = setTimeout(lookupEmployeeFromInput, 500);
-}
-
-if (employeeIdInput){
-  employeeIdInput.addEventListener("input", scheduleEmployeeLookup);
-  employeeIdInput.addEventListener("blur", lookupEmployeeFromInput);
-  employeeIdInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter"){
-      e.preventDefault();
-      lookupEmployeeFromInput();
-    }
-  });
-}
-
-function getFinalDepartment(){
-  if (currentEmployee?.isWorker) return departmentWorker?.value || "";
-  if (employeeLookupOk && currentEmployee && !currentEmployee.isWorker) return departmentAuto?.value.trim() || "";
-  return $("#department")?.value || "";
-}
-
-/* ===================== SHARED STATE ===================== */
-let sharedIsOn = false;
-let sharedMessage = "";
-let isAdminSession = false;
-let adminSession = { email:"", passcode:"" };
-
-function applySurveyState(isOn){
-  sharedIsOn = !!isOn;
-  if (sharedIsOn){
-    mainArea.style.display = "";
-    closedPanel.style.display = "none";
-  } else {
-    mainArea.style.display = "none";
-    closedPanel.style.display = "block";
-  }
-  toggleBtn.dataset.state = sharedIsOn ? "on" : "off";
-  toggleBtn.textContent = sharedIsOn ? "Survey: ON" : "Survey: OFF";
-  toggleBtn.setAttribute("aria-pressed", sharedIsOn ? "true" : "false");
-}
-
-function setMessage(msg){
-  sharedMessage = msg || "";
-  visitorMessage.innerHTML = escapeHtml(sharedMessage || "We are not collecting responses right now. Please come back later.");
-  adminMessage.value = sharedMessage;
-}
-
-function setAdminUI(on){
-  isAdminSession = !!on;
-  toggleBtn.style.display = isAdminSession ? "" : "none";
-  adminBox.style.display  = isAdminSession ? "" : "none";
-}
-
-async function refreshFromServer(){
-  const s = await apiGetSettings();
-  applySurveyState(!!s.isOn);
-  setMessage(s.message || "");
-}
-
-/* ===================== SCENARIO TOGGLES ===================== */
-function syncScenarioExplain(){
-  $$('input[name="scenario"]').forEach(chk => {
-    const box = $(`.explain[data-explain-for="${chk.value}"]`);
-    if (!box) return;
-    box.style.display = chk.checked ? "block" : "none";
-    const ta = $("textarea", box);
-    if (ta){
-      ta.required = chk.checked;
-      if (!chk.checked) ta.value = "";
-    }
-  });
-}
-$$('input[name="scenario"]').forEach(i => i.addEventListener("change", syncScenarioExplain));
-
-/* ===================== VALIDATION ===================== */
-function validateRequiredGroups(){
-  const errors = [];
-
-  if (!$("#fullName").value.trim()) errors.push("Chưa điền tên.");
-
-  const finalDepartment = getFinalDepartment();
-  if (!finalDepartment){
-    errors.push(currentEmployee?.isWorker ? "Vui lòng chọn kho." : "Chưa chọn bộ phận.");
-  }
-
-  ["q1","q2"].forEach((q, idx) => {
-    if (!document.querySelector(`input[name="${q}"]:checked`)) {
-      errors.push(`Câu hỏi ${idx + 1} chưa trả lời.`);
-    }
-  });
-
-  ["q3", "q4"].forEach((q, idx) => {
-    if (getCheckedValues(q).length === 0){
-      errors.push(`Câu hỏi ${idx + 5} chưa trả lời.`);
-    }
-  });
-const disciplineCheck = document.querySelector('input[name="disciplineCheck"]:checked')?.value;
-
-if (!disciplineCheck){
-  errors.push("Vui lòng trả lời câu 7.1: Hành động đó có vi phạm kỷ luật Công ty không?");
-}
-
-  const scenario = getCheckedValues("scenario");
-  if (scenario.length === 0) errors.push("Câu hỏi tình huống chưa trả lời.");
-
-  // kiểm tra giải thích nâng cao
-  scenario.forEach(v => {
-    const ta = document.querySelector(`.explain[data-explain-for="${v}"] textarea`);
-    if (!ta) return;
-
-    const raw = ta.value || "";
-    if (!raw.trim()){
-      errors.push("Phần giải thích bắt buộc cho mỗi lựa chọn đã tick.");
-      return;
-    }
-
-    const r = validateExplainAdvanced(raw);
-    if (!r.ok){
-      errors.push(r.reason);
-    }
-  });
-
-  return errors;
-}
-
-/* ===================== SCORING ===================== */
-function computeScoreSplit(){
-  let knowScore = 0;
-  let understandScore = 0;
-
-  ["q1","q2"].forEach(q => {
-    const picked = document.querySelector(`input[name="${q}"]:checked`)?.value;
-    if (picked === correctSingle[q]) knowScore += 1;
-  });
-
-  Object.keys(correctSets).forEach(q => {
-    const block = document.querySelector(`.qblock[data-qid="${q}"]`);
-    const anyEl = block?.querySelector("input,select,textarea");
-    if (!anyEl || anyEl.disabled) return;
-
-    const picked = getCheckedValues(q);
-    const correct = correctSets[q];
-    if (setsEqual(picked, correct)) knowScore += 1;
-  });
-
-  getCheckedValues("scenario").forEach(v => {
-    if (scenarioCorrect.includes(v)) understandScore += 1;
-  });
-
-  const enabledSetQuestions = Object.keys(correctSets).filter(q => {
-    const block = document.querySelector(`.qblock[data-qid="${q}"]`);
-    if (!block) return false;
-    const anyEl = block.querySelector("input,select,textarea");
-    return anyEl && !anyEl.disabled;
-  });
-
-  const totalKnow = Object.keys(correctSingle).length + enabledSetQuestions.length;
-  const totalUnderstand = scenarioCorrect.length;
-  const total = totalKnow + totalUnderstand;
-  const score = knowScore + understandScore;
-
-  return { knowScore, totalKnow, understandScore, totalUnderstand, score, total };
-}
-/* ===================== ADMIN MODAL ===================== */
-function openAdminModal(){
-  adminMsg.textContent = "";
-  adminModal.style.display = "flex";
-  adminEmail.value = adminSession.email || "";
-  adminPass.value = adminSession.passcode || "";
-}
-function closeAdminModal(){ adminModal.style.display = "none"; }
-
-adminBtn.addEventListener("click", openAdminModal);
-adminClose.addEventListener("click", closeAdminModal);
-adminModal.addEventListener("click", (e) => { if (e.target === adminModal) closeAdminModal(); });
-
-adminLogin.addEventListener("click", async () => {
-  adminMsg.textContent = "";
-  const email = (adminEmail.value || "").trim().toLowerCase();
-  const pass  = (adminPass.value || "").trim();
-  if (!email || !pass){
-    adminMsg.textContent = "Email & passcode are required.";
-    return;
-  }
-  adminSession = { email, passcode: pass };
-  setAdminUI(true);
-  closeAdminModal();
-  try { await refreshFromServer(); } catch(e){}
-});
-
-adminLogout.addEventListener("click", () => {
-  adminSession = { email:"", passcode:"" };
-  setAdminUI(false);
-  adminMsg.textContent = "Logged out.";
-});
-
-/* ===================== ADMIN ACTIONS ===================== */
-toggleBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
-  const nextIsOn = (toggleBtn.dataset.state === "off");
-  const msg = adminMessage.value || sharedMessage || "";
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn: nextIsOn, message: msg });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
-
-saveMessageBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
-  const isOn = (toggleBtn.dataset.state !== "off");
-  const msg  = adminMessage.value || "";
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn, message: msg });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
-
-clearMessageBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
-  const isOn = (toggleBtn.dataset.state !== "off");
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn, message: "" });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
-
-/* ===================== SUBMIT ===================== */
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  errorBox.style.display = "none";
-  errorBox.textContent = "";
-  resultBox.style.display = "none";
-  scenarioReasons.innerHTML = "";
-
-  if (!sharedIsOn){
-    errorBox.style.display = "block";
-    errorBox.textContent = "Khảo sát đang TẮT.";
-    return;
-  }
-
-  const errors = validateRequiredGroups();
-  if (errors.length){
-    errorBox.style.display = "block";
-    errorBox.textContent = errors[0];
-    return;
-  }
-
- const { knowScore, totalKnow, understandScore, totalUnderstand, score, total } = computeScoreSplit();
-
-  const finalDepartment = getFinalDepartment();
-
-  const payload = {
-    timestamp: new Date().toISOString(),
-    employeeId: $("#employeeId").value.trim(),
-    name: $("#fullName").value.trim(),
-    department: finalDepartment,
-    position: currentEmployee?.position || "",
-    employeeLookupStatus: employeeLookupOk ? "FOUND" : ($("#employeeId").value.trim() ? "NOT_FOUND_OR_MANUAL" : "MANUAL"),
-    knowScore,
-    totalKnow,
-    understandScore,
-    totalUnderstand,
-    score,
-    total,
-    answers: {
-      q1: document.querySelector('input[name="q1"]:checked')?.value || "",
-      q2: document.querySelector('input[name="q2"]:checked')?.value || "",
-      q3: getCheckedValues("q3"),
-      q4: getCheckedValues("q4"),
-      q5: getCheckedValues("q5"),
-      discipline_check: document.querySelector('input[name="disciplineCheck"]:checked')?.value || "",
-      scenario: getCheckedValues("scenario"),
-      scenario_explain: {
-        s1: ($(`.explain[data-explain-for="s1"] textarea`)?.value ?? "").trim(),
-        s2: ($(`.explain[data-explain-for="s2"] textarea`)?.value ?? "").trim(),
-        s3: ($(`.explain[data-explain-for="s3"] textarea`)?.value ?? "").trim(),
-        s4: ($(`.explain[data-explain-for="s4"] textarea`)?.value ?? "").trim(),
-        s5: ($(`.explain[data-explain-for="s5"] textarea`)?.value ?? "").trim(),
-        s6: ($(`.explain[data-explain-for="s6"] textarea`)?.value ?? "").trim(),
+      if (msnv === state.lastLookupMSNV && state.employeeLookupOk) {
+        return;
       }
-    },
-    userAgent: navigator.userAgent
-  };
 
-  // show local result
-scoreLine.textContent = `Tổng điểm: ${score} / ${total}`;
-resultBox.querySelectorAll("[data-score-split]").forEach(el => el.remove());
-resultBox.querySelectorAll("[data-scenario-action]").forEach(el => el.remove());
+      const sequence = ++state.lookupSequence;
+      setLookupStatus('Đang kiểm tra MSNV…','loading');
 
-const extra = document.createElement("p");
-extra.setAttribute("data-score-split", "1");
-extra.textContent = `Phần biết: ${knowScore}/${totalKnow} • Phần hiểu: ${understandScore}/${totalUnderstand}`;
-resultBox.insertBefore(extra, scenarioReasons);
+      try{
+        let employee;
 
-const actionSummary = document.createElement("p");
-actionSummary.setAttribute("data-scenario-action", "1");
-actionSummary.style.marginTop = "10px";
-actionSummary.textContent = `Câu 7.1: ${payload.answers.discipline_check || "(Chưa chọn)"}`;
-resultBox.insertBefore(actionSummary, scenarioReasons);
-  
-  let intro = resultBox.querySelector("#scenarioIntro");
-  if (!intro) {
-    intro = document.createElement("p");
-    intro.id = "scenarioIntro";
-    intro.style.marginTop = "12px";
-    intro.style.fontWeight = "900";
-    intro.style.color = "#7c2d12";
-    intro.textContent = "Dưới đây là đề xuất các giá trị cốt lõi của Ban Văn hóa Doanh nghiệp đưa ra cho tình huống này:";
-    resultBox.insertBefore(intro, scenarioReasons);
-  }
+        if (state.employeeCache.has(msnv)){
+          employee = state.employeeCache.get(msnv);
+        }else{
+          const response = await apiGet('lookupEmployee',{ msnv:msnv });
+          employee = response.employee;
+          state.employeeCache.set(msnv,employee);
+        }
 
-  scenarioReasons.innerHTML = "";
-  const pickedScenario = payload.answers.scenario || [];
+        if (sequence !== state.lookupSequence) return;
 
-  scenarioCorrect.forEach(v => {
-    const card = document.createElement("div");
-    card.className = "reason-card";
+        state.lastLookupMSNV = msnv;
+        applyEmployee(employee);
+      }catch(error){
+        if (sequence !== state.lookupSequence) return;
 
-    const title = document.createElement("h4");
-    const label = scenarioLabels?.[v] || v;
-    const isPicked = pickedScenario.includes(v);
-    title.textContent = `${label}` + (isPicked ? " ✅ (Bạn đã chọn)" : " ❌ (Bạn chưa chọn)");
-    card.appendChild(title);
-
-    const rationale = (scenarioRationales?.[v] || "").trim();
-    if (rationale) {
-      const expected = document.createElement("p");
-      expected.className = "expected";
-      expected.textContent = rationale;
-      card.appendChild(expected);
+        state.lastLookupMSNV = msnv;
+        resetEmployeeToManual(error.message);
+      }
     }
 
-    const userExplain = ((payload.answers.scenario_explain?.[v] || "").trim());
-    const user = document.createElement("p");
-    user.className = "user";
-    user.textContent = isPicked
-      ? `Giải thích của Anh/Chị:\n${userExplain || "(Chưa nhập nội dung)"}`
-      : `Giải thích của Anh/Chị:\n(Bạn không chọn mục này nên không có giải thích)`;
-    card.appendChild(user);
+    function applyEmployee(employee){
+      state.employee = employee;
+      state.employeeLookupOk = true;
 
-    scenarioReasons.appendChild(card);
-  });
+      const nameInput = document.getElementById('fullName');
+      const positionInput = document.getElementById('position');
 
-  resultBox.style.display = "block";
-  resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      nameInput.value = employee.name || '';
+      nameInput.readOnly = true;
+      positionInput.value = employee.position || '';
 
-  // submit to server
-  submitBtn.disabled = true;
-  try{
-    await apiSubmitSurvey(payload);
-    lockFormUntilRefresh();
-  }catch(err){
-    // nếu server-side reject thì báo đúng lý do
-    errorBox.style.display = "block";
-    errorBox.textContent = "Không thể lưu vào hệ thống:\n" + (err?.message || err);
-    submitBtn.disabled = false;
-  }
-});
+      document.getElementById('manualDepartmentBox').style.display = 'none';
 
-resetBtn.addEventListener("click", () => location.reload());
+      if (employee.isWorker){
+        document.getElementById('autoDepartmentBox').style.display = 'none';
+        document.getElementById('workerDepartmentBox').style.display = '';
+        document.getElementById('departmentWorker').value = '';
+      }else{
+        document.getElementById('workerDepartmentBox').style.display = 'none';
+        document.getElementById('autoDepartmentBox').style.display = '';
+        document.getElementById('departmentAuto').value = employee.department || '';
+      }
 
-/* ===================== LOCK FORM ===================== */
-function lockFormUntilRefresh(){
-  form.querySelectorAll('input, select, textarea, button:not(#resetBtn)')
-    .forEach(el => { el.disabled = true; });
-
-  if (!document.getElementById("lockedNote")){
-    const note = document.createElement("div");
-    note.id = "lockedNote";
-    note.style.marginTop = "12px";
-    note.style.padding = "10px 12px";
-    note.style.borderRadius = "12px";
-    note.style.border = "1px solid rgba(255,122,0,.25)";
-    note.style.background = "rgba(255,122,0,.06)";
-    note.style.fontWeight = "900";
-    note.textContent = "Anh/chị đã nộp khảo sát thành công.";
-    resultBox.appendChild(note);
-  }
-}
-/* ===================== LUNAR (VN) + TET DECOR CONTROL ===================== */
-/* Thuật toán chuyển đổi Dương lịch -> Âm lịch VN (GMT+7) */
-
-function INT(d){ return Math.floor(d); }
-
-function jdFromDate(dd, mm, yy){
-  const a = INT((14 - mm)/12);
-  const y = yy + 4800 - a;
-  const m = mm + 12*a - 3;
-  let jd = dd + INT((153*m + 2)/5) + 365*y + INT(y/4) - INT(y/100) + INT(y/400) - 32045;
-  if (jd < 2299161){
-    jd = dd + INT((153*m + 2)/5) + 365*y + INT(y/4) - 32083;
-  }
-  return jd;
-}
-
-function jdToDate(jd){
-  let a, b, c, d, e, m;
-  if (jd > 2299160){
-    a = jd + 32044;
-    b = INT((4*a + 3)/146097);
-    c = a - INT((b*146097)/4);
-  } else {
-    b = 0;
-    c = jd + 32082;
-  }
-  d = INT((4*c + 3)/1461);
-  e = c - INT((1461*d)/4);
-  m = INT((5*e + 2)/153);
-  const day = e - INT((153*m + 2)/5) + 1;
-  const month = m + 3 - 12*INT(m/10);
-  const year = b*100 + d - 4800 + INT(m/10);
-  return [day, month, year];
-}
-
-function NewMoon(k){
-  const T = k/1236.85;
-  const T2 = T*T;
-  const T3 = T2*T;
-  const dr = Math.PI/180;
-  let Jd1 = 2415020.75933 + 29.53058868*k + 0.0001178*T2 - 0.000000155*T3;
-  Jd1 += 0.00033*Math.sin((166.56 + 132.87*T - 0.009173*T2)*dr);
-  const M = 359.2242 + 29.10535608*k - 0.0000333*T2 - 0.00000347*T3;
-  const Mpr = 306.0253 + 385.81691806*k + 0.0107306*T2 + 0.00001236*T3;
-  const F = 21.2964 + 390.67050646*k - 0.0016528*T2 - 0.00000239*T3;
-  let C1 = (0.1734 - 0.000393*T)*Math.sin(M*dr) + 0.0021*Math.sin(2*dr*M);
-  C1 -= 0.4068*Math.sin(Mpr*dr) + 0.0161*Math.sin(2*dr*Mpr);
-  C1 -= 0.0004*Math.sin(3*dr*Mpr);
-  C1 += 0.0104*Math.sin(2*dr*F) - 0.0051*Math.sin((M + Mpr)*dr);
-  C1 -= 0.0074*Math.sin((M - Mpr)*dr) + 0.0004*Math.sin((2*F + M)*dr);
-  C1 -= 0.0004*Math.sin((2*F - M)*dr) - 0.0006*Math.sin((2*F + Mpr)*dr);
-  C1 += 0.0010*Math.sin((2*F - Mpr)*dr) + 0.0005*Math.sin((2*Mpr + M)*dr);
-
-  let deltat;
-  if (T < -11){
-    deltat = 0.001 + 0.000839*T + 0.0002261*T2 - 0.00000845*T3 - 0.000000081*T*T3;
-  } else {
-    deltat = -0.000278 + 0.000265*T + 0.000262*T2;
-  }
-  return Jd1 + C1 - deltat;
-}
-
-function getNewMoonDay(k, timeZone){
-  return INT(NewMoon(k) + 0.5 + timeZone/24);
-}
-
-function SunLongitude(jdn){
-  const T = (jdn - 2451545.0)/36525;
-  const T2 = T*T;
-  const dr = Math.PI/180;
-  let M = 357.52910 + 35999.05030*T - 0.0001559*T2 - 0.00000048*T*T2;
-  let L0 = 280.46645 + 36000.76983*T + 0.0003032*T2;
-  let DL = (1.914600 - 0.004817*T - 0.000014*T2)*Math.sin(dr*M);
-  DL += (0.019993 - 0.000101*T)*Math.sin(dr*2*M) + 0.000290*Math.sin(dr*3*M);
-  let L = L0 + DL;
-  L = L*dr;
-  L = L - Math.PI*2*INT(L/(Math.PI*2));
-  return L;
-}
-
-function getSunLongitude(dayNumber, timeZone){
-  return INT(SunLongitude(dayNumber - 0.5 - timeZone/24)/Math.PI*6);
-}
-
-function getLunarMonth11(yy, timeZone){
-  const off = jdFromDate(31,12,yy) - 2415021;
-  const k = INT(off/29.530588853);
-  let nm = getNewMoonDay(k, timeZone);
-  const sunLong = getSunLongitude(nm, timeZone);
-  if (sunLong >= 9) nm = getNewMoonDay(k-1, timeZone);
-  return nm;
-}
-
-function getLeapMonthOffset(a11, timeZone){
-  const k = INT(0.5 + (a11 - 2415021.076998695)/29.530588853);
-  let last = 0;
-  let i = 1;
-  let arc = getSunLongitude(getNewMoonDay(k+i, timeZone), timeZone);
-  do {
-    last = arc;
-    i++;
-    arc = getSunLongitude(getNewMoonDay(k+i, timeZone), timeZone);
-  } while (arc !== last && i < 14);
-  return i - 1;
-}
-
-function solarToLunar(dd, mm, yy, timeZone){
-  const dayNumber = jdFromDate(dd, mm, yy);
-  const k = INT((dayNumber - 2415021.076998695)/29.530588853);
-  let monthStart = getNewMoonDay(k+1, timeZone);
-  if (monthStart > dayNumber) monthStart = getNewMoonDay(k, timeZone);
-
-  let a11 = getLunarMonth11(yy, timeZone);
-  let b11 = a11;
-  let lunarYear;
-
-  if (a11 >= monthStart){
-    lunarYear = yy;
-    a11 = getLunarMonth11(yy-1, timeZone);
-  } else {
-    lunarYear = yy + 1;
-    b11 = getLunarMonth11(yy+1, timeZone);
-  }
-
-  const lunarDay = dayNumber - monthStart + 1;
-  const diff = INT((monthStart - a11)/29);
-  let lunarLeap = 0;
-  let lunarMonth = diff + 11;
-
-  if (b11 - a11 > 365){
-    const leapMonthDiff = getLeapMonthOffset(a11, timeZone);
-    if (diff >= leapMonthDiff){
-      lunarMonth = diff + 10;
-      if (diff === leapMonthDiff) lunarLeap = 1;
+      setLookupStatus('Đã xác nhận MSNV.','ok');
     }
-  }
 
-  if (lunarMonth > 12) lunarMonth -= 12;
-  if (lunarMonth >= 11 && diff < 4) lunarYear -= 1;
+    function resetEmployeeToManual(message){
+      state.employee = null;
+      state.employeeLookupOk = false;
 
-  return [lunarDay, lunarMonth, lunarYear, lunarLeap];
-}
+      const nameInput = document.getElementById('fullName');
+      nameInput.readOnly = false;
 
-/* ===================== DECOR TOGGLE BY LUNAR RANGE ===================== */
-function applyTetDecorByLunar(){
-  const tz = 7; // VN
-  const now = new Date();
-  const dd = now.getDate();
-  const mm = now.getMonth() + 1;
-  const yy = now.getFullYear();
+      document.getElementById('position').value = '';
+      document.getElementById('manualDepartmentBox').style.display = '';
+      document.getElementById('autoDepartmentBox').style.display = 'none';
+      document.getElementById('workerDepartmentBox').style.display = 'none';
+      document.getElementById('departmentAuto').value = '';
+      document.getElementById('departmentWorker').value = '';
 
-  const [lDay, lMonth] = solarToLunar(dd, mm, yy, tz);
+      setLookupStatus(message || 'Bạn có thể nhập thông tin thủ công.','error');
+    }
 
-  // Show decor từ 1/1 âm -> 15/1 âm
-  const show = (lMonth === 1 && lDay >= 1 && lDay <= 15);
+    function setLookupStatus(message,type){
+      const element = document.getElementById('lookupStatus');
+      element.textContent = message || '';
+      element.className = 'lookup-status ' + (type || '');
+    }
 
-  document.querySelectorAll(".tet-side").forEach(el => {
-    el.style.display = show ? "" : "none";
-  });
+    function normalizeMSNV(value){
+      return String(value || '').trim().replace(/\s+/g,'');
+    }
 
-  // (tuỳ chọn) debug nhỏ
-  // console.log("Lunar:", lDay, lMonth, "show:", show);
-}
-/* ===================== BOOT ===================== */
-(async function boot(){
-  setAdminUI(false);
+    function getFinalDepartment(){
+      if (state.employee && state.employee.isWorker) {
+        return document.getElementById('departmentWorker').value;
+      }
 
-  randomizeStandardChoices("q1");
-  randomizeStandardChoices("q2");
-  randomizeStandardChoices("q3");
-  randomizeStandardChoices("q4");
-  randomizeStandardChoices("q5"); // nếu đang ẩn thì vẫn không sao
-  randomizeScenarioChoices();     // nếu muốn random luôn phần giá trị cốt lõi
+      if (state.employeeLookupOk && state.employee) {
+        return document.getElementById('departmentAuto').value.trim();
+      }
 
-  syncScenarioExplain();
-  disableQuestion("q5");
+      return document.getElementById('department').value;
+    }
 
-  try{
-    await refreshFromServer();
-  }catch(err){
-    applySurveyState(false);
-    setMessage("Cannot load survey state right now. Please try again later.");
-    console.warn(err);
-  }
+    function renderQuestions(){
+      const container = document.getElementById('questionContainer');
 
-  setInterval(() => {
-    refreshFromServer().catch(() => {});
-  }, 20000);
-})();
-</script>
+      const standardHtml = QUESTIONS.map((question,index) => {
+        const options = shuffle(question.options);
+
+        return `
+          <section class="question" data-question="${escapeAttribute(question.id)}">
+            <h3>${index + 1}. ${escapeHtml(question.title)} <span class="required">Bắt buộc</span></h3>
+            <div class="choices">
+              ${options.map(([value,label]) => `
+                <label class="choice">
+                  <input
+                    type="${question.type === 'single' ? 'radio' : 'checkbox'}"
+                    name="${escapeAttribute(question.id)}"
+                    value="${escapeAttribute(value)}">
+                  <span>${escapeHtml(label)}</span>
+                </label>
+              `).join('')}
+            </div>
+          </section>
+        `;
+      }).join('');
+
+      const scenarioHtml = `
+        <section class="question">
+          <h3>5. Tình huống an toàn PPE <span class="required">Bắt buộc</span></h3>
+
+          <p>
+            Nhân viên A làm việc tại khu vực xuất nhập hàng nhưng không mang giày bảo hộ và áo phản quang.
+            Tổ trưởng đã nhắc nhở nhưng A vẫn tiếp tục làm việc trong khu vực xe nâng đang hoạt động.
+          </p>
+
+          <h3 style="margin-top:18px">5.1. Hành động trên có vi phạm kỷ luật Công ty không?</h3>
+          <div class="choices">
+            <label class="choice">
+              <input type="radio" name="disciplineCheck" value="Có">
+              <span>Có</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="disciplineCheck" value="Không">
+              <span>Không</span>
+            </label>
+          </div>
+
+          <h3 style="margin-top:18px">5.2. Những giá trị cốt lõi nào được thể hiện rõ nhất?</h3>
+          <div id="scenarioChoices" class="choices">
+            ${shuffle(SCENARIO_VALUES).map(([value,label]) => `
+              <div>
+                <label class="choice">
+                  <input
+                    type="checkbox"
+                    name="scenario"
+                    value="${escapeAttribute(value)}"
+                    onchange="toggleScenarioExplanation('${escapeAttribute(value)}',this.checked)">
+                  <span>${escapeHtml(label)}</span>
+                </label>
+                <div id="explanation_${escapeAttribute(value)}" class="explanation">
+                  <label class="field-label">Giải thích lý do, tối thiểu ${MIN_MEANINGFUL_WORDS} từ</label>
+                  <textarea data-scenario-explanation="${escapeAttribute(value)}"></textarea>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+
+      container.innerHTML = standardHtml + scenarioHtml;
+    }
+
+    function toggleScenarioExplanation(value,checked){
+      const box = document.getElementById('explanation_' + value);
+      box.classList.toggle('active',checked);
+
+      if (!checked){
+        const textarea = box.querySelector('textarea');
+        if (textarea) textarea.value = '';
+      }
+    }
+
+    function shuffle(items){
+      const copy = [...items];
+
+      for (let index = copy.length - 1; index > 0; index--){
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [copy[index],copy[randomIndex]] = [copy[randomIndex],copy[index]];
+      }
+
+      return copy;
+    }
+
+    document.getElementById('surveyForm').addEventListener('submit',submitSurvey);
+
+    async function submitSurvey(event){
+      event.preventDefault();
+      clearFormMessage();
+
+      const validation = validateSurvey();
+      if (!validation.ok){
+        showFormMessage(validation.message,'error');
+        return;
+      }
+
+      const scores = calculateScores();
+      const payload = buildPayload(scores);
+
+      document.getElementById('submitButton').disabled = true;
+      setLoading(true);
+
+      try{
+        const response = await apiPost('submitSurvey',payload);
+
+        renderLocalResult(scores,response.queueId);
+        lockSurveyForm();
+      }catch(error){
+        showFormMessage('Không thể lưu vào hệ thống: ' + error.message,'error');
+        document.getElementById('submitButton').disabled = false;
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    function validateSurvey(){
+      if (!document.getElementById('fullName').value.trim()){
+        return { ok:false,message:'Vui lòng nhập họ và tên.' };
+      }
+
+      if (!getFinalDepartment()){
+        return { ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.' };
+      }
+
+      for (const question of QUESTIONS){
+        const selected = getSelectedValues(question.id);
+
+        if (!selected.length){
+          return { ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.' };
+        }
+      }
+
+      if (!document.querySelector('input[name="disciplineCheck"]:checked')){
+        return { ok:false,message:'Vui lòng trả lời câu hỏi vi phạm kỷ luật.' };
+      }
+
+      const scenarioValues = getSelectedValues('scenario');
+
+      if (!scenarioValues.length){
+        return { ok:false,message:'Vui lòng chọn ít nhất một giá trị cốt lõi.' };
+      }
+
+      for (const value of scenarioValues){
+        const textarea = document.querySelector(
+          `[data-scenario-explanation="${cssEscape(value)}"]`
+        );
+        const text = textarea ? textarea.value.trim() : '';
+
+        if (countMeaningfulWords(text) < MIN_MEANINGFUL_WORDS){
+          return {
+            ok:false,
+            message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`
+          };
+        }
+
+        if (isTooRepetitive(text)){
+          return {
+            ok:false,
+            message:'Nội dung giải thích đang lặp lại quá nhiều.'
+          };
+        }
+      }
+
+      return { ok:true };
+    }
+
+    function calculateScores(){
+      let knowScore = 0;
+
+      QUESTIONS.forEach(question => {
+        const selected = getSelectedValues(question.id);
+
+        if (question.type === 'single'){
+          if (selected[0] === question.correct) knowScore += 1;
+        }else if (setsEqual(selected,question.correct)){
+          knowScore += 1;
+        }
+      });
+
+      const selectedScenario = getSelectedValues('scenario');
+      const correctScenarioValues = SCENARIO_VALUES.map(item => item[0]);
+      const understandScore = selectedScenario.filter(
+        value => correctScenarioValues.includes(value)
+      ).length;
+
+      const totalKnow = QUESTIONS.length;
+      const totalUnderstand = correctScenarioValues.length;
+
+      return {
+        knowScore:knowScore,
+        totalKnow:totalKnow,
+        understandScore:understandScore,
+        totalUnderstand:totalUnderstand,
+        score:knowScore + understandScore,
+        total:totalKnow + totalUnderstand
+      };
+    }
+
+    function buildPayload(scores){
+      const scenarioExplain = {};
+
+      SCENARIO_VALUES.forEach(([value]) => {
+        const textarea = document.querySelector(
+          `[data-scenario-explanation="${cssEscape(value)}"]`
+        );
+        scenarioExplain[value] = textarea ? textarea.value.trim() : '';
+      });
+
+      return {
+        timestamp:new Date().toISOString(),
+        employeeId:normalizeMSNV(document.getElementById('employeeId').value),
+        name:document.getElementById('fullName').value.trim(),
+        fullName:document.getElementById('fullName').value.trim(),
+        department:getFinalDepartment(),
+        position:state.employee ? state.employee.position || '' : '',
+        employeeLookupStatus:state.employeeLookupOk
+          ? 'FOUND'
+          : normalizeMSNV(document.getElementById('employeeId').value)
+            ? 'NOT_FOUND_OR_MANUAL'
+            : 'MANUAL',
+        ...scores,
+        answers:{
+          q1:getSelectedValues('q1')[0] || '',
+          q2:getSelectedValues('q2')[0] || '',
+          q3:getSelectedValues('q3'),
+          q4:getSelectedValues('q4'),
+          discipline_check:
+            document.querySelector('input[name="disciplineCheck"]:checked')?.value || '',
+          scenario:getSelectedValues('scenario'),
+          scenario_explain:scenarioExplain
+        },
+        userAgent:navigator.userAgent
+      };
+    }
+
+    function renderLocalResult(scores,queueId){
+      const percent = scores.total > 0
+        ? Math.round(scores.score / scores.total * 10000) / 100
+        : 0;
+
+      const result = document.getElementById('resultBox');
+      result.classList.add('active');
+      result.innerHTML = `
+        <h3 style="margin-top:0">Đã nộp khảo sát thành công ✅</h3>
+        <p><strong>Điểm tổng:</strong> ${scores.score}/${scores.total} (${formatNumber(percent)}%)</p>
+        <p><strong>Phần Biết:</strong> ${scores.knowScore}/${scores.totalKnow}</p>
+        <p><strong>Phần Hiểu:</strong> ${scores.understandScore}/${scores.totalUnderstand}</p>
+        <p><strong>Mã hàng đợi:</strong> ${escapeHtml(queueId || '')}</p>
+        <p style="font-size:12px">Kết quả sẽ được chuyển vào sheet Responses bởi trigger xử lý Queue.</p>
+      `;
+
+      result.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function lockSurveyForm(){
+      document
+        .querySelectorAll('#surveyArea input,#surveyArea select,#surveyArea textarea,#submitButton')
+        .forEach(element => {
+          element.disabled = true;
+        });
+    }
+
+    function getSelectedValues(name){
+      return Array.from(
+        document.querySelectorAll(`input[name="${cssEscape(name)}"]:checked`)
+      ).map(input => input.value);
+    }
+
+    function setsEqual(left,right){
+      if (left.length !== right.length) return false;
+      return [...left].sort().join('|') === [...right].sort().join('|');
+    }
+
+    function countMeaningfulWords(value){
+      return normalizeText(value)
+        .split(' ')
+        .filter(word => word.length >= 2 || /^\d+$/.test(word))
+        .length;
+    }
+
+    function isTooRepetitive(value){
+      const tokens = normalizeText(value).split(' ').filter(Boolean);
+      if (tokens.length < MIN_MEANINGFUL_WORDS) return false;
+
+      const frequency = {};
+      tokens.forEach(token => {
+        frequency[token] = (frequency[token] || 0) + 1;
+      });
+
+      const highest = Math.max(...Object.values(frequency));
+      return highest >= Math.ceil(tokens.length * 0.7);
+    }
+
+    function normalizeText(value){
+      return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/đ/g,'d')
+        .replace(/[^a-z0-9\s]/g,' ')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
+
+    function openAdminLogin(){
+      openModal('adminLoginModal');
+    }
+
+    async function adminLogin(){
+      const email = document.getElementById('adminEmail').value.trim();
+      const passcode = document.getElementById('adminPasscode').value.trim();
+
+      if (!email || !passcode){
+        showMessageElement(
+          'adminLoginMessage',
+          'Vui lòng nhập email và passcode.',
+          'error'
+        );
+        return;
+      }
+
+      state.admin = { email:email,passcode:passcode };
+      setLoading(true);
+
+      try{
+        await loadDashboard(false);
+        document.getElementById('adminSurveyStatus').value =
+          String(Boolean(state.settings.isOn));
+        document.getElementById('adminSurveyMessage').value =
+          state.settings.message || '';
+
+        closeModal('adminLoginModal');
+        openModal('adminDashboardModal');
+      }catch(error){
+        state.admin = { email:'',passcode:'' };
+        showMessageElement('adminLoginMessage',error.message,'error');
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    async function saveAdminSettings(){
+      setLoading(true);
+
+      try{
+        const response = await apiPost('saveSettings',{
+          ...state.admin,
+          isOn:document.getElementById('adminSurveyStatus').value === 'true',
+          message:document.getElementById('adminSurveyMessage').value
+        });
+
+        state.settings = response.settings;
+        applySurveyState();
+        alert('Đã cập nhật trạng thái khảo sát.');
+      }catch(error){
+        alert(error.message);
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    async function loadDashboard(showLoader = true){
+      if (showLoader) setLoading(true);
+
+      try{
+        const response = await apiPost('adminDashboard',{
+          ...state.admin,
+          filters:{
+            fromDate:document.getElementById('filterFromDate').value,
+            toDate:document.getElementById('filterToDate').value,
+            department:document.getElementById('filterDepartment').value,
+            minPercent:document.getElementById('filterMinPercent').value,
+            maxPercent:document.getElementById('filterMaxPercent').value
+          }
+        });
+
+        state.dashboard = response.dashboard;
+        renderDashboard();
+      }finally{
+        if (showLoader) setLoading(false);
+      }
+    }
+
+    function renderDashboard(){
+      const dashboard = state.dashboard || {
+        summary:{totalResponses:0,averagePercent:0,averageRawScore:0},
+        departments:[],
+        rows:[],
+        truncated:false
+      };
+
+      document.getElementById('metricTotal').textContent =
+        dashboard.summary.totalResponses || 0;
+      document.getElementById('metricAveragePercent').textContent =
+        formatNumber(dashboard.summary.averagePercent || 0) + '%';
+      document.getElementById('metricAverageRaw').textContent =
+        formatNumber(dashboard.summary.averageRawScore || 0);
+
+      renderDepartmentFilter(dashboard.departments || []);
+
+      const rows = dashboard.rows || [];
+      document.getElementById('dashboardRows').innerHTML = rows.length
+        ? rows.map((row,index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(row.timestamp)}</td>
+            <td>${escapeHtml(row.employeeId)}</td>
+            <td><strong>${escapeHtml(row.fullName)}</strong></td>
+            <td>${escapeHtml(row.position)}</td>
+            <td>${escapeHtml(row.department)}</td>
+            <td class="num">${formatNumber(row.knowScore)}</td>
+            <td class="num">${formatNumber(row.understandScore)}</td>
+            <td class="num">${formatNumber(row.score)}/${formatNumber(row.total)}</td>
+            <td class="num"><strong>${formatNumber(row.percent)}%</strong></td>
+          </tr>
+        `).join('')
+        : '<tr><td colspan="10" style="text-align:center;color:var(--muted)">Không có dữ liệu phù hợp bộ lọc.</td></tr>';
+
+      const notice = document.getElementById('dashboardNotice');
+
+      if (dashboard.truncated){
+        notice.textContent = 'Kết quả quá nhiều; bảng chỉ hiển thị tối đa 2.000 dòng đầu.';
+        notice.className = 'message error';
+      }else{
+        notice.textContent = '';
+        notice.className = 'message';
+      }
+    }
+
+    function renderDepartmentFilter(departments){
+      const select = document.getElementById('filterDepartment');
+      const currentValue = select.value;
+
+      select.innerHTML =
+        '<option value="">Tất cả bộ phận</option>' +
+        departments.map(department =>
+          `<option value="${escapeAttribute(department)}">${escapeHtml(department)}</option>`
+        ).join('');
+
+      if (departments.includes(currentValue)){
+        select.value = currentValue;
+      }
+    }
+
+    function resetDashboardFilters(){
+      document.getElementById('filterFromDate').value = '';
+      document.getElementById('filterToDate').value = '';
+      document.getElementById('filterDepartment').value = '';
+      document.getElementById('filterMinPercent').value = '';
+      document.getElementById('filterMaxPercent').value = '';
+      loadDashboard();
+    }
+
+    function bindAdminTabs(){
+      document.querySelectorAll('.admin-tab').forEach(button => {
+        button.addEventListener('click',() => {
+          document.querySelectorAll('.admin-tab').forEach(item =>
+            item.classList.remove('active')
+          );
+          document.querySelectorAll('.admin-panel').forEach(panel =>
+            panel.classList.remove('active')
+          );
+
+          button.classList.add('active');
+          document.getElementById(button.dataset.panel).classList.add('active');
+        });
+      });
+    }
+
+    function closeAdminDashboard(){
+      state.admin = { email:'',passcode:'' };
+      closeModal('adminDashboardModal');
+    }
+
+    function openModal(id){
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id){
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function setLoading(active){
+      document.getElementById('loader').classList.toggle('active',Boolean(active));
+    }
+
+    function showFormMessage(message,type){
+      const element = document.getElementById('formMessage');
+      element.textContent = message;
+      element.className = 'message ' + type;
+    }
+
+    function clearFormMessage(){
+      const element = document.getElementById('formMessage');
+      element.textContent = '';
+      element.className = 'message';
+    }
+
+    function showMessageElement(id,message,type){
+      const element = document.getElementById(id);
+      element.textContent = message;
+      element.className = 'message ' + type;
+    }
+
+    function escapeHtml(value){
+      return String(value == null ? '' : value)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    function escapeAttribute(value){
+      return escapeHtml(value).replace(/`/g,'&#096;');
+    }
+
+    function cssEscape(value){
+      if (window.CSS && CSS.escape) return CSS.escape(String(value));
+      return String(value).replace(/[^a-zA-Z0-9_-]/g,'\\$&');
+    }
+
+    function formatNumber(value){
+      const number = Number(value);
+      if (!Number.isFinite(number)) return '0';
+      return Number.isInteger(number)
+        ? String(number)
+        : number.toFixed(2).replace(/\.?0+$/,'');
+    }
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
