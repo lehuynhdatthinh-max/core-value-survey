@@ -1,523 +1,183 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bảng câu hỏi phỏng vấn khi nghỉ việc</title>
-
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123b5d">
+  <title>Phiếu phỏng vấn nghỉ việc</title>
   <style>
     :root{
-      --orange:#ff7a00;
-      --ink:#1f2937;
-      --muted:#6b7280;
-      --card:#ffffff;
-      --border:#e5e7eb;
-      --shadow: 0 10px 30px rgba(0,0,0,.08);
-      --radius:16px;
+      --primary:#ff7a00;--primary2:#ff9a3d;--accent:#123b5d;--success:#16865c;
+      --danger:#c9363e;--warning:#a85a00;--bg:#fff7ef;--card:#fff;--border:#e5e7eb;
+      --text:#1f2937;--muted:#6b7280;--radius:17px;--shadow:0 12px 32px rgba(80,45,15,.10)
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
-      background: linear-gradient(135deg, #fff 0%, #fff 45%, rgba(255,122,0,.10) 100%);
-      min-height:100vh;
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;min-height:100dvh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(135deg,#fff 0%,#fff 45%,rgba(255,122,0,.10) 100%)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{width:min(980px,calc(100% - 28px));margin:20px auto 56px;padding-bottom:env(safe-area-inset-bottom)}
+    .header{position:relative;overflow:hidden;padding:25px 25px 23px;border-radius:var(--radius);color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--shadow)}
+    .header:after{content:"";position:absolute;width:240px;height:240px;right:-85px;top:-115px;border-radius:50%;background:#ffffff12}
+    .header-row{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .eyebrow{margin-bottom:8px;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#cfe4f2}
+    .header h1{margin:0;font-size:clamp(25px,4vw,36px);line-height:1.18}
+    .header p{max-width:680px;margin:10px 0 0;color:#e2eef5;font-size:15px;line-height:1.55}
+    .admin-btn{position:relative;z-index:2;flex:0 0 auto;min-height:46px;padding:10px 15px;border:1px solid #ffffff6b;border-radius:12px;color:#fff;background:#ffffff18;font-weight:800}
+    .privacy{position:relative;z-index:1;display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:12px 14px;border:1px solid #ffffff29;border-radius:13px;background:#ffffff12;color:#edf6fb;font-size:13px;line-height:1.5}
+    .status-banner{display:none;margin-top:15px;padding:15px 16px;border-radius:14px;font-weight:800;line-height:1.5}
+    .status-banner.off{display:block;color:#8d2730;background:#fde7e9;border:1px solid #f5c9ce}
+    .status-banner.on{display:block;color:#0d6847;background:#def5eb;border:1px solid #bee9d9}
+    .progress-wrap{position:sticky;top:0;z-index:50;margin:14px 0;padding:8px;border:1px solid var(--border);border-radius:14px;background:#ffffffed;box-shadow:0 8px 22px rgba(18,59,93,.08);backdrop-filter:blur(8px)}
+    .progress{height:7px;overflow:hidden;border-radius:999px;background:#dfe8ee}.progress-bar{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#ffae55);transition:width .25s ease}
+    .progress-text{display:flex;justify-content:space-between;gap:12px;margin-top:7px;color:var(--muted);font-size:12px;font-weight:800}
+    .card{margin-top:14px;padding:22px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
+    .section-title{display:flex;align-items:flex-start;gap:12px;margin-bottom:17px}
+    .section-no{flex:0 0 auto;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;color:#fff;background:var(--primary);font-weight:900}
+    .section-title h2{margin:0;color:var(--primary);font-size:21px;line-height:1.3}
+    .section-title p{margin:5px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+    .full{grid-column:1/-1}
+    label.field-label{display:block;margin-bottom:7px;color:#334155;font-size:14px;font-weight:800}
+    .required:after{content:" *";color:var(--danger)}
+    input[type="text"],input[type="date"],input[type="email"],input[type="password"],select,textarea{
+      width:100%;min-height:51px;padding:12px 13px;border:1px solid var(--border);border-radius:12px;outline:none;color:var(--text);background:#fff;font-size:16px
     }
+    textarea{min-height:105px;resize:vertical;line-height:1.55}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary2);box-shadow:0 0 0 4px rgba(31,95,139,.12)}
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .choice-grid.one{grid-template-columns:1fr}
+    .choice{position:relative;display:flex;align-items:flex-start;gap:11px;min-height:52px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;transition:.15s}
+    .choice:hover{border-color:#9db8ca;background:#f8fbfd}
+    .choice:has(input:checked){border-color:var(--primary2);background:#eef6fb;box-shadow:0 0 0 3px rgba(31,95,139,.08)}
+    .choice input{flex:0 0 auto;width:20px;height:20px;margin:0;margin-top:1px;accent-color:var(--primary2)}
+    .choice span{line-height:1.4}
+    .conditional{display:none;margin-top:11px;padding:13px;border-left:4px solid var(--accent);border-radius:10px;background:#fff8f0}
+    .conditional.on{display:block}
+    .question{padding:18px 0;border-top:1px solid #edf1f4}
+    .question:first-of-type{padding-top:0;border-top:0}
+    .q-title{margin:0 0 11px;color:#26384a;font-size:16px;font-weight:900;line-height:1.5}
+    .help{margin:-4px 0 11px;color:var(--muted);font-size:13px;line-height:1.45}
+    .consent{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
+    .consent input{width:21px;height:21px;margin:0;accent-color:var(--primary2)}
+    .consent span{font-size:14px;line-height:1.5}
+    .actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .btn{min-height:48px;padding:11px 17px;border:0;border-radius:12px;font-weight:900}
+    .btn-primary{color:#fff;background:var(--primary)}.btn-success{color:#fff;background:var(--success)}
+    .btn-light{color:var(--primary);background:#e8eff4}.btn-danger{color:#fff;background:var(--danger)}
+    .submit-btn{min-width:210px;min-height:54px;font-size:16px}
+    .success-view{display:none;text-align:center;padding:32px 18px}
+    .success-view.on{display:block}
+    .success-icon{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 17px;border-radius:50%;color:#fff;background:var(--success);font-size:42px;font-weight:900}
+    .success-view h2{margin:0;color:var(--primary);font-size:26px}.success-view p{color:var(--muted);line-height:1.6}
+    .response-code{display:inline-block;margin:8px 0 17px;padding:9px 12px;border-radius:10px;background:#edf3f7;color:var(--primary);font-family:monospace;font-weight:800;overflow-wrap:anywhere}
+    .modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:#0f172a88}
+    .modal.on{display:flex}
+    .modal-card{width:min(540px,100%);max-height:92vh;overflow:auto;padding:22px;border-radius:17px;background:#fff;box-shadow:0 24px 65px #0005}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .modal-head h3{margin:0;color:var(--primary);font-size:21px}
+    .close-btn{width:38px;height:38px;border:0;border-radius:50%;font-size:22px}
+    .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:17px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
+    .switch{position:relative;width:54px;height:30px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;transition:.2s}.slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0003;transition:.2s}.switch input:checked+.slider{background:var(--success)}.switch input:checked+.slider:before{transform:translateX(24px)}
+    .admin-note{margin-top:12px;padding:12px 13px;border-radius:11px;color:#744100;background:#fff0d7;font-size:13px;line-height:1.5}
 
-    header{
-      position:sticky; top:0; z-index:10;
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,.82);
-      border-bottom: 1px solid rgba(229,231,235,.85);
-    }
-    .header-inner{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 14px 18px;
-      display:flex;
-      gap:14px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .brand{
-      display:flex; gap:12px; align-items:center;
-      min-width: 240px;
-    }
-    .logo{
-      width:78px; height:78px;
-      border-radius:12px;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      border: 1px solid rgba(229,231,235,.9);
-      flex-shrink:0;
-    }
-    .logo img{ width:100%; height:100%; object-fit:contain; display:block; }
-    .titlewrap{ display:flex; flex-direction:column; line-height:1.15; }
-    .title{
-      font-size: 18px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .3px;
-    }
-    .subtitle{
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .admin-modal-card{width:min(1120px,100%)}
+    .admin-auth{display:grid;grid-template-columns:1.2fr 1fr auto;gap:12px;align-items:end;margin-top:16px}
+    .admin-workspace{margin-top:16px}
+    .admin-tabs{display:flex;gap:7px;padding:5px;border:1px solid var(--border);border-radius:13px;background:#e8eff4}
+    .admin-tab{flex:1;min-height:45px;padding:9px 12px;border:0;border-radius:10px;color:var(--muted);background:transparent;font-weight:900}
+    .admin-tab.on{color:#fff;background:var(--primary)}
+    .admin-panel{display:none;margin-top:15px}.admin-panel.on{display:block}
+    .response-filter{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:11px;align-items:end}
+    .response-summary{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 0;color:var(--muted);font-size:13px;font-weight:800}
+    .response-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:13px}
+    .response-table{width:100%;min-width:900px;border-collapse:collapse}
+    .response-table th,.response-table td{padding:11px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    .response-table th{position:sticky;top:0;color:#fff;background:var(--primary);font-size:13px;white-space:nowrap}
+    .response-name{color:var(--primary);font-weight:900}.response-meta{margin-top:4px;color:var(--muted);font-size:12px}
+    .response-mobile{display:none}
+    .response-card{padding:14px;border:1px solid var(--border);border-radius:13px;background:#fff}
+    .response-card+.response-card{margin-top:10px}.response-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .response-card-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+    .response-field{padding-top:8px;border-top:1px solid #edf1f4}.response-label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase}.response-value{margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
 
-    button{
-      border:none;
-      cursor:pointer;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      font-size: 14px;
-    }
-    .btn-primary{
-      color:white;
-      background: linear-gradient(135deg, var(--orange) 0%, #ff9a3d 100%);
-      box-shadow: 0 10px 20px rgba(255,122,0,.22);
-    }
-    .btn-ghost{
-      color: var(--ink);
-      background: #fff;
-      border: 1px solid var(--border);
-    }
-    .toggle-btn{
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,122,0,.35);
-      background: #fff;
-      font-weight: 900;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .toggle-btn[data-state="on"]{
-      color: #0f5132;
-      border-color: rgba(16,185,129,.35);
-      background: rgba(16,185,129,.08);
-    }
-    .toggle-btn[data-state="off"]{
-      color: #7f1d1d;
-      border-color: rgba(180,35,24,.28);
-      background: rgba(180,35,24,.08);
-    }
+    .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(510px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:var(--primary);box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:800;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
+    .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:#ffffffc7;backdrop-filter:blur(2px)}.loading.on{display:grid}.spinner{width:50px;height:50px;border:5px solid #d8e2e9;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .hidden{display:none!important}
 
-    main{
-      max-width: 1100px;
-      margin: 18px auto 40px;
-      padding: 0 18px;
-    }
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card-head{
-      padding: 18px 18px 12px;
-      background: linear-gradient(90deg, rgba(255,122,0,.08), rgba(255,255,255,1));
-      border-bottom: 1px solid var(--border);
-    }
-    .card-head h2{
-      margin:0;
-      font-size: 22px;
-      letter-spacing:.2px;
-    }
-    .card-head p{
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height:1.45;
-    }
+    .brand-wrap{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-logo{flex:0 0 auto;width:76px;height:76px;padding:5px;border:1px solid #ffffff55;border-radius:13px;background:#fff;object-fit:contain}
+    .doc-meta{display:flex;justify-content:space-between;gap:14px;margin-top:15px;padding-top:12px;border-top:1px solid #ffffff38;color:#fff4ea;font-size:12px;font-weight:800}
+    .header .eyebrow{color:#fff4e7}
 
-    form{
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 16px;
-    }
-
-    .meta-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-      margin-bottom: 4px;
-    }
-    .meta-top .right{
-      text-align:right;
-      white-space:pre-line;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .row-3{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 900px){
-      .row-3{ grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 760px){
-      .row, .row-3{grid-template-columns:1fr}
-      .brand{min-width:auto}
-    }
-
-    label{
-      display:block;
-      font-size: 13px;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-    input[type="text"], input[type="password"], textarea{
-      width:100%;
-      padding: 12px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      outline:none;
-      font-size: 14px;
-      background: #fff;
-      color: var(--ink);
-    }
-    input[type="text"]:focus, input[type="password"]:focus, textarea:focus{
-      border-color: rgba(255,122,0,.65);
-      box-shadow: 0 0 0 4px rgba(255,122,0,.10);
-    }
-    textarea{
-      min-height: 88px;
-      resize: vertical;
-    }
-
-    .required{
-      font-size: 12px;
-      font-weight: 900;
-      color: #b42318;
-      background: rgba(180,35,24,.08);
-      border: 1px solid rgba(180,35,24,.18);
-      padding: 4px 8px;
-      border-radius: 999px;
-      white-space: nowrap;
-      display:inline-flex;
-      align-items:center;
-      margin-left: 6px;
-    }
-
-    .section{
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,122,0,.04), rgba(255,255,255,1));
-    }
-
-    .question-block{
-      margin: 14px 0 18px;
-    }
-    .question-text{
-      font-size: 14px;
-      font-weight: 900;
-      margin-bottom: 10px;
-      line-height:1.45;
-    }
-
-    .choices{
-      display:grid;
-      gap:10px;
-    }
-
-    .choice{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(229,231,235,.9);
-      background: rgba(255,255,255,.96);
-      margin-bottom: 0;
-    }
-    .choice input{
-      margin-top: 3px;
-      flex-shrink:0;
-    }
-    .choice span{
-      font-size: 14px;
-      line-height: 1.35rem;
-      font-weight: 500;
-    }
-
-    .inline-choices{
-      display:flex;
-      gap:14px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom: 8px;
-    }
-
-    .followup-box{
-      display:none;
-      margin-top: 8px;
-    }
-    .followup-box.show{
-      display:block;
-    }
-
-    .signature-box{
-      margin-top: 18px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:20px;
-    }
-    .signature-col{
-      min-height: 110px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-end;
-      align-items:center;
-      text-align:center;
-      font-size: 14px;
-    }
-    .signature-col .muted{
-      color: var(--muted);
-      font-style: italic;
-      font-size: 13px;
-    }
-
-    .footer-note{
-      margin-top: 12px;
-      color: var(--muted);
-      font-style: italic;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .actions{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:flex-end;
-      padding-top: 6px;
-    }
-
-    .result{
-      display:none;
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(16,185,129,.25);
-      background: rgba(16,185,129,.08);
-    }
-    .result h3{margin:0 0 6px}
-    .result p{margin:0; color: #064e3b; line-height:1.5}
-
-    .error{
-      display:none;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(180,35,24,.22);
-      background: rgba(180,35,24,.06);
-      color:#7f1d1d;
-      font-weight: 900;
-      white-space: pre-wrap;
-      line-height:1.5;
-    }
-
-    .closed-panel{
-      max-width: 1100px;
-      margin: 18px auto 0;
-      padding: 0 18px;
-      display:none;
-    }
-    .closed-card{
-      background: #fff;
-      border: 1px solid rgba(229,231,235,.9);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      padding: 18px;
-    }
-    .closed-title{
-      margin: 0 0 10px;
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-    .visitor-message{
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,122,0,.22);
-      background: rgba(255,122,0,.06);
-      white-space: pre-wrap;
-      font-size: 14px;
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
-    .admin-box{
-      padding-top: 8px;
-      border-top: 1px solid rgba(229,231,235,.9);
-      display:none;
-    }
-    .admin-label{
-      display:block;
-      font-size: 13px;
-      font-weight: 900;
-      margin: 10px 0 8px;
-    }
-    .admin-textarea{
-      width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(229,231,235,.9);
-      outline: none;
-      resize: vertical;
-    }
-    .admin-actions{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      margin-top: 10px;
-    }
-
-    .modal{
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      z-index: 999;
-    }
-    .modal-card{
-      width: min(520px, 100%);
-      background:#fff;
-      border-radius: 16px;
-      border:1px solid rgba(229,231,235,.9);
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
-      overflow:hidden;
-    }
-    .modal-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(229,231,235,.9);
-    }
-    .modal-body{ padding: 14px; }
-    .xbtn{
-      border:none;
-      background:transparent;
-      cursor:pointer;
-      font-size: 16px;
-      font-weight: 900;
-      padding: 6px 10px;
-    }
-    .admin-msg{
-      margin-top:10px;
-      font-weight: 900;
-      color:#7f1d1d;
-      min-height: 18px;
+    @media(max-width:700px){
+      .app{width:calc(100% - 16px);margin:8px auto 32px}
+      .header{padding:18px 16px;border-radius:14px}.header-row{gap:10px}.header h1{font-size:21px}.header p{font-size:14px}.brand-logo{width:58px;height:58px}.doc-meta{flex-direction:column;gap:4px}
+      .admin-btn{min-width:46px;padding:10px;font-size:0}.admin-btn:after{content:"⚙";font-size:22px}
+      .privacy{font-size:12px}
+      .card{padding:17px 14px;border-radius:14px}
+      .grid,.choice-grid{grid-template-columns:1fr}.full{grid-column:auto}
+      .section-title h2{font-size:19px}.section-no{width:34px;height:34px}
+      input[type="text"],input[type="date"],input[type="email"],input[type="password"],select,textarea{min-height:54px;font-size:16px}
+      .choice{min-height:56px;padding:14px}
+      .actions{display:grid;grid-template-columns:1fr}.btn,.submit-btn{width:100%;min-height:53px;font-size:16px}
+      .modal{align-items:flex-end;padding:0}.modal-card{width:100%;border-radius:19px 19px 0 0;padding:20px 15px calc(20px + env(safe-area-inset-bottom))}
+      .admin-modal-card{height:min(94dvh,900px);max-height:94dvh;border-radius:19px 19px 0 0}
+      .admin-auth,.response-filter{grid-template-columns:1fr}
+      .admin-tabs{position:sticky;top:-1px;z-index:5}
+      .response-table-wrap{display:none}.response-mobile{display:block}
+      .response-summary{align-items:flex-start;flex-direction:column}
+      .progress-wrap{top:4px}
     }
   </style>
 </head>
-
 <body>
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="logo">
-        <img src="../images/logo.png" alt="TBS Logistics Logo">
+  <div class="loading" id="loading"><div class="spinner"></div></div>
+  <div class="toast" id="toast"></div>
+
+  <main class="app">
+    <header class="header">
+      <div class="header-row">
+        <div class="brand-wrap">
+          <img class="brand-logo" src="https://lehuynhdatthinh-max.github.io/core-value-survey/images/logo.png" alt="TBS Logistics">
+          <div>
+            <div class="eyebrow">Khảo sát nhân sự</div>
+            <h1>BẢNG CÂU HỎI PHỎNG VẤN KHI NGHỈ VIỆC</h1>
+            <p>Ghi nhận ý kiến chân thành để cải thiện môi trường làm việc và giữ chân nhân sự tốt hơn.</p>
+          </div>
+        </div>
+        <button class="admin-btn" type="button" onclick="openAdmin()">Quản trị</button>
       </div>
-      <div class="titlewrap">
-        <div class="title">BẢNG CÂU HỎI PHỎNG VẤN KHI NGHỈ VIỆC</div>
-        <div class="subtitle">Ghi nhận ý kiến chân thành để cải thiện môi trường làm việc và giữ chân nhân sự tốt hơn</div>
-      </div>
-    </div>
+      <div class="doc-meta"><span>MKH: TBSL-NS-QT03-BM05</span><span>Lần ban hành: 02</span></div>
+      <div class="privacy"><span>🔒</span><span>Nội dung phản hồi được sử dụng cho mục đích cải tiến nội bộ. Vui lòng trả lời trung thực và đầy đủ.</span></div>
+    </header>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button type="button" id="toggleSurveyBtn" class="toggle-btn" style="display:none;" aria-pressed="false" data-state="off">
-        Survey: OFF
-      </button>
-      <button type="button" id="adminBtn" class="toggle-btn">Admin</button>
-    </div>
-  </div>
-</header>
+    <div id="formStatus" class="status-banner"></div>
 
-<section id="closedPanel" class="closed-panel">
-  <div class="closed-card">
-    <h2 class="closed-title">Biểu mẫu hiện đang đóng</h2>
-    <div id="visitorMessage" class="visitor-message"></div>
-
-    <div class="admin-box" id="adminBox">
-      <label for="adminMessage" class="admin-label">Thông báo khi biểu mẫu đang đóng</label>
-      <textarea id="adminMessage" class="admin-textarea" placeholder="Nhập nội dung thông báo..."></textarea>
-
-      <div class="admin-actions">
-        <button type="button" id="saveMessageBtn" class="btn-primary">Lưu thông báo</button>
-        <button type="button" id="clearMessageBtn" class="btn-ghost">Xóa</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<main id="mainArea">
-  <div class="card">
-    <div class="card-head">
-      <div class="meta-top">
-        <div>MKH: TBSL-NS-QT03-BM05</div>
-        <div class="right">Lần ban hành: 02</div>
-      </div>
-      <h2>Bảng câu hỏi phỏng vấn khi nghỉ việc</h2>
-      <p>
-        Bảng câu hỏi này nhằm giúp TBS Logistics hiểu rõ hơn những lý do khiến bạn rời khỏi công ty.
-        Việc trả lời bảng câu hỏi này là trên cơ sở tự nguyện. Xin vui lòng ghi lại bằng câu hỏi đã được trả lời đầy đủ cho Bộ phận Nhân sự - TBS Logistics.
-        Chúng tôi trân trọng cảm ơn phần hồi đáp của bạn.
-      </p>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text"><span>Tiến độ hoàn thành</span><span id="progressPercent">0%</span></div>
     </div>
 
     <form id="surveyForm" novalidate>
-      <div class="row-3">
-        <div>
-          <label for="fullName">Họ và tên <span class="required">Required</span></label>
-          <input id="fullName" name="fullName" type="text" placeholder="Nhập họ và tên" required />
+      <section class="card">
+        <div class="section-title"><div class="section-no">1</div><div><h2>Thông tin cá nhân</h2><p>Vui lòng điền chính xác thông tin nhân sự.</p></div></div>
+        <div class="grid">
+          <div><label class="field-label required" for="fullName">Họ và tên</label><input id="fullName" type="text" autocomplete="name" placeholder="Nhập họ và tên"></div>
+          <div><label class="field-label required" for="employeeId">MSNV</label><input id="employeeId" type="text" autocomplete="off" placeholder="Nhập mã số nhân viên"></div>
+          <div><label class="field-label required" for="workDate">Ngày vào làm</label><input id="workDate" type="date"></div>
+          <div><label class="field-label required" for="leaveDate">Ngày nghỉ việc</label><input id="leaveDate" type="date"></div>
+          <div class="full"><label class="field-label required" for="department">Bộ phận / Chức danh</label><input id="department" type="text" placeholder="Ví dụ: Kho 6 – Nhân viên xe nâng"></div>
         </div>
+      </section>
 
-        <div>
-          <label for="employeeId">MSNV <span class="required">Required</span></label>
-          <input id="employeeId" name="employeeId" type="text" placeholder="Nhập mã số nhân viên" required />
-        </div>
+      <section class="card">
+        <div class="section-title"><div class="section-no">2</div><div><h2>Lý do nghỉ việc và điều hài lòng</h2><p>Có thể chọn nhiều phương án.</p></div></div>
 
-        <div>
-          <label for="workDate">Ngày vào làm <span class="required">Required</span></label>
-          <input id="workDate" name="workDate" type="text" placeholder="dd/mm/yyyy" required />
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label for="department">Bộ phận / Chức danh <span class="required">Required</span></label>
-          <input id="department" name="department" type="text" placeholder="Ví dụ: HCNS / Nhân viên hành chính" required />
-        </div>
-
-        <div>
-          <label for="leaveDate">Ngày chính thức nghỉ việc <span class="required">Required</span></label>
-          <input id="leaveDate" name="leaveDate" type="text" placeholder="dd/mm/yyyy" required />
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="question-block">
-          <div class="question-text">1) Lý do tại sao bạn nghỉ việc? <span class="required">Required</span></div>
-          <div class="choices">
+        <div class="question">
+          <p class="q-title">Câu 1. Lý do chính khiến Anh/Chị quyết định nghỉ việc? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="checkbox" name="q1" value="Lương &amp; thu nhập không phù hợp"><span>Lương &amp; thu nhập không phù hợp</span></label>
             <label class="choice"><input type="checkbox" name="q1" value="Công việc quá áp lực"><span>Công việc quá áp lực</span></label>
             <label class="choice"><input type="checkbox" name="q1" value="Thời gian làm việc (tăng ca nhiều, ca kíp)"><span>Thời gian làm việc (tăng ca nhiều, ca kíp)</span></label>
@@ -526,546 +186,598 @@
             <label class="choice"><input type="checkbox" name="q1" value="Không có cơ hội phát triển"><span>Không có cơ hội phát triển</span></label>
             <label class="choice"><input type="checkbox" name="q1" value="Lý do cá nhân (gia đình, sức khỏe, chuyển nơi ở…)"><span>Lý do cá nhân (gia đình, sức khỏe, chuyển nơi ở…)</span></label>
             <label class="choice"><input type="checkbox" name="q1" value="Công việc không phù hợp"><span>Công việc không phù hợp</span></label>
+            <label class="choice"><input id="q1OtherCheck" type="checkbox" name="q1" value="Ý kiến khác"><span>Ý kiến khác</span></label>
           </div>
-          <textarea id="q1_other" placeholder="Khác..."></textarea>
+          <div class="conditional" id="q1OtherBox"><label class="field-label" for="q1Other">Vui lòng ghi rõ</label><textarea id="q1Other" placeholder="Nhập lý do khác"></textarea></div>
         </div>
 
-        <div class="question-block">
-          <div class="question-text">2) Bạn hài lòng với những điểm nào của công ty? <span class="required">Required</span></div>
-          <div class="choices">
+        <div class="question">
+          <p class="q-title">Câu 2. Điều Anh/Chị hài lòng trong thời gian làm việc tại công ty? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="checkbox" name="q2" value="Mức lương hiện tại"><span>Mức lương hiện tại</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="Cơ hội phát triển"><span>Cơ hội phát triển</span></label>
             <label class="choice"><input type="checkbox" name="q2" value="Chế độ phúc lợi (BHXH, thưởng, phụ cấp…)"><span>Chế độ phúc lợi (BHXH, thưởng, phụ cấp…)</span></label>
+            <label class="choice"><input type="checkbox" name="q2" value="Khối lượng công việc"><span>Khối lượng công việc</span></label>
             <label class="choice"><input type="checkbox" name="q2" value="Môi trường làm việc"><span>Môi trường làm việc</span></label>
             <label class="choice"><input type="checkbox" name="q2" value="Quan hệ với đồng nghiệp"><span>Quan hệ với đồng nghiệp</span></label>
             <label class="choice"><input type="checkbox" name="q2" value="Cách quản lý của cấp trên"><span>Cách quản lý của cấp trên</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Khối lượng công việc"><span>Khối lượng công việc</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Cơ hội phát triển"><span>Cơ hội phát triển</span></label>
             <label class="choice"><input type="checkbox" name="q2" value="Thức ăn công ty"><span>Thức ăn công ty</span></label>
           </div>
         </div>
+      </section>
 
-        <div class="question-block">
-          <div class="question-text">3) Vấn đề cụ thể trong công việc</div>
+      <section class="card">
+        <div class="section-title"><div class="section-no">3</div><div><h2>Khối lượng và thời gian làm việc</h2><p>Đánh giá trải nghiệm thực tế của Anh/Chị.</p></div></div>
 
-          <div class="question-text">3.1) Có thường xuyên bị tăng ca không? <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 3.1. Anh/Chị có thường xuyên phải tăng ca không? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q3_overtime" value="Có"><span>Có</span></label>
             <label class="choice"><input type="radio" name="q3_overtime" value="Không"><span>Không</span></label>
           </div>
-          <div id="q3_overtime_reason_wrap" class="followup-box">
-            <textarea id="q3_overtime_reason" placeholder="Nếu chọn Có, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
+          <div class="conditional" id="q3OvertimeReasonBox"><label class="field-label" for="q3OvertimeReason">Nguyên nhân / ý kiến thêm</label><textarea id="q3OvertimeReason" placeholder="Mô tả nguyên nhân tăng ca hoặc khó khăn gặp phải"></textarea></div>
+        </div>
 
-          <div class="question-text">3.2) Công việc/Khối lượng của bạn <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 3.2. Khối lượng công việc được giao như thế nào? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q3_workload" value="Quá nhiều"><span>Quá nhiều</span></label>
             <label class="choice"><input type="radio" name="q3_workload" value="Bình thường"><span>Bình thường</span></label>
             <label class="choice"><input type="radio" name="q3_workload" value="Quá ít"><span>Quá ít</span></label>
           </div>
         </div>
+      </section>
 
-        <div class="question-block">
-          <div class="question-text">4) Đánh giá quản lý trực tiếp</div>
+      <section class="card">
+        <div class="section-title"><div class="section-no">4</div><div><h2>Đánh giá quản lý trực tiếp</h2><p>Chọn phương án phù hợp nhất và ghi rõ nguyên nhân khi cần.</p></div></div>
 
-          <div class="question-text">4.1) Quản lý có hỗ trợ khi bạn gặp khó khăn không? <span class="required">Required</span></div>
-          <div class="inline-choices">
-            <label class="choice"><input type="radio" name="q4_support" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q4_support" value="Không"><span>Không</span></label>
-          </div>
-          <div id="q4_support_reason_wrap" class="followup-box">
-            <textarea id="q4_support_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
-
-          <div class="question-text">4.2) Có đối xử công bằng không? <span class="required">Required</span></div>
-          <div class="inline-choices">
-            <label class="choice"><input type="radio" name="q4_fairness" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q4_fairness" value="Không"><span>Không</span></label>
-          </div>
-          <div id="q4_fairness_reason_wrap" class="followup-box">
-            <textarea id="q4_fairness_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
-
-          <div class="question-text">4.3) Có lắng nghe ý kiến không? <span class="required">Required</span></div>
-          <div class="inline-choices">
-            <label class="choice"><input type="radio" name="q4_listening" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q4_listening" value="Không"><span>Không</span></label>
-          </div>
-          <div id="q4_listening_reason_wrap" class="followup-box">
-            <textarea id="q4_listening_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
-
-          <div class="question-text">4.4) Bạn mong đợi người quản lý của bạn cải thiện điều gì? <span class="required">Required</span></div>
-          <textarea id="q44_manager_improve" placeholder="Nhập nội dung..."></textarea>
+        <div class="question">
+          <p class="q-title">Câu 4.1. Quản lý trực tiếp có hỗ trợ Anh/Chị trong công việc không? *</p>
+          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_support" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_support" value="Không"><span>Không</span></label></div>
+          <div class="conditional" id="q4SupportBox"><label class="field-label" for="q4SupportReason">Vui lòng nêu nguyên nhân</label><textarea id="q4SupportReason"></textarea></div>
         </div>
 
-        <div class="question-block">
-          <div class="question-text">5) Môi trường và văn hóa</div>
+        <div class="question">
+          <p class="q-title">Câu 4.2. Quản lý có đối xử công bằng với nhân viên không? *</p>
+          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_fairness" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_fairness" value="Không"><span>Không</span></label></div>
+          <div class="conditional" id="q4FairnessBox"><label class="field-label" for="q4FairnessReason">Vui lòng nêu nguyên nhân</label><textarea id="q4FairnessReason"></textarea></div>
+        </div>
 
-          <div class="question-text">5.1) Quan hệ đồng nghiệp <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 4.3. Quản lý có lắng nghe ý kiến của Anh/Chị không? *</p>
+          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_listening" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_listening" value="Không"><span>Không</span></label></div>
+          <div class="conditional" id="q4ListeningBox"><label class="field-label" for="q4ListeningReason">Vui lòng nêu nguyên nhân</label><textarea id="q4ListeningReason"></textarea></div>
+        </div>
+
+        <div class="question">
+          <p class="q-title">Câu 4.4. Anh/Chị mong đợi quản lý cần cải thiện điều gì? *</p>
+          <textarea id="q44ManagerImprove" placeholder="Nhập nội dung mong muốn cải thiện"></textarea>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title"><div class="section-no">5</div><div><h2>Đồng nghiệp và môi trường làm việc</h2><p>Đánh giá tổng quan trong thời gian làm việc.</p></div></div>
+
+        <div class="question">
+          <p class="q-title">Câu 5.1. Quan hệ giữa Anh/Chị và đồng nghiệp như thế nào? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q51_colleague" value="Tốt"><span>Tốt</span></label>
             <label class="choice"><input type="radio" name="q51_colleague" value="Bình thường"><span>Bình thường</span></label>
             <label class="choice"><input type="radio" name="q51_colleague" value="Cần cải thiện"><span>Cần cải thiện</span></label>
           </div>
+        </div>
 
-          <div class="question-text">5.2) Bạn cảm nhận môi trường làm việc như thế nào? <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 5.2. Anh/Chị đánh giá môi trường làm việc như thế nào? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q52_environment" value="Tốt"><span>Tốt</span></label>
             <label class="choice"><input type="radio" name="q52_environment" value="Bình thường"><span>Bình thường</span></label>
             <label class="choice"><input type="radio" name="q52_environment" value="Cần cải thiện"><span>Cần cải thiện</span></label>
           </div>
         </div>
+      </section>
 
-        <div class="question-block">
-          <div class="question-text">6) Cân nhắc ở lại làm việc</div>
+      <section class="card">
+        <div class="section-title"><div class="section-no">6</div><div><h2>Khả năng quay lại và đề xuất cải thiện</h2><p>Những ý kiến này rất quan trọng với doanh nghiệp.</p></div></div>
 
-          <div class="question-text">6.1) Công ty cần cải thiện như thế nào để bạn cân nhắc ở lại làm việc? <span class="required">Required</span></div>
-          <textarea id="q61_stay_improve" placeholder="Nhập nội dung..."></textarea>
+        <div class="question">
+          <p class="q-title">Câu 6.1. Công ty cần cải thiện điều gì để Anh/Chị cân nhắc ở lại? *</p>
+          <textarea id="q61StayImprove" placeholder="Nhập đề xuất cải thiện"></textarea>
+        </div>
 
-          <div class="question-text">6.2) Bạn có nghĩ sẽ quay lại làm việc tại TBS Logistics trong tương lai? <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 6.2. Anh/Chị có cân nhắc quay lại làm việc tại công ty trong tương lai không? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q62_return" value="Có"><span>Có</span></label>
             <label class="choice"><input type="radio" name="q62_return" value="Không"><span>Không</span></label>
           </div>
-          <div id="q62_return_reason_wrap" class="followup-box">
-            <textarea id="q62_return_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
+          <div class="conditional" id="q62ReturnBox"><label class="field-label" for="q62ReturnReason">Vui lòng nêu nguyên nhân</label><textarea id="q62ReturnReason"></textarea></div>
+        </div>
 
-          <div class="question-text">6.3) Bạn có đề xuất người quen vào làm việc tại TBS Logistics không? <span class="required">Required</span></div>
-          <div class="inline-choices">
+        <div class="question">
+          <p class="q-title">Câu 6.3. Anh/Chị có sẵn sàng giới thiệu người quen vào làm việc tại công ty không? *</p>
+          <div class="choice-grid">
             <label class="choice"><input type="radio" name="q63_refer" value="Có"><span>Có</span></label>
             <label class="choice"><input type="radio" name="q63_refer" value="Không"><span>Không</span></label>
           </div>
-          <div id="q63_refer_reason_wrap" class="followup-box">
-            <textarea id="q63_refer_reason" placeholder="Nếu chọn Không, vui lòng ghi nguyên nhân (không bắt buộc)..."></textarea>
-          </div>
+          <div class="conditional" id="q63ReferBox"><label class="field-label" for="q63ReferReason">Vui lòng nêu nguyên nhân</label><textarea id="q63ReferReason"></textarea></div>
         </div>
-      </div>
 
-      <div class="question-block">
-        <div class="question-text">Nhận xét chung của nhân viên <span class="required">Required</span></div>
-        <textarea id="finalComment" name="finalComment"></textarea>
-      </div>
-
-      <div class="signature-box">
-        <div></div>
-        <div class="signature-col">
-          <div>Người lao động</div>
-          <div class="muted">(Ký, ghi rõ họ tên)</div>
+        <div class="question">
+          <p class="q-title">Nhận xét chung của Anh/Chị *</p>
+          <textarea id="finalComment" placeholder="Nhập nhận xét hoặc góp ý khác"></textarea>
         </div>
-      </div>
 
-      <div class="footer-note">
-        TBS Logistics cảm ơn những chia sẻ từ bạn. Chúng tôi luôn ghi nhận những ý kiến đóng góp của bạn để cải thiện và xây dựng một TBS Logistics chuyên nghiệp hơn.
-      </div>
-
-      <div class="actions">
-        <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
-        <button type="submit" class="btn-primary" id="submitBtn">Nộp khảo sát</button>
-      </div>
-
-      <div class="error" id="errorBox"></div>
-
-      <div class="result" id="resultBox">
-        <h3>Đã gửi phiếu thành công ✅</h3>
-        <p id="resultLine">Cảm ơn Anh/Chị đã dành thời gian chia sẻ thông tin.</p>
-      </div>
+        <label class="consent"><input id="consent" type="checkbox"><span>Tôi xác nhận các thông tin trên là phản hồi của cá nhân tôi và đồng ý gửi phiếu này cho doanh nghiệp.</span></label>
+        <div class="actions"><button class="btn btn-success submit-btn" id="submitButton" type="submit">Gửi phiếu phỏng vấn</button></div>
+      </section>
     </form>
-  </div>
-</main>
 
-<div id="adminModal" class="modal">
-  <div class="modal-card">
-    <div class="modal-head">
-      <strong>Admin access</strong>
-      <button type="button" id="adminClose" class="xbtn">✕</button>
-    </div>
+    <section class="card success-view" id="successView">
+      <div class="success-icon">✓</div>
+      <h2>Đã ghi nhận phản hồi</h2>
+      <p>Cảm ơn Anh/Chị đã dành thời gian chia sẻ. Mã phản hồi:</p>
+      <div class="response-code" id="responseCode"></div>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-primary" type="button" id="viewResponseButton">Xem / in phiếu</button>
+      </div>
+    </section>
+  </main>
 
-    <div class="modal-body">
-      <label class="admin-label" for="adminEmail">Email</label>
-      <input id="adminEmail" type="text" placeholder="name@company.com" />
-
-      <label class="admin-label" for="adminPass">Passcode</label>
-      <input id="adminPass" type="password" placeholder="Enter passcode" />
-
-      <div class="admin-actions">
-        <button type="button" id="adminLogin" class="btn-primary">Login</button>
-        <button type="button" id="adminLogout" class="btn-ghost">Logout</button>
+  <div class="modal" id="adminModal">
+    <div class="modal-card admin-modal-card">
+      <div class="modal-head">
+        <div><h3>Quản trị phiếu nghỉ việc</h3><div class="help" style="margin:5px 0 0">Xem phản hồi và mở trực tiếp mẫu PDF ngay trên giao diện.</div></div>
+        <button class="close-btn" type="button" onclick="closeAdmin()">×</button>
       </div>
 
-      <div id="adminMsg" class="admin-msg"></div>
-      <small class="muted">Admin only can toggle ON/OFF + edit message.</small>
+      <div class="admin-auth" id="adminAuth">
+        <div><label class="field-label">Email quản trị</label><input id="adminEmail" type="email" placeholder="Nhập email được cấp quyền"></div>
+        <div><label class="field-label">Mật khẩu quản trị</label><input id="adminPasscode" type="password" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+        <button class="btn btn-primary" type="button" onclick="loginAdmin()">Đăng nhập</button>
+      </div>
+
+      <div class="admin-note" id="adminLoginNote">Thông tin đăng nhập chỉ được giữ trong bộ nhớ của tab hiện tại và không lưu vào trình duyệt.</div>
+
+      <div class="admin-workspace hidden" id="adminWorkspace">
+        <div class="admin-tabs">
+          <button class="admin-tab on" type="button" data-admin-tab="responses" onclick="openAdminTab('responses')">Phiếu đã gửi</button>
+          <button class="admin-tab" type="button" data-admin-tab="settings" onclick="openAdminTab('settings')">Cài đặt biểu mẫu</button>
+        </div>
+
+        <section class="admin-panel on" id="adminResponsesPanel">
+          <div class="response-filter">
+            <div><label class="field-label">Tìm theo họ tên, MSNV hoặc bộ phận</label><input id="responseSearch" placeholder="Nhập nội dung tìm kiếm" onkeydown="if(event.key==='Enter')loadAdminResponses(true)"></div>
+            <div><label class="field-label">Từ ngày gửi</label><input id="responseFromDate" type="date"></div>
+            <div><label class="field-label">Đến ngày gửi</label><input id="responseToDate" type="date"></div>
+            <button class="btn btn-primary" type="button" onclick="loadAdminResponses(true)">Lọc dữ liệu</button>
+          </div>
+          <div class="response-summary">
+            <span id="responseCountText">Chưa tải phản hồi.</span>
+            <div><button class="btn btn-light" type="button" onclick="setResponseLast30Days()">30 ngày gần nhất</button> <button class="btn btn-light" type="button" onclick="clearResponseFilters()">Tất cả</button></div>
+          </div>
+
+          <div class="response-table-wrap">
+            <table class="response-table">
+              <thead><tr><th>STT</th><th>Ngày gửi</th><th>Người lao động</th><th>Bộ phận / Chức danh</th><th>Ngày nghỉ việc</th><th>Thao tác</th></tr></thead>
+              <tbody id="responseTableBody"><tr><td colspan="6">Chưa tải dữ liệu.</td></tr></tbody>
+            </table>
+          </div>
+          <div class="response-mobile" id="responseMobileList"></div>
+        </section>
+
+        <section class="admin-panel" id="adminSettingsPanel">
+          <div class="switch-row">
+            <div><b>Mở biểu mẫu</b><div class="help" style="margin:4px 0 0">Tắt để ngừng nhận phản hồi mới.</div></div>
+            <label class="switch"><input id="adminIsOn" type="checkbox"><span class="slider"></span></label>
+          </div>
+          <div style="margin-top:14px"><label class="field-label">Thông báo khi biểu mẫu đóng</label><textarea id="adminMessage" placeholder="Nhập thông báo"></textarea></div>
+          <div class="actions"><button class="btn btn-light" type="button" onclick="logoutAdmin()">Đăng xuất</button><button class="btn btn-primary" type="button" onclick="saveAdminSettings()">Lưu cài đặt</button></div>
+        </section>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGguzWp5LUGoetmjJvxxNBCaUhRxJLkUaBp_6ZVWg3aqB6mTHH_Atxm5-ZWDSNQVDAbA/exec";
+  <script>
+    // Web App URL đang được HTML GitHub sử dụng.
+    // Khi tạo deployment mới, chỉ cần thay giá trị này.
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxEt9LdCrdcQwuwd8DWPS6GEmv08qFyyI445xikyPV6WWA---wRmBqQSlr7CxSS0nhWNg/exec";
+    const state={settings:null,submitting:false,admin:{email:"",passcode:"",responses:[]}};
 
-const $  = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    document.addEventListener("DOMContentLoaded",initialize);
 
-function getCheckedValues(name){
-  return $$(`input[name="${name}"]:checked`).map(i => i.value);
-}
+    async function initialize(){
+      bindEvents();
+      updateProgress();
+      await loadSettings();
+      setInterval(()=>loadSettings(false),20000);
+    }
 
-function escapeHtml(str){
-  return String(str ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+    function bindEvents(){
+      document.getElementById("surveyForm").addEventListener("submit",submitSurvey);
+      document.querySelectorAll("input,select,textarea").forEach(el=>{
+        el.addEventListener("change",updateProgress);
+        el.addEventListener("input",updateProgress);
+      });
 
-function toggleFollowup(radioName, triggerValue, wrapId, textareaId){
-  const checked = document.querySelector(`input[name="${radioName}"]:checked`);
-  const wrap = document.getElementById(wrapId);
-  const textarea = document.getElementById(textareaId);
-  if (!wrap) return;
+      document.getElementById("q1OtherCheck").addEventListener("change",e=>toggleBox("q1OtherBox",e.target.checked));
+      bindConditional("q3_overtime","Có","q3OvertimeReasonBox");
+      bindConditional("q4_support","Không","q4SupportBox");
+      bindConditional("q4_fairness","Không","q4FairnessBox");
+      bindConditional("q4_listening","Không","q4ListeningBox");
+      bindConditional("q62_return","Không","q62ReturnBox");
+      bindConditional("q63_refer","Không","q63ReferBox");
 
-  const show = checked && checked.value === triggerValue;
-  wrap.classList.toggle("show", show);
+      document.getElementById("workDate").addEventListener("change",()=>{
+        document.getElementById("leaveDate").min=document.getElementById("workDate").value;
+      });
+    }
 
-  if (!show && textarea){
-    textarea.value = "";
-  }
-}
+    function bindConditional(name,value,boxId){
+      document.querySelectorAll(`input[name="${name}"]`).forEach(el=>{
+        el.addEventListener("change",()=>toggleBox(boxId,radioValue(name)===value));
+      });
+    }
 
-function setupFollowup(radioName, triggerValue, wrapId, textareaId){
-  document.querySelectorAll(`input[name="${radioName}"]`).forEach(el => {
-    el.addEventListener("change", () => toggleFollowup(radioName, triggerValue, wrapId, textareaId));
-  });
-  toggleFollowup(radioName, triggerValue, wrapId, textareaId);
-}
+    function toggleBox(id,on){document.getElementById(id).classList.toggle("on",Boolean(on))}
 
-async function apiGetSettings(){
-  const url = `${GOOGLE_SCRIPT_URL}?action=getSettings&ts=${Date.now()}`;
-  const res = await fetch(url, { method: "GET" });
-  const text = await res.text();
-  const json = JSON.parse(text);
-  if (!json.ok) throw new Error(json.error || "getSettings failed");
-  return json.settings;
-}
+    async function postApi(action,data){
+      const body=new URLSearchParams();
+      body.append("action",action);
+      body.append("data",JSON.stringify(data||{}));
 
-async function apiSaveSettings({ email, passcode, isOn, message }){
-  const body = new URLSearchParams();
-  body.append("action", "saveSettings");
-  body.append("data", JSON.stringify({ email, passcode, isOn, message }));
+      const response=await fetch(WEB_APP_URL,{
+        method:"POST",
+        body:body
+      });
+      const text=await response.text();
+      let result;
+      try{result=JSON.parse(text)}catch(error){
+        throw new Error("Máy chủ trả về dữ liệu không hợp lệ.");
+      }
+      if(!result.ok)throw new Error(result.error||"Yêu cầu không thành công.");
+      return result;
+    }
 
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
-  const text = await res.text();
-  const json = JSON.parse(text);
-  if (!json.ok) throw new Error(json.error || "saveSettings failed");
-  return json.settings;
-}
 
-async function apiSubmitSurvey(payload){
-  const body = new URLSearchParams();
-  body.append("action", "submitSurvey");
-  body.append("data", JSON.stringify(payload));
+    async function loadSettings(showOverlay=true){
+      if(showOverlay)setLoading(true);
+      try{
+        const response=await fetch(`${WEB_APP_URL}?action=getSettings&v=${Date.now()}`,{cache:"no-store"});
+        const result=await response.json();
+        if(!result.ok)throw new Error(result.error||"Không tải được cài đặt.");
+        state.settings=result.settings;
+        applySettings();
+      }catch(error){
+        showToast(error.message||String(error),true);
+      }finally{if(showOverlay)setLoading(false)}
+    }
 
-  const res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body });
-  const text = await res.text();
-  const json = JSON.parse(text);
-  if (!json.ok) throw new Error(json.error || "submitSurvey failed");
-  return json;
-}
+    function applySettings(){
+      const banner=document.getElementById("formStatus");
+      const isOn=Boolean(state.settings&&state.settings.isOn);
+      banner.className="status-banner "+(isOn?"on":"off");
+      banner.textContent=isOn?"Biểu mẫu đang mở và sẵn sàng nhận phản hồi.":(state.settings.message||"Biểu mẫu hiện đang tạm đóng.");
+      document.getElementById("surveyForm").querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=!isOn);
+      document.getElementById("progressWrap").classList.toggle("hidden",!isOn);
+      document.getElementById("adminIsOn").checked=isOn;
+      document.getElementById("adminMessage").value=state.settings.message||"";
+    }
 
-const toggleBtn       = $("#toggleSurveyBtn");
-const adminBtn        = $("#adminBtn");
-const closedPanel     = $("#closedPanel");
-const visitorMessage  = $("#visitorMessage");
-const adminBox        = $("#adminBox");
-const adminMessage    = $("#adminMessage");
-const saveMessageBtn  = $("#saveMessageBtn");
-const clearMessageBtn = $("#clearMessageBtn");
-const mainArea        = $("#mainArea");
+    function collectPayload(){
+      return{
+        timestamp:new Date().toISOString(),
+        fullName:value("fullName"),
+        employeeId:value("employeeId").toUpperCase(),
+        workDate:value("workDate"),
+        department:value("department"),
+        leaveDate:value("leaveDate"),
+        userAgent:navigator.userAgent,
+        answers:{
+          q1:checkedValues("q1"),
+          q1_other:value("q1Other"),
+          q2:checkedValues("q2"),
+          q3_overtime:radioValue("q3_overtime"),
+          q3_overtime_reason:value("q3OvertimeReason"),
+          q3_workload:radioValue("q3_workload"),
+          q4_support:radioValue("q4_support"),
+          q4_support_reason:value("q4SupportReason"),
+          q4_fairness:radioValue("q4_fairness"),
+          q4_fairness_reason:value("q4FairnessReason"),
+          q4_listening:radioValue("q4_listening"),
+          q4_listening_reason:value("q4ListeningReason"),
+          q44_manager_improve:value("q44ManagerImprove"),
+          q51_colleague:radioValue("q51_colleague"),
+          q52_environment:radioValue("q52_environment"),
+          q61_stay_improve:value("q61StayImprove"),
+          q62_return:radioValue("q62_return"),
+          q62_return_reason:value("q62ReturnReason"),
+          q63_refer:radioValue("q63_refer"),
+          q63_refer_reason:value("q63ReferReason"),
+          finalComment:value("finalComment")
+        }
+      };
+    }
 
-const adminModal  = $("#adminModal");
-const adminClose  = $("#adminClose");
-const adminEmail  = $("#adminEmail");
-const adminPass   = $("#adminPass");
-const adminLogin  = $("#adminLogin");
-const adminLogout = $("#adminLogout");
-const adminMsg    = $("#adminMsg");
+    function validateClient(payload){
+      const required=[
+        ["fullName","Vui lòng nhập Họ và tên."],["employeeId","Vui lòng nhập MSNV."],
+        ["workDate","Vui lòng chọn Ngày vào làm."],["department","Vui lòng nhập Bộ phận / Chức danh."],
+        ["leaveDate","Vui lòng chọn Ngày nghỉ việc."]
+      ];
+      for(const [id,message] of required){if(!value(id))return focusError(id,message)}
 
-const form        = $("#surveyForm");
-const errorBox    = $("#errorBox");
-const resultBox   = $("#resultBox");
-const resultLine  = $("#resultLine");
-const resetBtn    = $("#resetBtn");
-const submitBtn   = $("#submitBtn");
+      if(payload.workDate>payload.leaveDate)return focusError("leaveDate","Ngày nghỉ việc không được trước Ngày vào làm.");
+      if(!payload.answers.q1.length)return focusGroup("q1","Vui lòng chọn ít nhất một lý do nghỉ việc.");
+      if(payload.answers.q1.includes("Ý kiến khác")&&!payload.answers.q1_other)return focusError("q1Other","Vui lòng nhập ý kiến khác.");
+      if(!payload.answers.q2.length)return focusGroup("q2","Vui lòng chọn ít nhất một điều hài lòng.");
 
-let sharedIsOn = false;
-let sharedMessage = "";
-let isAdminSession = false;
-let adminSession = { email:"", passcode:"" };
+      const radios=[
+        ["q3_overtime","Vui lòng trả lời Câu 3.1."],["q3_workload","Vui lòng trả lời Câu 3.2."],
+        ["q4_support","Vui lòng trả lời Câu 4.1."],["q4_fairness","Vui lòng trả lời Câu 4.2."],
+        ["q4_listening","Vui lòng trả lời Câu 4.3."],["q51_colleague","Vui lòng trả lời Câu 5.1."],
+        ["q52_environment","Vui lòng trả lời Câu 5.2."],["q62_return","Vui lòng trả lời Câu 6.2."],
+        ["q63_refer","Vui lòng trả lời Câu 6.3."]
+      ];
+      for(const [name,message] of radios){if(!radioValue(name))return focusGroup(name,message)}
 
-function applySurveyState(isOn){
-  sharedIsOn = !!isOn;
-  if (sharedIsOn){
-    mainArea.style.display = "";
-    closedPanel.style.display = "none";
-  } else {
-    mainArea.style.display = "none";
-    closedPanel.style.display = "block";
-  }
-  toggleBtn.dataset.state = sharedIsOn ? "on" : "off";
-  toggleBtn.textContent = sharedIsOn ? "Survey: ON" : "Survey: OFF";
-  toggleBtn.setAttribute("aria-pressed", sharedIsOn ? "true" : "false");
-}
+      if(payload.answers.q4_support==="Không"&&!payload.answers.q4_support_reason)return focusError("q4SupportReason","Vui lòng nêu nguyên nhân ở Câu 4.1.");
+      if(payload.answers.q4_fairness==="Không"&&!payload.answers.q4_fairness_reason)return focusError("q4FairnessReason","Vui lòng nêu nguyên nhân ở Câu 4.2.");
+      if(payload.answers.q4_listening==="Không"&&!payload.answers.q4_listening_reason)return focusError("q4ListeningReason","Vui lòng nêu nguyên nhân ở Câu 4.3.");
+      if(!payload.answers.q44_manager_improve)return focusError("q44ManagerImprove","Vui lòng trả lời Câu 4.4.");
+      if(!payload.answers.q61_stay_improve)return focusError("q61StayImprove","Vui lòng trả lời Câu 6.1.");
+      if(payload.answers.q62_return==="Không"&&!payload.answers.q62_return_reason)return focusError("q62ReturnReason","Vui lòng nêu nguyên nhân ở Câu 6.2.");
+      if(payload.answers.q63_refer==="Không"&&!payload.answers.q63_refer_reason)return focusError("q63ReferReason","Vui lòng nêu nguyên nhân ở Câu 6.3.");
+      if(!payload.answers.finalComment)return focusError("finalComment","Vui lòng nhập Nhận xét chung.");
+      if(!document.getElementById("consent").checked)return focusError("consent","Vui lòng xác nhận trước khi gửi.");
+      return true;
+    }
 
-function setMessage(msg){
-  sharedMessage = msg || "";
-  visitorMessage.innerHTML = escapeHtml(sharedMessage || "Biểu mẫu hiện đang tạm đóng. Vui lòng quay lại sau.");
-  adminMessage.value = sharedMessage;
-}
+    async function submitSurvey(event){
+      event.preventDefault();
+      if(state.submitting)return;
+      if(!state.settings||!state.settings.isOn)return showToast(state.settings?.message||"Biểu mẫu đang đóng.",true);
 
-function setAdminUI(on){
-  isAdminSession = !!on;
-  toggleBtn.style.display = isAdminSession ? "" : "none";
-  adminBox.style.display  = isAdminSession ? "" : "none";
-}
+      const payload=collectPayload();
+      if(!validateClient(payload))return;
 
-async function refreshFromServer(){
-  const s = await apiGetSettings();
-  applySurveyState(!!s.isOn);
-  setMessage(s.message || "");
-}
+      state.submitting=true;
+      setLoading(true);
+      document.getElementById("submitButton").disabled=true;
+      try{
+        const result=await postApi("submitSurvey",payload);
 
-function validateRequiredGroups(){
-  const errors = [];
+        document.getElementById("surveyForm").classList.add("hidden");
+        document.getElementById("progressWrap").classList.add("hidden");
+        document.getElementById("successView").classList.add("on");
+        document.getElementById("responseCode").textContent=result.responseId;
+        document.getElementById("viewResponseButton").onclick=()=>window.open(result.pdfUrl||`${WEB_APP_URL}?action=viewResponse&id=${encodeURIComponent(result.responseId)}`,"_blank","noopener");
+        window.scrollTo({top:0,behavior:"smooth"});
+      }catch(error){
+        showToast(error.message||String(error),true);
+        document.getElementById("submitButton").disabled=false;
+      }finally{
+        state.submitting=false;
+        setLoading(false);
+      }
+    }
 
-  if (!$("#fullName").value.trim()) errors.push("Vui lòng nhập Họ và tên.");
-  if (!$("#employeeId").value.trim()) errors.push("Vui lòng nhập MSNV.");
-  if (!$("#workDate").value.trim()) errors.push("Vui lòng nhập Ngày vào làm.");
-  if (!$("#department").value.trim()) errors.push("Vui lòng nhập Bộ phận / Chức danh.");
-  if (!$("#leaveDate").value.trim()) errors.push("Vui lòng nhập Ngày chính thức nghỉ việc.");
-  
+    function openAdmin(){
+      document.getElementById("adminModal").classList.add("on");
+      if(state.admin.email){
+        document.getElementById("adminWorkspace").classList.remove("hidden");
+        document.getElementById("adminAuth").classList.add("hidden");
+        document.getElementById("adminLoginNote").classList.add("hidden");
+      }else{
+        document.getElementById("adminEmail").focus();
+      }
+    }
 
-  if (getCheckedValues("q1").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 1.");
-  if (getCheckedValues("q2").length === 0) errors.push("Vui lòng chọn ít nhất 1 đáp án cho câu 2.");
-  if (!document.querySelector('input[name="q3_overtime"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 3.1.");
-  if (!document.querySelector('input[name="q3_workload"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 3.2.");
-  if (!document.querySelector('input[name="q4_support"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.1.");
-  if (!document.querySelector('input[name="q4_fairness"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.2.");
-  if (!document.querySelector('input[name="q4_listening"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 4.3.");
-  if (!document.querySelector('input[name="q51_colleague"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 5.1.");
-  if (!document.querySelector('input[name="q52_environment"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 5.2.");
-  if (!document.querySelector('input[name="q62_return"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.2.");
-  if (!document.querySelector('input[name="q63_refer"]:checked')) errors.push("Vui lòng chọn câu trả lời cho mục 6.3.");
-    
-  if (!$("#q44_manager_improve").value.trim()){errors.push("Vui lòng nhập nội dung cho mục 4.4.");}
-  if (!$("#q61_stay_improve").value.trim()){errors.push("Vui lòng nhập nội dung cho mục 6.1.");}
-  if (!$("#finalComment").value.trim()){errors.push("Vui lòng nhập Nhận xét chung của nhân viên.");}
-  
-  return errors;
-}
+    function closeAdmin(){document.getElementById("adminModal").classList.remove("on")}
 
-function openAdminModal(){
-  adminMsg.textContent = "";
-  adminModal.style.display = "flex";
-  adminEmail.value = adminSession.email || "";
-  adminPass.value = adminSession.passcode || "";
-}
-function closeAdminModal(){
-  adminModal.style.display = "none";
-}
+    async function loginAdmin(){
+      const email=value("adminEmail"),passcode=value("adminPasscode");
+      if(!email)return focusError("adminEmail","Vui lòng nhập email quản trị.");
+      if(!passcode)return focusError("adminPasscode","Vui lòng nhập mật khẩu quản trị.");
 
-adminBtn.addEventListener("click", openAdminModal);
-adminClose.addEventListener("click", closeAdminModal);
-adminModal.addEventListener("click", (e) => {
-  if (e.target === adminModal) closeAdminModal();
-});
+      state.admin.email=email;
+      state.admin.passcode=passcode;
+      setLoading(true);
+      try{
+        await postApi("adminLogin",{email:email,passcode:passcode});
+        setDefaultResponseRange();
+        await requestAdminResponses();
+        document.getElementById("adminAuth").classList.add("hidden");
+        document.getElementById("adminLoginNote").classList.add("hidden");
+        document.getElementById("adminWorkspace").classList.remove("hidden");
+        document.getElementById("adminPasscode").value="";
+        renderAdminResponses();
+        showToast("Đăng nhập quản trị thành công.");
+      }catch(error){
+        state.admin.email="";
+        state.admin.passcode="";
+        showToast(error.message||String(error),true);
+      }finally{setLoading(false)}
+    }
 
-adminLogin.addEventListener("click", async () => {
-  adminMsg.textContent = "";
+    function logoutAdmin(){
+      state.admin={email:"",passcode:"",responses:[]};
+      document.getElementById("adminWorkspace").classList.add("hidden");
+      document.getElementById("adminAuth").classList.remove("hidden");
+      document.getElementById("adminLoginNote").classList.remove("hidden");
+      document.getElementById("adminPasscode").value="";
+      document.getElementById("responseTableBody").innerHTML='<tr><td colspan="6">Chưa tải dữ liệu.</td></tr>';
+      document.getElementById("responseMobileList").innerHTML="";
+      document.getElementById("adminEmail").focus();
+    }
 
-  const email = (adminEmail.value || "").trim().toLowerCase();
-  const pass  = (adminPass.value || "").trim();
+    function openAdminTab(tab){
+      document.querySelectorAll(".admin-tab").forEach(button=>button.classList.toggle("on",button.dataset.adminTab===tab));
+      document.getElementById("adminResponsesPanel").classList.toggle("on",tab==="responses");
+      document.getElementById("adminSettingsPanel").classList.toggle("on",tab==="settings");
+    }
 
-  if (!email || !pass){
-    adminMsg.textContent = "Email & passcode are required.";
-    return;
-  }
+    async function requestAdminResponses(){
+      const result=await postApi("listResponses",{
+        email:state.admin.email,
+        passcode:state.admin.passcode,
+        filters:{
+          search:value("responseSearch"),
+          fromDate:value("responseFromDate"),
+          toDate:value("responseToDate"),
+          limit:500
+        }
+      });
+      state.admin.responses=result.result.rows||[];
+      state.admin.responseTotal=Number(result.result.total)||0;
+      state.admin.responseReturned=Number(result.result.returned)||0;
+    }
 
-  adminSession = { email, passcode: pass };
-  setAdminUI(true);
-  closeAdminModal();
+    async function loadAdminResponses(showMessage){
+      if(!state.admin.email||!state.admin.passcode)return showToast("Vui lòng đăng nhập quản trị.",true);
+      setLoading(true);
+      try{
+        await requestAdminResponses();
+        renderAdminResponses();
+        if(showMessage)showToast("Đã cập nhật danh sách phản hồi.");
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
 
-  try { await refreshFromServer(); } catch(e){}
-});
+    function renderAdminResponses(){
+      const rows=state.admin.responses||[];
+      const total=state.admin.responseTotal||0;
+      const returned=state.admin.responseReturned||rows.length;
+      document.getElementById("responseCountText").textContent=
+        total>returned?`Hiển thị ${returned}/${total} phản hồi phù hợp.`:`Có ${total} phản hồi phù hợp.`;
 
-adminLogout.addEventListener("click", () => {
-  adminSession = { email:"", passcode:"" };
-  setAdminUI(false);
-  adminMsg.textContent = "Logged out.";
-});
+      const body=document.getElementById("responseTableBody");
+      const mobile=document.getElementById("responseMobileList");
+      if(!rows.length){
+        body.innerHTML='<tr><td colspan="6"><div class="admin-note">Không có phản hồi phù hợp với bộ lọc.</div></td></tr>';
+        mobile.innerHTML='<div class="admin-note">Không có phản hồi phù hợp với bộ lọc.</div>';
+        return;
+      }
 
-toggleBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
+      body.innerHTML=rows.map((row,index)=>`
+        <tr>
+          <td>${index+1}</td>
+          <td><b>${escapeHtml(row.submittedAt||"—")}</b></td>
+          <td><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></td>
+          <td>${escapeHtml(row.department||"—")}</td>
+          <td>${escapeHtml(row.leaveDate||"—")}</td>
+          <td><button class="btn btn-primary" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem phiếu PDF</button></td>
+        </tr>`).join("");
 
-  const nextIsOn = (toggleBtn.dataset.state === "off");
-  const msg = adminMessage.value || sharedMessage || "";
+      mobile.innerHTML=rows.map(row=>`
+        <article class="response-card">
+          <div class="response-card-top">
+            <div><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></div>
+            <button class="btn btn-primary" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem PDF</button>
+          </div>
+          <div class="response-card-grid">
+            ${responseField("Ngày gửi",row.submittedAt||"—")}
+            ${responseField("Bộ phận / Chức danh",row.department||"—")}
+            ${responseField("Ngày vào làm",row.workDate||"—")}
+            ${responseField("Ngày nghỉ việc",row.leaveDate||"—")}
+          </div>
+        </article>`).join("");
+    }
 
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn: nextIsOn, message: msg });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
+    function responseField(label,text){
+      return`<div class="response-field"><div class="response-label">${escapeHtml(label)}</div><div class="response-value">${escapeHtml(text)}</div></div>`;
+    }
 
-saveMessageBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
+    function openResponsePdf(responseId){
+      if(!responseId)return showToast("Không tìm thấy mã phản hồi.",true);
+      window.open(`${WEB_APP_URL}?action=viewResponse&id=${encodeURIComponent(responseId)}`,"_blank","noopener");
+    }
 
-  const isOn = (toggleBtn.dataset.state !== "off");
-  const msg  = adminMessage.value || "";
+    function setDefaultResponseRange(){
+      if(value("responseFromDate")||value("responseToDate"))return;
+      const end=new Date();
+      const start=new Date();
+      start.setDate(start.getDate()-29);
+      document.getElementById("responseFromDate").value=dateKey(start);
+      document.getElementById("responseToDate").value=dateKey(end);
+    }
 
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn, message: msg });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
+    function setResponseLast30Days(){
+      const end=new Date();
+      const start=new Date();
+      start.setDate(start.getDate()-29);
+      document.getElementById("responseFromDate").value=dateKey(start);
+      document.getElementById("responseToDate").value=dateKey(end);
+      loadAdminResponses(true);
+    }
 
-clearMessageBtn.addEventListener("click", async () => {
-  if (!isAdminSession) return;
+    function clearResponseFilters(){
+      document.getElementById("responseSearch").value="";
+      document.getElementById("responseFromDate").value="";
+      document.getElementById("responseToDate").value="";
+      loadAdminResponses(true);
+    }
 
-  const isOn = (toggleBtn.dataset.state !== "off");
+    async function saveAdminSettings(){
+      if(!state.admin.email||!state.admin.passcode)return showToast("Vui lòng đăng nhập quản trị.",true);
 
-  try{
-    const s = await apiSaveSettings({ ...adminSession, isOn, message: "" });
-    applySurveyState(!!s.isOn);
-    setMessage(s.message || "");
-  }catch(err){
-    alert("Save failed: " + err.message);
-    setAdminUI(false);
-  }
-});
+      setLoading(true);
+      try{
+        const result=await postApi("saveSettings",{
+          email:state.admin.email,
+          passcode:state.admin.passcode,
+          isOn:document.getElementById("adminIsOn").checked,
+          message:value("adminMessage")
+        });
+        state.settings=result.settings;
+        applySettings();
+        showToast("Đã cập nhật trạng thái biểu mẫu.");
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    function updateProgress(){
+      const fields=[
+        value("fullName"),value("employeeId"),value("workDate"),value("leaveDate"),value("department"),
+        checkedValues("q1").length,checkedValues("q2").length,radioValue("q3_overtime"),radioValue("q3_workload"),
+        radioValue("q4_support"),radioValue("q4_fairness"),radioValue("q4_listening"),value("q44ManagerImprove"),
+        radioValue("q51_colleague"),radioValue("q52_environment"),value("q61StayImprove"),radioValue("q62_return"),
+        radioValue("q63_refer"),value("finalComment"),document.getElementById("consent").checked
+      ];
+      const completed=fields.filter(Boolean).length;
+      const percent=Math.round(completed/fields.length*100);
+      document.getElementById("progressBar").style.width=percent+"%";
+      document.getElementById("progressPercent").textContent=percent+"%";
+    }
 
-  errorBox.style.display = "none";
-  errorBox.textContent = "";
-  resultBox.style.display = "none";
+    function dateKey(date){return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
+    function escapeHtml(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+    function escapeJs(value){return String(value==null?"":value).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r/g,"\\r").replace(/\n/g,"\\n")}
 
-  if (!sharedIsOn){
-    errorBox.style.display = "block";
-    errorBox.textContent = "Biểu mẫu hiện đang đóng.";
-    return;
-  }
+    function value(id){return String(document.getElementById(id)?.value||"").trim()}
+    function checkedValues(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el=>el.value)}
+    function radioValue(name){return document.querySelector(`input[name="${name}"]:checked`)?.value||""}
 
-  const errors = validateRequiredGroups();
-  if (errors.length){
-    errorBox.style.display = "block";
-    errorBox.textContent = errors[0];
-    return;
-  }
+    function focusError(id,message){
+      const el=document.getElementById(id);
+      if(el){el.disabled=false;el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}
+      showToast(message,true);return false;
+    }
+    function focusGroup(name,message){
+      const el=document.querySelector(`input[name="${name}"]`);
+      if(el){el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}
+      showToast(message,true);return false;
+    }
 
-  const payload = {
-    timestamp: new Date().toISOString(),
-    fullName: $("#fullName").value.trim(),
-    employeeId: $("#employeeId").value.trim(),
-    workDate: $("#workDate").value.trim(),
-    department: $("#department").value.trim(),
-    leaveDate: $("#leaveDate").value.trim(),
-    answers: {
-      q1: getCheckedValues("q1"),
-      q1_other: $("#q1_other")?.value.trim() || "",
-
-      q2: getCheckedValues("q2"),
-
-      q3_overtime: document.querySelector('input[name="q3_overtime"]:checked')?.value || "",
-      q3_overtime_reason: $("#q3_overtime_reason")?.value.trim() || "",
-      q3_workload: document.querySelector('input[name="q3_workload"]:checked')?.value || "",
-
-      q4_support: document.querySelector('input[name="q4_support"]:checked')?.value || "",
-      q4_support_reason: $("#q4_support_reason")?.value.trim() || "",
-      q4_fairness: document.querySelector('input[name="q4_fairness"]:checked')?.value || "",
-      q4_fairness_reason: $("#q4_fairness_reason")?.value.trim() || "",
-      q4_listening: document.querySelector('input[name="q4_listening"]:checked')?.value || "",
-      q4_listening_reason: $("#q4_listening_reason")?.value.trim() || "",
-      q44_manager_improve: $("#q44_manager_improve")?.value.trim() || "",
-
-      q51_colleague: document.querySelector('input[name="q51_colleague"]:checked')?.value || "",
-      q52_environment: document.querySelector('input[name="q52_environment"]:checked')?.value || "",
-
-      q61_stay_improve: $("#q61_stay_improve")?.value.trim() || "",
-      q62_return: document.querySelector('input[name="q62_return"]:checked')?.value || "",
-      q62_return_reason: $("#q62_return_reason")?.value.trim() || "",
-      q63_refer: document.querySelector('input[name="q63_refer"]:checked')?.value || "",
-      q63_refer_reason: $("#q63_refer_reason")?.value.trim() || "",
-
-      finalComment: $("#finalComment")?.value.trim() || ""
-    },
-    userAgent: navigator.userAgent
-  };
-
-  submitBtn.disabled = true;
-
-  try{
-    await apiSubmitSurvey(payload);
-    resultLine.textContent = "Anh/Chị đã gửi phiếu phỏng vấn nghỉ việc thành công.";
-    resultBox.style.display = "block";
-    resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    lockFormUntilRefresh();
-  }catch(err){
-    errorBox.style.display = "block";
-    errorBox.textContent = "Không thể lưu vào hệ thống:\n" + (err?.message || err);
-    submitBtn.disabled = false;
-  }
-});
-
-resetBtn.addEventListener("click", () => location.reload());
-
-function lockFormUntilRefresh(){
-  form.querySelectorAll('input, textarea, button:not(#resetBtn)')
-    .forEach(el => { el.disabled = true; });
-
-  if (!document.getElementById("lockedNote")){
-    const note = document.createElement("div");
-    note.id = "lockedNote";
-    note.style.marginTop = "12px";
-    note.style.padding = "10px 12px";
-    note.style.borderRadius = "12px";
-    note.style.border = "1px solid rgba(255,122,0,.25)";
-    note.style.background = "rgba(255,122,0,.06)";
-    note.style.fontWeight = "900";
-    note.textContent = "Anh/Chị đã nộp phiếu thành công. Vui lòng tải lại trang (F5) nếu muốn nhập lại.";
-    resultBox.appendChild(note);
-  }
-}
-
-(async function boot(){
-  setAdminUI(false);
-
-  setupFollowup("q3_overtime", "Có", "q3_overtime_reason_wrap", "q3_overtime_reason");
-  setupFollowup("q4_support", "Không", "q4_support_reason_wrap", "q4_support_reason");
-  setupFollowup("q4_fairness", "Không", "q4_fairness_reason_wrap", "q4_fairness_reason");
-  setupFollowup("q4_listening", "Không", "q4_listening_reason_wrap", "q4_listening_reason");
-  setupFollowup("q62_return", "Không", "q62_return_reason_wrap", "q62_return_reason");
-  setupFollowup("q63_refer", "Không", "q63_refer_reason_wrap", "q63_refer_reason");
-
-  try{
-    await refreshFromServer();
-  }catch(err){
-    applySurveyState(false);
-    setMessage("Không thể tải trạng thái biểu mẫu lúc này. Vui lòng thử lại sau.");
-    console.warn(err);
-  }
-
-  setInterval(() => {
-    refreshFromServer().catch(() => {});
-  }, 20000);
-})();
-</script>
+    function setLoading(on){document.getElementById("loading").classList.toggle("on",Boolean(on))}
+    let toastTimer;
+    function showToast(message,error){
+      clearTimeout(toastTimer);
+      const toast=document.getElementById("toast");
+      toast.textContent=message;
+      toast.className="toast on"+(error?" error":"");
+      toastTimer=setTimeout(()=>toast.className="toast",4500);
+    }
+  </script>
 </body>
 </html>
