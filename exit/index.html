@@ -4,131 +4,120 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#123b5d">
+  <meta name="theme-color" content="#ff7a00">
   <title>Phiếu phỏng vấn nghỉ việc</title>
   <style>
     :root{
       --primary:#ff7a00;--primary2:#ff9a3d;--accent:#123b5d;--success:#16865c;
-      --danger:#c9363e;--warning:#a85a00;--bg:#fff7ef;--card:#fff;--border:#e5e7eb;
+      --danger:#c9363e;--warning:#9a5300;--bg:#fff7ef;--card:#fff;--border:#e5e7eb;
       --text:#1f2937;--muted:#6b7280;--radius:17px;--shadow:0 12px 32px rgba(80,45,15,.10)
     }
     *{box-sizing:border-box}
     html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
     body{margin:0;min-height:100vh;min-height:100dvh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(135deg,#fff 0%,#fff 45%,rgba(255,122,0,.10) 100%)}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
-    .app{width:min(980px,calc(100% - 28px));margin:20px auto 56px;padding-bottom:env(safe-area-inset-bottom)}
-    .header{position:relative;overflow:hidden;padding:25px 25px 23px;border-radius:var(--radius);color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--shadow)}
-    .header:after{content:"";position:absolute;width:240px;height:240px;right:-85px;top:-115px;border-radius:50%;background:#ffffff12}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}
+    .app{width:min(1000px,calc(100% - 28px));margin:20px auto 56px;padding-bottom:env(safe-area-inset-bottom)}
+    .header{position:relative;overflow:hidden;padding:24px;border-radius:var(--radius);color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:var(--shadow)}
+    .header:after{content:"";position:absolute;width:250px;height:250px;right:-80px;top:-125px;border-radius:50%;background:#ffffff12}
     .header-row{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-    .eyebrow{margin-bottom:8px;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#cfe4f2}
-    .header h1{margin:0;font-size:clamp(25px,4vw,36px);line-height:1.18}
-    .header p{max-width:680px;margin:10px 0 0;color:#e2eef5;font-size:15px;line-height:1.55}
-    .admin-btn{position:relative;z-index:2;flex:0 0 auto;min-height:46px;padding:10px 15px;border:1px solid #ffffff6b;border-radius:12px;color:#fff;background:#ffffff18;font-weight:800}
-    .privacy{position:relative;z-index:1;display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:12px 14px;border:1px solid #ffffff29;border-radius:13px;background:#ffffff12;color:#edf6fb;font-size:13px;line-height:1.5}
-    .status-banner{display:none;margin-top:15px;padding:15px 16px;border-radius:14px;font-weight:800;line-height:1.5}
-    .status-banner.off{display:block;color:#8d2730;background:#fde7e9;border:1px solid #f5c9ce}
-    .status-banner.on{display:block;color:#0d6847;background:#def5eb;border:1px solid #bee9d9}
-    .progress-wrap{position:sticky;top:0;z-index:50;margin:14px 0;padding:8px;border:1px solid var(--border);border-radius:14px;background:#ffffffed;box-shadow:0 8px 22px rgba(18,59,93,.08);backdrop-filter:blur(8px)}
-    .progress{height:7px;overflow:hidden;border-radius:999px;background:#dfe8ee}.progress-bar{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#ffae55);transition:width .25s ease}
-    .progress-text{display:flex;justify-content:space-between;gap:12px;margin-top:7px;color:var(--muted);font-size:12px;font-weight:800}
-    .card{margin-top:14px;padding:22px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
-    .section-title{display:flex;align-items:flex-start;gap:12px;margin-bottom:17px}
-    .section-no{flex:0 0 auto;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;color:#fff;background:var(--primary);font-weight:900}
-    .section-title h2{margin:0;color:var(--primary);font-size:21px;line-height:1.3}
-    .section-title p{margin:5px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-    .full{grid-column:1/-1}
-    label.field-label{display:block;margin-bottom:7px;color:#334155;font-size:14px;font-weight:800}
-    .required:after{content:" *";color:var(--danger)}
-    input[type="text"],input[type="date"],input[type="email"],input[type="password"],select,textarea{
-      width:100%;min-height:51px;padding:12px 13px;border:1px solid var(--border);border-radius:12px;outline:none;color:var(--text);background:#fff;font-size:16px
-    }
-    textarea{min-height:105px;resize:vertical;line-height:1.55}
-    input:focus,select:focus,textarea:focus{border-color:var(--primary2);box-shadow:0 0 0 4px rgba(31,95,139,.12)}
-    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .choice-grid.one{grid-template-columns:1fr}
-    .choice{position:relative;display:flex;align-items:flex-start;gap:11px;min-height:52px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;transition:.15s}
-    .choice:hover{border-color:#9db8ca;background:#f8fbfd}
-    .choice:has(input:checked){border-color:var(--primary2);background:#eef6fb;box-shadow:0 0 0 3px rgba(31,95,139,.08)}
-    .choice input{flex:0 0 auto;width:20px;height:20px;margin:0;margin-top:1px;accent-color:var(--primary2)}
-    .choice span{line-height:1.4}
-    .conditional{display:none;margin-top:11px;padding:13px;border-left:4px solid var(--accent);border-radius:10px;background:#fff8f0}
-    .conditional.on{display:block}
-    .question{padding:18px 0;border-top:1px solid #edf1f4}
-    .question:first-of-type{padding-top:0;border-top:0}
-    .q-title{margin:0 0 11px;color:#26384a;font-size:16px;font-weight:900;line-height:1.5}
-    .help{margin:-4px 0 11px;color:var(--muted);font-size:13px;line-height:1.45}
-    .consent{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
-    .consent input{width:21px;height:21px;margin:0;accent-color:var(--primary2)}
-    .consent span{font-size:14px;line-height:1.5}
-    .actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
-    .btn{min-height:48px;padding:11px 17px;border:0;border-radius:12px;font-weight:900}
-    .btn-primary{color:#fff;background:var(--primary)}.btn-success{color:#fff;background:var(--success)}
-    .btn-light{color:var(--primary);background:#e8eff4}.btn-danger{color:#fff;background:var(--danger)}
-    .submit-btn{min-width:210px;min-height:54px;font-size:16px}
-    .success-view{display:none;text-align:center;padding:32px 18px}
-    .success-view.on{display:block}
-    .success-icon{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 17px;border-radius:50%;color:#fff;background:var(--success);font-size:42px;font-weight:900}
-    .success-view h2{margin:0;color:var(--primary);font-size:26px}.success-view p{color:var(--muted);line-height:1.6}
-    .response-code{display:inline-block;margin:8px 0 17px;padding:9px 12px;border-radius:10px;background:#edf3f7;color:var(--primary);font-family:monospace;font-weight:800;overflow-wrap:anywhere}
-    .modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:#0f172a88}
-    .modal.on{display:flex}
-    .modal-card{width:min(540px,100%);max-height:92vh;overflow:auto;padding:22px;border-radius:17px;background:#fff;box-shadow:0 24px 65px #0005}
-    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .modal-head h3{margin:0;color:var(--primary);font-size:21px}
-    .close-btn{width:38px;height:38px;border:0;border-radius:50%;font-size:22px}
-    .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:17px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
-    .switch{position:relative;width:54px;height:30px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;transition:.2s}.slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0003;transition:.2s}.switch input:checked+.slider{background:var(--success)}.switch input:checked+.slider:before{transform:translateX(24px)}
-    .admin-note{margin-top:12px;padding:12px 13px;border-radius:11px;color:#744100;background:#fff0d7;font-size:13px;line-height:1.5}
-
-    .admin-modal-card{width:min(1120px,100%)}
-    .admin-auth{display:grid;grid-template-columns:1.2fr 1fr auto;gap:12px;align-items:end;margin-top:16px}
-    .admin-workspace{margin-top:16px}
-    .admin-tabs{display:flex;gap:7px;padding:5px;border:1px solid var(--border);border-radius:13px;background:#e8eff4}
-    .admin-tab{flex:1;min-height:45px;padding:9px 12px;border:0;border-radius:10px;color:var(--muted);background:transparent;font-weight:900}
-    .admin-tab.on{color:#fff;background:var(--primary)}
-    .admin-panel{display:none;margin-top:15px}.admin-panel.on{display:block}
-    .response-filter{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:11px;align-items:end}
-    .response-summary{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 0;color:var(--muted);font-size:13px;font-weight:800}
-    .response-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:13px}
-    .response-table{width:100%;min-width:900px;border-collapse:collapse}
-    .response-table th,.response-table td{padding:11px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-    .response-table th{position:sticky;top:0;color:#fff;background:var(--primary);font-size:13px;white-space:nowrap}
-    .response-name{color:var(--primary);font-weight:900}.response-meta{margin-top:4px;color:var(--muted);font-size:12px}
-    .response-mobile{display:none}
-    .response-card{padding:14px;border:1px solid var(--border);border-radius:13px;background:#fff}
-    .response-card+.response-card{margin-top:10px}.response-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .response-card-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
-    .response-field{padding-top:8px;border-top:1px solid #edf1f4}.response-label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase}.response-value{margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
-
-    .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(510px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:var(--primary);box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:800;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
-    .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:#ffffffc7;backdrop-filter:blur(2px)}.loading.on{display:grid}.spinner{width:50px;height:50px;border:5px solid #d8e2e9;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-    .hidden{display:none!important}
-
     .brand-wrap{display:flex;align-items:center;gap:14px;min-width:0}
     .brand-logo{flex:0 0 auto;width:76px;height:76px;padding:5px;border:1px solid #ffffff55;border-radius:13px;background:#fff;object-fit:contain}
-    .doc-meta{display:flex;justify-content:space-between;gap:14px;margin-top:15px;padding-top:12px;border-top:1px solid #ffffff38;color:#fff4ea;font-size:12px;font-weight:800}
-    .header .eyebrow{color:#fff4e7}
-
-    @media(max-width:700px){
-      .app{width:calc(100% - 16px);margin:8px auto 32px}
-      .header{padding:18px 16px;border-radius:14px}.header-row{gap:10px}.header h1{font-size:21px}.header p{font-size:14px}.brand-logo{width:58px;height:58px}.doc-meta{flex-direction:column;gap:4px}
-      .admin-btn{min-width:46px;padding:10px;font-size:0}.admin-btn:after{content:"⚙";font-size:22px}
-      .privacy{font-size:12px}
-      .card{padding:17px 14px;border-radius:14px}
-      .grid,.choice-grid{grid-template-columns:1fr}.full{grid-column:auto}
-      .section-title h2{font-size:19px}.section-no{width:34px;height:34px}
-      input[type="text"],input[type="date"],input[type="email"],input[type="password"],select,textarea{min-height:54px;font-size:16px}
-      .choice{min-height:56px;padding:14px}
-      .actions{display:grid;grid-template-columns:1fr}.btn,.submit-btn{width:100%;min-height:53px;font-size:16px}
-      .modal{align-items:flex-end;padding:0}.modal-card{width:100%;border-radius:19px 19px 0 0;padding:20px 15px calc(20px + env(safe-area-inset-bottom))}
-      .admin-modal-card{height:min(94dvh,900px);max-height:94dvh;border-radius:19px 19px 0 0}
-      .admin-auth,.response-filter{grid-template-columns:1fr}
-      .admin-tabs{position:sticky;top:-1px;z-index:5}
-      .response-table-wrap{display:none}.response-mobile{display:block}
-      .response-summary{align-items:flex-start;flex-direction:column}
-      .progress-wrap{top:4px}
+    .eyebrow{margin-bottom:7px;color:#fff4e7;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+    .header h1{margin:0;font-size:clamp(24px,4vw,35px);line-height:1.16}
+    .header p{max-width:690px;margin:9px 0 0;color:#fff7f0;font-size:14px;line-height:1.5}
+    .admin-btn{position:relative;z-index:2;flex:0 0 auto;min-height:46px;padding:10px 15px;border:1px solid #ffffff70;border-radius:12px;color:#fff;background:#ffffff18;font-weight:900}
+    .doc-meta{position:relative;z-index:1;display:flex;justify-content:space-between;gap:14px;margin-top:15px;padding-top:11px;border-top:1px solid #ffffff38;color:#fff4ea;font-size:12px;font-weight:800}
+    .privacy{position:relative;z-index:1;display:flex;gap:10px;align-items:flex-start;margin-top:13px;padding:11px 13px;border:1px solid #ffffff29;border-radius:13px;background:#ffffff12;color:#fff;font-size:13px;line-height:1.5}
+    .status-banner{display:none;margin-top:14px;padding:14px 16px;border-radius:14px;font-weight:800;line-height:1.5}
+    .status-banner.on{display:block;color:#0d6847;background:#def5eb;border:1px solid #bee9d9}
+    .status-banner.off{display:block;color:#8d2730;background:#fde7e9;border:1px solid #f5c9ce}
+    .progress-wrap{position:sticky;top:4px;z-index:40;margin:13px 0;padding:8px;border:1px solid var(--border);border-radius:14px;background:#ffffffed;box-shadow:0 8px 22px rgba(70,40,15,.08);backdrop-filter:blur(8px)}
+    .progress{height:7px;overflow:hidden;border-radius:999px;background:#e5e7eb}.progress-bar{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--primary2));transition:width .2s}
+    .progress-text{display:flex;justify-content:space-between;margin-top:7px;color:var(--muted);font-size:12px;font-weight:800}
+    .card{margin-top:14px;padding:22px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
+    .section-title{display:flex;align-items:flex-start;gap:12px;margin-bottom:17px}
+    .section-no{flex:0 0 auto;display:grid;place-items:center;width:37px;height:37px;border-radius:11px;color:#fff;background:var(--primary);font-weight:900}
+    .section-title h2{margin:0;color:var(--primary);font-size:21px;line-height:1.3}.section-title p{margin:5px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.full{grid-column:1/-1}
+    label.field-label{display:block;margin-bottom:7px;color:#334155;font-size:14px;font-weight:800}.required:after{content:" *";color:var(--danger)}
+    input[type="text"],input[type="date"],input[type="email"],input[type="password"],input[type="file"],select,textarea{
+      width:100%;min-height:51px;padding:12px 13px;border:1px solid var(--border);border-radius:12px;outline:none;color:var(--text);background:#fff;font-size:16px
+    }
+    textarea{min-height:100px;resize:vertical;line-height:1.5}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary2);box-shadow:0 0 0 4px rgba(255,122,0,.12)}
+    input[readonly]{background:#f5f7f9;color:#475569;border-style:dashed}
+    .employee-lookup{display:flex;gap:10px;align-items:flex-end}.employee-lookup>div:first-child{flex:1}
+    .lookup-status{margin-top:8px;padding:10px 12px;border-radius:10px;color:var(--muted);background:#f8fafc;font-size:13px;font-weight:800;line-height:1.45}
+    .lookup-status.ok{color:#0f6847;background:#e2f6ed}.lookup-status.error{color:#9b2630;background:#fde9eb}.lookup-status.warning{color:#8a4b00;background:#fff0dc}
+    .employee-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:15px}
+    .question{padding:18px 0;border-top:1px solid #edf1f4}.question:first-child{padding-top:0;border-top:0}
+    .q-title{margin:0 0 9px;color:#26384a;font-size:16px;font-weight:900;line-height:1.5}.help{margin:-3px 0 10px;color:var(--muted);font-size:13px;line-height:1.45}
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .choice{display:flex;align-items:flex-start;gap:10px;min-height:52px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer}
+    .choice:hover{border-color:#f0a35d;background:#fffaf5}.choice:has(input:checked){border-color:var(--primary);background:#fff6ed;box-shadow:0 0 0 3px rgba(255,122,0,.08)}
+    .choice input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;accent-color:var(--primary)}.choice span{line-height:1.4}
+    .conditional{display:none;margin-top:11px;padding:13px;border-left:4px solid var(--primary);border-radius:10px;background:#fff8f0}.conditional.on{display:block}
+    .consent{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
+    .consent input{width:21px;height:21px;margin:0;accent-color:var(--primary)}.consent span{font-size:14px;line-height:1.5}
+    .actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:17px}
+    .btn{min-height:47px;padding:10px 16px;border:0;border-radius:12px;font-weight:900}
+    .btn-primary{color:#fff;background:var(--primary)}.btn-success{color:#fff;background:var(--success)}.btn-danger{color:#fff;background:var(--danger)}
+    .btn-light{color:#7a4300;background:#fff0df}.btn-outline{color:var(--primary);background:#fff;border:1px solid #f0a35d}.btn-sm{min-height:38px;padding:7px 10px;font-size:13px}
+    .submit-btn{min-width:220px;min-height:54px;font-size:16px}
+    .success-view{display:none;text-align:center;padding:32px 18px}.success-view.on{display:block}
+    .success-icon{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 17px;border-radius:50%;color:#fff;background:var(--success);font-size:42px;font-weight:900}
+    .success-view h2{margin:0;color:var(--primary)}.success-view p{color:var(--muted);line-height:1.6}
+    .response-code{display:inline-block;margin:8px 0 17px;padding:9px 12px;border-radius:10px;background:#fff0df;color:#9a5300;font-family:monospace;font-weight:800;overflow-wrap:anywhere}
+    .modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:#0f172a88}.modal.on{display:flex}
+    .modal-card{width:min(1180px,100%);max-height:94vh;overflow:auto;padding:22px;border-radius:17px;background:#fff;box-shadow:0 24px 65px #0005}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.modal-head h3{margin:0;color:var(--primary);font-size:22px}
+    .close-btn{width:38px;height:38px;border:0;border-radius:50%;font-size:22px}
+    .admin-auth{display:grid;grid-template-columns:1.2fr 1fr auto;gap:12px;align-items:end;margin-top:16px}
+    .admin-note{margin-top:12px;padding:12px 13px;border-radius:11px;color:#744100;background:#fff0d7;font-size:13px;line-height:1.5}
+    .admin-workspace{margin-top:16px}.admin-tabs{display:flex;gap:7px;padding:5px;border:1px solid var(--border);border-radius:13px;background:#f7f1ea;overflow:auto}
+    .admin-tab{flex:1;min-width:145px;min-height:45px;padding:9px 12px;border:0;border-radius:10px;color:var(--muted);background:transparent;font-weight:900}
+    .admin-tab.on{color:#fff;background:var(--primary)}.admin-panel{display:none;margin-top:15px}.admin-panel.on{display:block}
+    .filter-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:11px;align-items:end}
+    .summary-row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:13px 0;color:var(--muted);font-size:13px;font-weight:800}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:13px}.data-table{width:100%;min-width:900px;border-collapse:collapse}
+    .data-table th,.data-table td{padding:11px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    .data-table th{position:sticky;top:0;color:#fff;background:var(--primary);font-size:13px;white-space:nowrap}
+    .response-name{color:#a65a00;font-weight:900}.response-meta{margin-top:4px;color:var(--muted);font-size:12px}
+    .mobile-list{display:none}.mobile-card{padding:14px;border:1px solid var(--border);border-radius:13px;background:#fff}.mobile-card+.mobile-card{margin-top:10px}
+    .mobile-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.mobile-grid{display:grid;gap:8px;margin-top:12px}
+    .mobile-field{padding-top:8px;border-top:1px solid #edf1f4}.mobile-label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase}.mobile-value{margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
+    .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid var(--border);border-radius:13px;background:#f8fafc}
+    .switch{position:relative;width:54px;height:30px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd5e1}.slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0003;transition:.2s}.switch input:checked+.slider{background:var(--success)}.switch input:checked+.slider:before{transform:translateX(24px)}
+    .import-box{padding:16px;border:1px dashed #f0a35d;border-radius:14px;background:#fffaf5}.import-grid{display:grid;grid-template-columns:1.4fr .8fr auto;gap:11px;align-items:end}
+    .expected-columns{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.55}.import-summary{margin-top:12px;padding:11px 12px;border-radius:11px;background:#f8f2eb;color:#334155;font-size:13px;font-weight:800}
+    .preview-wrap{display:none;margin-top:12px;overflow:auto;border:1px solid var(--border);border-radius:12px}.preview-wrap.on{display:block}.preview-table{width:100%;min-width:950px;border-collapse:collapse}
+    .preview-table th,.preview-table td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px;white-space:nowrap}.preview-table th{color:#fff;background:var(--primary)}
+    .employee-toolbar{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin:15px 0 10px}
+    .builder-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:14px;border:1px solid #f1dfcf;border-radius:14px;background:#fffaf5}
+    .builder-list{display:grid;gap:14px}.builder-section{border:1px solid #efd7c1;border-radius:15px;background:#fff;overflow:hidden}
+    .builder-section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px;background:linear-gradient(90deg,#fff1e2,#fff)}
+    .builder-section-number{display:inline-grid;place-items:center;min-width:38px;height:38px;border-radius:11px;color:#fff;background:var(--primary);font-weight:900}
+    .builder-head-left{display:flex;gap:11px;align-items:flex-start;flex:1}.builder-head-fields{display:grid;grid-template-columns:1.2fr 1.6fr;gap:10px;flex:1}
+    .builder-section-actions,.builder-question-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .builder-questions{padding:13px;display:grid;gap:12px}.builder-question{padding:14px;border:1px solid var(--border);border-radius:13px;background:#fcfcfc}
+    .builder-question-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}
+    .builder-question-label{font-weight:900;color:#8b4b00}.builder-question-grid{display:grid;grid-template-columns:1.8fr .7fr .65fr;gap:10px}
+    .builder-extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.builder-options{margin-top:10px}
+    .builder-followup{margin-top:10px;padding:12px;border-left:4px solid var(--primary);border-radius:10px;background:#fff8ef}
+    .builder-empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}
+    .schema-warning{padding:11px 13px;border-radius:11px;color:#744100;background:#fff0d7;font-size:13px;line-height:1.5}
+    .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(520px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:#9a5300;box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:800;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
+    .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:#ffffffc7;backdrop-filter:blur(2px)}.loading.on{display:grid}.spinner{width:50px;height:50px;border:5px solid #e5e7eb;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .hidden{display:none!important}
+    @media(max-width:760px){
+      .app{width:calc(100% - 16px);margin:8px auto 32px}.header{padding:17px 15px;border-radius:14px}.brand-logo{width:58px;height:58px}
+      .header h1{font-size:20px}.header p{font-size:13px}.doc-meta{flex-direction:column;gap:4px}.admin-btn{min-width:46px;padding:10px;font-size:0}.admin-btn:after{content:"⚙";font-size:22px}
+      .card{padding:17px 13px;border-radius:14px}.grid,.choice-grid,.employee-info-grid,.admin-auth,.filter-grid,.import-grid,.employee-toolbar,.builder-head-fields,.builder-question-grid,.builder-extra-grid{grid-template-columns:1fr}
+      .full{grid-column:auto}.employee-lookup{align-items:stretch;flex-direction:column}.btn,.submit-btn{width:100%;min-height:52px;font-size:15px}.btn-sm{min-height:43px}
+      .actions{display:grid;grid-template-columns:1fr}.modal{align-items:flex-end;padding:0}.modal-card{width:100%;height:95dvh;max-height:95dvh;border-radius:19px 19px 0 0;padding:18px 13px calc(18px + env(safe-area-inset-bottom))}
+      .admin-tabs{position:sticky;top:-1px;z-index:5}.table-wrap{display:none}.mobile-list{display:block}.summary-row{align-items:flex-start;flex-direction:column}
+      .builder-section-head,.builder-question-top{flex-direction:column}.builder-section-actions,.builder-question-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}.builder-section-actions .btn,.builder-question-actions .btn{width:100%}
+      input[type="text"],input[type="date"],input[type="email"],input[type="password"],input[type="file"],select,textarea{min-height:54px;font-size:16px}
     }
   </style>
 </head>
@@ -162,152 +151,32 @@
 
     <form id="surveyForm" novalidate>
       <section class="card">
-        <div class="section-title"><div class="section-no">1</div><div><h2>Thông tin cá nhân</h2><p>Vui lòng điền chính xác thông tin nhân sự.</p></div></div>
-        <div class="grid">
-          <div><label class="field-label required" for="fullName">Họ và tên</label><input id="fullName" type="text" autocomplete="name" placeholder="Nhập họ và tên"></div>
-          <div><label class="field-label required" for="employeeId">MSNV</label><input id="employeeId" type="text" autocomplete="off" placeholder="Nhập mã số nhân viên"></div>
-          <div><label class="field-label required" for="workDate">Ngày vào làm</label><input id="workDate" type="date"></div>
+        <div class="section-title">
+          <div class="section-no">1</div>
+          <div><h2>Thông tin cá nhân</h2><p>Nhập MSNV và chọn Ngày nghỉ việc. Các thông tin còn lại được tự động lấy từ sheet NHÂN SỰ.</p></div>
+        </div>
+
+        <div class="employee-lookup">
+          <div><label class="field-label required" for="employeeId">MSNV</label><input id="employeeId" type="text" autocomplete="off" placeholder="Nhập MSNV rồi nhấn Enter"></div>
+          <button class="btn btn-primary" id="lookupEmployeeButton" type="button" onclick="lookupEmployee(true)">Kiểm tra MSNV</button>
+        </div>
+        <div class="lookup-status" id="employeeLookupStatus">Chưa kiểm tra MSNV.</div>
+
+        <div class="employee-info-grid">
+          <div><label class="field-label">Họ và tên</label><input id="fullName" type="text" readonly placeholder="Tự động điền"></div>
+          <div><label class="field-label">Bộ phận</label><input id="department" type="text" readonly placeholder="Tự động điền"></div>
+          <div><label class="field-label">Chức vụ</label><input id="jobTitle" type="text" readonly placeholder="Tự động điền"></div>
+          <div><label class="field-label">Vị trí công việc</label><input id="workPosition" type="text" readonly placeholder="Tự động điền"></div>
+          <div><label class="field-label">Ngày vào làm</label><input id="workDate" type="date" readonly></div>
           <div><label class="field-label required" for="leaveDate">Ngày nghỉ việc</label><input id="leaveDate" type="date"></div>
-          <div class="full"><label class="field-label required" for="department">Bộ phận / Chức danh</label><input id="department" type="text" placeholder="Ví dụ: Kho 6 – Nhân viên xe nâng"></div>
+          <div><label class="field-label">Giới tính</label><input id="gender" type="text" readonly placeholder="Tự động điền"></div>
+          <div><label class="field-label">IDBP Báo cáo TCT</label><input id="idbp" type="text" readonly placeholder="Tự động điền"></div>
         </div>
       </section>
 
-      <section class="card">
-        <div class="section-title"><div class="section-no">2</div><div><h2>Lý do nghỉ việc và điều hài lòng</h2><p>Có thể chọn nhiều phương án.</p></div></div>
-
-        <div class="question">
-          <p class="q-title">Câu 1. Lý do chính khiến Anh/Chị quyết định nghỉ việc? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="checkbox" name="q1" value="Lương &amp; thu nhập không phù hợp"><span>Lương &amp; thu nhập không phù hợp</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Công việc quá áp lực"><span>Công việc quá áp lực</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Thời gian làm việc (tăng ca nhiều, ca kíp)"><span>Thời gian làm việc (tăng ca nhiều, ca kíp)</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Quản lý / tổ trưởng"><span>Quản lý / tổ trưởng</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Môi trường làm việc"><span>Môi trường làm việc</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Không có cơ hội phát triển"><span>Không có cơ hội phát triển</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Lý do cá nhân (gia đình, sức khỏe, chuyển nơi ở…)"><span>Lý do cá nhân (gia đình, sức khỏe, chuyển nơi ở…)</span></label>
-            <label class="choice"><input type="checkbox" name="q1" value="Công việc không phù hợp"><span>Công việc không phù hợp</span></label>
-            <label class="choice"><input id="q1OtherCheck" type="checkbox" name="q1" value="Ý kiến khác"><span>Ý kiến khác</span></label>
-          </div>
-          <div class="conditional" id="q1OtherBox"><label class="field-label" for="q1Other">Vui lòng ghi rõ</label><textarea id="q1Other" placeholder="Nhập lý do khác"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 2. Điều Anh/Chị hài lòng trong thời gian làm việc tại công ty? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="checkbox" name="q2" value="Mức lương hiện tại"><span>Mức lương hiện tại</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Cơ hội phát triển"><span>Cơ hội phát triển</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Chế độ phúc lợi (BHXH, thưởng, phụ cấp…)"><span>Chế độ phúc lợi (BHXH, thưởng, phụ cấp…)</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Khối lượng công việc"><span>Khối lượng công việc</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Môi trường làm việc"><span>Môi trường làm việc</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Quan hệ với đồng nghiệp"><span>Quan hệ với đồng nghiệp</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Cách quản lý của cấp trên"><span>Cách quản lý của cấp trên</span></label>
-            <label class="choice"><input type="checkbox" name="q2" value="Thức ăn công ty"><span>Thức ăn công ty</span></label>
-          </div>
-        </div>
-      </section>
+      <div id="dynamicSurveySections"></div>
 
       <section class="card">
-        <div class="section-title"><div class="section-no">3</div><div><h2>Khối lượng và thời gian làm việc</h2><p>Đánh giá trải nghiệm thực tế của Anh/Chị.</p></div></div>
-
-        <div class="question">
-          <p class="q-title">Câu 3.1. Anh/Chị có thường xuyên phải tăng ca không? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q3_overtime" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q3_overtime" value="Không"><span>Không</span></label>
-          </div>
-          <div class="conditional" id="q3OvertimeReasonBox"><label class="field-label" for="q3OvertimeReason">Nguyên nhân / ý kiến thêm</label><textarea id="q3OvertimeReason" placeholder="Mô tả nguyên nhân tăng ca hoặc khó khăn gặp phải"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 3.2. Khối lượng công việc được giao như thế nào? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q3_workload" value="Quá nhiều"><span>Quá nhiều</span></label>
-            <label class="choice"><input type="radio" name="q3_workload" value="Bình thường"><span>Bình thường</span></label>
-            <label class="choice"><input type="radio" name="q3_workload" value="Quá ít"><span>Quá ít</span></label>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-title"><div class="section-no">4</div><div><h2>Đánh giá quản lý trực tiếp</h2><p>Chọn phương án phù hợp nhất và ghi rõ nguyên nhân khi cần.</p></div></div>
-
-        <div class="question">
-          <p class="q-title">Câu 4.1. Quản lý trực tiếp có hỗ trợ Anh/Chị trong công việc không? *</p>
-          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_support" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_support" value="Không"><span>Không</span></label></div>
-          <div class="conditional" id="q4SupportBox"><label class="field-label" for="q4SupportReason">Vui lòng nêu nguyên nhân</label><textarea id="q4SupportReason"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 4.2. Quản lý có đối xử công bằng với nhân viên không? *</p>
-          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_fairness" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_fairness" value="Không"><span>Không</span></label></div>
-          <div class="conditional" id="q4FairnessBox"><label class="field-label" for="q4FairnessReason">Vui lòng nêu nguyên nhân</label><textarea id="q4FairnessReason"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 4.3. Quản lý có lắng nghe ý kiến của Anh/Chị không? *</p>
-          <div class="choice-grid"><label class="choice"><input type="radio" name="q4_listening" value="Có"><span>Có</span></label><label class="choice"><input type="radio" name="q4_listening" value="Không"><span>Không</span></label></div>
-          <div class="conditional" id="q4ListeningBox"><label class="field-label" for="q4ListeningReason">Vui lòng nêu nguyên nhân</label><textarea id="q4ListeningReason"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 4.4. Anh/Chị mong đợi quản lý cần cải thiện điều gì? *</p>
-          <textarea id="q44ManagerImprove" placeholder="Nhập nội dung mong muốn cải thiện"></textarea>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-title"><div class="section-no">5</div><div><h2>Đồng nghiệp và môi trường làm việc</h2><p>Đánh giá tổng quan trong thời gian làm việc.</p></div></div>
-
-        <div class="question">
-          <p class="q-title">Câu 5.1. Quan hệ giữa Anh/Chị và đồng nghiệp như thế nào? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q51_colleague" value="Tốt"><span>Tốt</span></label>
-            <label class="choice"><input type="radio" name="q51_colleague" value="Bình thường"><span>Bình thường</span></label>
-            <label class="choice"><input type="radio" name="q51_colleague" value="Cần cải thiện"><span>Cần cải thiện</span></label>
-          </div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 5.2. Anh/Chị đánh giá môi trường làm việc như thế nào? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q52_environment" value="Tốt"><span>Tốt</span></label>
-            <label class="choice"><input type="radio" name="q52_environment" value="Bình thường"><span>Bình thường</span></label>
-            <label class="choice"><input type="radio" name="q52_environment" value="Cần cải thiện"><span>Cần cải thiện</span></label>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-title"><div class="section-no">6</div><div><h2>Khả năng quay lại và đề xuất cải thiện</h2><p>Những ý kiến này rất quan trọng với doanh nghiệp.</p></div></div>
-
-        <div class="question">
-          <p class="q-title">Câu 6.1. Công ty cần cải thiện điều gì để Anh/Chị cân nhắc ở lại? *</p>
-          <textarea id="q61StayImprove" placeholder="Nhập đề xuất cải thiện"></textarea>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 6.2. Anh/Chị có cân nhắc quay lại làm việc tại công ty trong tương lai không? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q62_return" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q62_return" value="Không"><span>Không</span></label>
-          </div>
-          <div class="conditional" id="q62ReturnBox"><label class="field-label" for="q62ReturnReason">Vui lòng nêu nguyên nhân</label><textarea id="q62ReturnReason"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Câu 6.3. Anh/Chị có sẵn sàng giới thiệu người quen vào làm việc tại công ty không? *</p>
-          <div class="choice-grid">
-            <label class="choice"><input type="radio" name="q63_refer" value="Có"><span>Có</span></label>
-            <label class="choice"><input type="radio" name="q63_refer" value="Không"><span>Không</span></label>
-          </div>
-          <div class="conditional" id="q63ReferBox"><label class="field-label" for="q63ReferReason">Vui lòng nêu nguyên nhân</label><textarea id="q63ReferReason"></textarea></div>
-        </div>
-
-        <div class="question">
-          <p class="q-title">Nhận xét chung của Anh/Chị *</p>
-          <textarea id="finalComment" placeholder="Nhập nhận xét hoặc góp ý khác"></textarea>
-        </div>
-
         <label class="consent"><input id="consent" type="checkbox"><span>Tôi xác nhận các thông tin trên là phản hồi của cá nhân tôi và đồng ý gửi phiếu này cho doanh nghiệp.</span></label>
         <div class="actions"><button class="btn btn-success submit-btn" id="submitButton" type="submit">Gửi phiếu phỏng vấn</button></div>
       </section>
@@ -318,16 +187,14 @@
       <h2>Đã ghi nhận phản hồi</h2>
       <p>Cảm ơn Anh/Chị đã dành thời gian chia sẻ. Mã phản hồi:</p>
       <div class="response-code" id="responseCode"></div>
-      <div class="actions" style="justify-content:center">
-        <button class="btn btn-primary" type="button" id="viewResponseButton">Xem / in phiếu</button>
-      </div>
+      <div class="actions" style="justify-content:center"><button class="btn btn-primary" type="button" id="viewResponseButton">Xem / in phiếu</button></div>
     </section>
   </main>
 
   <div class="modal" id="adminModal">
-    <div class="modal-card admin-modal-card">
+    <div class="modal-card">
       <div class="modal-head">
-        <div><h3>Quản trị phiếu nghỉ việc</h3><div class="help" style="margin:5px 0 0">Xem phản hồi và mở trực tiếp mẫu PDF ngay trên giao diện.</div></div>
+        <div><h3>Quản trị phiếu nghỉ việc</h3><div class="help" style="margin:5px 0 0">Quản lý phản hồi, nhân sự, cấu trúc câu hỏi và trạng thái biểu mẫu.</div></div>
         <button class="close-btn" type="button" onclick="closeAdmin()">×</button>
       </div>
 
@@ -336,41 +203,65 @@
         <div><label class="field-label">Mật khẩu quản trị</label><input id="adminPasscode" type="password" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
         <button class="btn btn-primary" type="button" onclick="loginAdmin()">Đăng nhập</button>
       </div>
-
-      <div class="admin-note" id="adminLoginNote">Thông tin đăng nhập chỉ được giữ trong bộ nhớ của tab hiện tại và không lưu vào trình duyệt.</div>
+      <div class="admin-note" id="adminLoginNote">Thông tin đăng nhập chỉ được giữ trong bộ nhớ của tab hiện tại.</div>
 
       <div class="admin-workspace hidden" id="adminWorkspace">
         <div class="admin-tabs">
           <button class="admin-tab on" type="button" data-admin-tab="responses" onclick="openAdminTab('responses')">Phiếu đã gửi</button>
+          <button class="admin-tab" type="button" data-admin-tab="employees" onclick="openAdminTab('employees')">Danh sách nhân sự</button>
+          <button class="admin-tab" type="button" data-admin-tab="builder" onclick="openAdminTab('builder')">Thiết kế câu hỏi</button>
           <button class="admin-tab" type="button" data-admin-tab="settings" onclick="openAdminTab('settings')">Cài đặt biểu mẫu</button>
         </div>
 
         <section class="admin-panel on" id="adminResponsesPanel">
-          <div class="response-filter">
+          <div class="filter-grid">
             <div><label class="field-label">Tìm theo họ tên, MSNV hoặc bộ phận</label><input id="responseSearch" placeholder="Nhập nội dung tìm kiếm" onkeydown="if(event.key==='Enter')loadAdminResponses(true)"></div>
             <div><label class="field-label">Từ ngày gửi</label><input id="responseFromDate" type="date"></div>
             <div><label class="field-label">Đến ngày gửi</label><input id="responseToDate" type="date"></div>
             <button class="btn btn-primary" type="button" onclick="loadAdminResponses(true)">Lọc dữ liệu</button>
           </div>
-          <div class="response-summary">
-            <span id="responseCountText">Chưa tải phản hồi.</span>
-            <div><button class="btn btn-light" type="button" onclick="setResponseLast30Days()">30 ngày gần nhất</button> <button class="btn btn-light" type="button" onclick="clearResponseFilters()">Tất cả</button></div>
-          </div>
+          <div class="summary-row"><span id="responseCountText">Chưa tải phản hồi.</span><div><button class="btn btn-light btn-sm" type="button" onclick="setResponseLast30Days()">30 ngày</button> <button class="btn btn-light btn-sm" type="button" onclick="clearResponseFilters()">Tất cả</button></div></div>
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>STT</th><th>Ngày gửi</th><th>Người lao động</th><th>Bộ phận / Chức danh</th><th>Ngày nghỉ việc</th><th>Thao tác</th></tr></thead><tbody id="responseTableBody"><tr><td colspan="6">Chưa tải dữ liệu.</td></tr></tbody></table></div>
+          <div class="mobile-list" id="responseMobileList"></div>
+        </section>
 
-          <div class="response-table-wrap">
-            <table class="response-table">
-              <thead><tr><th>STT</th><th>Ngày gửi</th><th>Người lao động</th><th>Bộ phận / Chức danh</th><th>Ngày nghỉ việc</th><th>Thao tác</th></tr></thead>
-              <tbody id="responseTableBody"><tr><td colspan="6">Chưa tải dữ liệu.</td></tr></tbody>
-            </table>
+        <section class="admin-panel" id="adminEmployeesPanel">
+          <div class="import-box">
+            <h4 style="margin:0;color:var(--primary);font-size:18px">Upload Excel cập nhật nhân sự</h4>
+            <p class="help" style="margin:6px 0 13px">Hệ thống tự tìm dòng tiêu đề trong 20 dòng đầu.</p>
+            <div class="import-grid">
+              <div><label class="field-label">Chọn file Excel</label><input id="employeeExcelFile" type="file" accept=".xlsx,.xls,.xlsm" onchange="prepareEmployeeExcel(event)"></div>
+              <div><label class="field-label">Cách cập nhật</label><select id="employeeImportMode"><option value="merge">Gộp và cập nhật theo MSNV</option><option value="replace">Thay toàn bộ danh sách đang hoạt động</option></select></div>
+              <button class="btn btn-success" id="importEmployeeButton" type="button" onclick="importEmployeeExcel()" disabled>Cập nhật danh sách</button>
+            </div>
+            <div class="expected-columns"><b>Cột khuyến nghị:</b> MSNV/Mã số, Họ và tên hoặc Họ + Đệm và Tên, Bộ phận, Chức vụ, Vị trí công việc, Giới tính, IDBP và Ngày vào làm. Ngày nghỉ việc do người lao động tự chọn.</div>
+            <div class="import-summary" id="employeeImportSummary">Chưa chọn file Excel.</div>
+            <div class="preview-wrap" id="employeePreviewWrap"><table class="preview-table"><thead><tr><th>MSNV</th><th>Họ và tên</th><th>Bộ phận</th><th>Chức vụ</th><th>Vị trí</th><th>Ngày vào làm</th></tr></thead><tbody id="employeePreviewBody"></tbody></table></div>
           </div>
-          <div class="response-mobile" id="responseMobileList"></div>
+          <div class="employee-toolbar"><div><label class="field-label">Tìm nhân sự đang hoạt động</label><input id="employeeAdminSearch" placeholder="Nhập MSNV, họ tên, bộ phận hoặc vị trí" onkeydown="if(event.key==='Enter')loadAdminEmployees(true)"></div><button class="btn btn-primary" type="button" onclick="loadAdminEmployees(true)">Làm mới danh sách</button></div>
+          <div class="summary-row"><span id="employeeCountText">Chưa tải danh sách nhân sự.</span><span>Hoàn thành khảo sát sẽ chuyển sang sheet “NHÂN SỰ ĐÃ NGHỈ”.</span></div>
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>STT</th><th>MSNV</th><th>Họ và tên</th><th>Bộ phận</th><th>Chức vụ</th><th>Vị trí</th><th>Ngày vào làm</th></tr></thead><tbody id="employeeTableBody"><tr><td colspan="7">Chưa tải dữ liệu.</td></tr></tbody></table></div>
+          <div class="mobile-list" id="employeeMobileList"></div>
+        </section>
+
+        <section class="admin-panel" id="adminBuilderPanel">
+          <div class="builder-toolbar">
+            <div>
+              <h4 style="margin:0;color:var(--primary);font-size:19px">Trình thiết kế câu hỏi</h4>
+              <p class="help" style="margin:6px 0 0">Phần 1 “Thông tin cá nhân” được cố định. Các phần tạo tại đây sẽ tự đánh số từ Phần 2.</p>
+            </div>
+            <div class="builder-section-actions">
+              <button class="btn btn-outline" type="button" onclick="builderAddSection()">+ Thêm phần lớn</button>
+              <button class="btn btn-success" type="button" onclick="saveQuestionBuilder()">Lưu biểu mẫu</button>
+              <button class="btn btn-light" type="button" onclick="resetQuestionBuilder()">Khôi phục mặc định</button>
+            </div>
+          </div>
+          <div class="schema-warning">Sau khi lưu, người đang nhập biểu mẫu phiên bản cũ sẽ được yêu cầu tải lại trang trước khi gửi. PDF của các phản hồi cũ vẫn giữ nguyên cấu trúc tại thời điểm nộp.</div>
+          <div class="builder-list" id="questionBuilderList"></div>
         </section>
 
         <section class="admin-panel" id="adminSettingsPanel">
-          <div class="switch-row">
-            <div><b>Mở biểu mẫu</b><div class="help" style="margin:4px 0 0">Tắt để ngừng nhận phản hồi mới.</div></div>
-            <label class="switch"><input id="adminIsOn" type="checkbox"><span class="slider"></span></label>
-          </div>
+          <div class="switch-row"><div><b>Mở biểu mẫu</b><div class="help" style="margin:4px 0 0">Tắt để ngừng nhận phản hồi mới.</div></div><label class="switch"><input id="adminIsOn" type="checkbox"><span class="slider"></span></label></div>
           <div style="margin-top:14px"><label class="field-label">Thông báo khi biểu mẫu đóng</label><textarea id="adminMessage" placeholder="Nhập thông báo"></textarea></div>
           <div class="actions"><button class="btn btn-light" type="button" onclick="logoutAdmin()">Đăng xuất</button><button class="btn btn-primary" type="button" onclick="saveAdminSettings()">Lưu cài đặt</button></div>
         </section>
@@ -378,157 +269,230 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    // Web App URL đang được HTML GitHub sử dụng.
-    // Khi tạo deployment mới, chỉ cần thay giá trị này.
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxEt9LdCrdcQwuwd8DWPS6GEmv08qFyyI445xikyPV6WWA---wRmBqQSlr7CxSS0nhWNg/exec";
-    const state={settings:null,submitting:false,admin:{email:"",passcode:"",responses:[]}};
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrRW3_en4TArxCwxxY8pKk-hRm7NZZ6AslaV_39GxMHGQMe998oJygk7IrG7PJ9H2C9A/exec";
+    const state={
+      settings:null,schema:null,submitting:false,employee:null,lookupTimer:null,
+      importPreview:{rows:[],fileName:""},
+      admin:{email:"",passcode:"",responses:[],employees:[],builder:null}
+    };
 
     document.addEventListener("DOMContentLoaded",initialize);
 
     async function initialize(){
-      bindEvents();
-      updateProgress();
-      await loadSettings();
+      bindStaticEvents();
+      await loadFormConfig();
       setInterval(()=>loadSettings(false),20000);
     }
 
-    function bindEvents(){
+    function bindStaticEvents(){
       document.getElementById("surveyForm").addEventListener("submit",submitSurvey);
-      document.querySelectorAll("input,select,textarea").forEach(el=>{
-        el.addEventListener("change",updateProgress);
-        el.addEventListener("input",updateProgress);
+      document.getElementById("consent").addEventListener("change",updateProgress);
+      document.getElementById("leaveDate").addEventListener("change",updateProgress);
+
+      const employeeId=document.getElementById("employeeId");
+      employeeId.addEventListener("input",()=>{
+        employeeId.value=employeeId.value.toUpperCase().replace(/\s+/g,"");
+        clearTimeout(state.lookupTimer);
+        clearEmployeeDetails();
+        if(employeeId.value.trim().length>=2)state.lookupTimer=setTimeout(()=>lookupEmployee(false),550);
       });
-
-      document.getElementById("q1OtherCheck").addEventListener("change",e=>toggleBox("q1OtherBox",e.target.checked));
-      bindConditional("q3_overtime","Có","q3OvertimeReasonBox");
-      bindConditional("q4_support","Không","q4SupportBox");
-      bindConditional("q4_fairness","Không","q4FairnessBox");
-      bindConditional("q4_listening","Không","q4ListeningBox");
-      bindConditional("q62_return","Không","q62ReturnBox");
-      bindConditional("q63_refer","Không","q63ReferBox");
-
-      document.getElementById("workDate").addEventListener("change",()=>{
-        document.getElementById("leaveDate").min=document.getElementById("workDate").value;
+      employeeId.addEventListener("keydown",event=>{
+        if(event.key==="Enter"){event.preventDefault();lookupEmployee(true)}
       });
-    }
-
-    function bindConditional(name,value,boxId){
-      document.querySelectorAll(`input[name="${name}"]`).forEach(el=>{
-        el.addEventListener("change",()=>toggleBox(boxId,radioValue(name)===value));
+      employeeId.addEventListener("blur",()=>{
+        if(employeeId.value.trim()&&!state.employee)lookupEmployee(false);
       });
     }
-
-    function toggleBox(id,on){document.getElementById(id).classList.toggle("on",Boolean(on))}
 
     async function postApi(action,data){
       const body=new URLSearchParams();
       body.append("action",action);
       body.append("data",JSON.stringify(data||{}));
-
-      const response=await fetch(WEB_APP_URL,{
-        method:"POST",
-        body:body
-      });
+      const response=await fetch(WEB_APP_URL,{method:"POST",body});
       const text=await response.text();
       let result;
-      try{result=JSON.parse(text)}catch(error){
-        throw new Error("Máy chủ trả về dữ liệu không hợp lệ.");
-      }
+      try{result=JSON.parse(text)}catch(error){throw new Error("Máy chủ trả về dữ liệu không hợp lệ.")}
       if(!result.ok)throw new Error(result.error||"Yêu cầu không thành công.");
       return result;
     }
 
+    async function loadFormConfig(showOverlay=true){
+      if(showOverlay)setLoading(true);
+      try{
+        const response=await fetch(`${WEB_APP_URL}?action=getFormConfig&v=${Date.now()}`,{cache:"no-store"});
+        const result=await response.json();
+        if(!result.ok)throw new Error(result.error||"Không tải được cấu hình biểu mẫu.");
+        state.settings=result.config.settings;
+        state.schema=result.config.schema;
+        renderSurveySchema();
+        applySettings();
+        updateProgress();
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{if(showOverlay)setLoading(false)}
+    }
 
     async function loadSettings(showOverlay=true){
       if(showOverlay)setLoading(true);
       try{
         const response=await fetch(`${WEB_APP_URL}?action=getSettings&v=${Date.now()}`,{cache:"no-store"});
         const result=await response.json();
-        if(!result.ok)throw new Error(result.error||"Không tải được cài đặt.");
+        if(!result.ok)throw new Error(result.error||"Không tải được trạng thái biểu mẫu.");
         state.settings=result.settings;
         applySettings();
-      }catch(error){
-        showToast(error.message||String(error),true);
-      }finally{if(showOverlay)setLoading(false)}
+      }catch(error){if(showOverlay)showToast(error.message||String(error),true)}
+      finally{if(showOverlay)setLoading(false)}
     }
 
     function applySettings(){
-      const banner=document.getElementById("formStatus");
       const isOn=Boolean(state.settings&&state.settings.isOn);
+      const banner=document.getElementById("formStatus");
       banner.className="status-banner "+(isOn?"on":"off");
-      banner.textContent=isOn?"Biểu mẫu đang mở và sẵn sàng nhận phản hồi.":(state.settings.message||"Biểu mẫu hiện đang tạm đóng.");
+      banner.textContent=isOn?"Biểu mẫu đang mở và sẵn sàng nhận phản hồi.":(state.settings?.message||"Biểu mẫu hiện đang tạm đóng.");
       document.getElementById("surveyForm").querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=!isOn);
       document.getElementById("progressWrap").classList.toggle("hidden",!isOn);
       document.getElementById("adminIsOn").checked=isOn;
-      document.getElementById("adminMessage").value=state.settings.message||"";
+      document.getElementById("adminMessage").value=state.settings?.message||"";
+    }
+
+    function renderSurveySchema(){
+      const container=document.getElementById("dynamicSurveySections");
+      const sections=state.schema?.sections||[];
+      container.innerHTML=sections.map((section,sectionIndex)=>`
+        <section class="card dynamic-section" data-section-id="${escapeAttr(section.id)}">
+          <div class="section-title">
+            <div class="section-no">${sectionIndex+2}</div>
+            <div><h2>${escapeHtml(section.title)}</h2>${section.description?`<p>${escapeHtml(section.description)}</p>`:""}</div>
+          </div>
+          <div class="dynamic-question-list">
+            ${(section.questions||[]).map((question,questionIndex)=>renderQuestionHtml(question,sectionIndex,questionIndex)).join("")}
+          </div>
+        </section>`).join("");
+
+      container.querySelectorAll(".dynamic-question").forEach(wrapper=>{
+        const question=findQuestionById(wrapper.dataset.questionId);
+        if(!question)return;
+        wrapper.querySelectorAll("input,textarea").forEach(el=>{
+          el.addEventListener("change",()=>{updateQuestionFollowUp(wrapper,question);updateProgress()});
+          el.addEventListener("input",updateProgress);
+        });
+        updateQuestionFollowUp(wrapper,question);
+      });
+      applySettings();
+    }
+
+    function renderQuestionHtml(question,sectionIndex,questionIndex){
+      const domName=`choice_${sectionIndex}_${questionIndex}`;
+      let control="";
+      if(question.type==="radio"||question.type==="checkbox"){
+        control=`<div class="choice-grid">${(question.options||[]).map(option=>`
+          <label class="choice"><input type="${question.type}" name="${domName}" value="${escapeAttr(option)}"><span>${escapeHtml(option)}</span></label>`).join("")}</div>`;
+      }else if(question.type==="textarea"){
+        control=`<textarea class="dynamic-answer" placeholder="Nhập nội dung trả lời"></textarea>`;
+      }else{
+        control=`<input class="dynamic-answer" type="text" placeholder="Nhập nội dung trả lời">`;
+      }
+
+      const follow=question.followUp?.enabled?`
+        <div class="conditional dynamic-followup">
+          <label class="field-label${question.followUp.required?" required":""}">${escapeHtml(question.followUp.label||"Vui lòng ghi rõ")}</label>
+          <textarea class="followup-answer" placeholder="${escapeAttr(question.followUp.label||"Nhập nội dung giải thích")}"></textarea>
+        </div>`:"";
+
+      return`<div class="question dynamic-question" data-question-id="${escapeAttr(question.id)}">
+        <p class="q-title">Câu ${sectionIndex+2}.${questionIndex+1}. ${escapeHtml(question.title)}${question.required?" *":""}</p>
+        ${question.help?`<div class="help">${escapeHtml(question.help)}</div>`:""}
+        ${control}${follow}
+      </div>`;
+    }
+
+    function findQuestionById(id){
+      for(const section of state.schema?.sections||[]){
+        const found=(section.questions||[]).find(question=>String(question.id)===String(id));
+        if(found)return found;
+      }
+      return null;
+    }
+
+    function questionValue(question,wrapper){
+      if(question.type==="checkbox")return[...wrapper.querySelectorAll('input[type="checkbox"]:checked')].map(el=>el.value);
+      if(question.type==="radio")return wrapper.querySelector('input[type="radio"]:checked')?.value||"";
+      return String(wrapper.querySelector(".dynamic-answer")?.value||"").trim();
+    }
+
+    function triggerSelected(question,value){
+      if(!question.followUp?.enabled)return false;
+      if(question.type==="checkbox")return Array.isArray(value)&&value.includes(question.followUp.trigger);
+      return String(value)===String(question.followUp.trigger);
+    }
+
+    function updateQuestionFollowUp(wrapper,question){
+      const box=wrapper.querySelector(".dynamic-followup");
+      if(!box)return;
+      const show=triggerSelected(question,questionValue(question,wrapper));
+      box.classList.toggle("on",show);
+      if(!show){
+        const textarea=box.querySelector(".followup-answer");
+        if(textarea)textarea.value="";
+      }
+    }
+
+    function collectAnswers(){
+      const answers={};
+      document.querySelectorAll(".dynamic-question").forEach(wrapper=>{
+        const question=findQuestionById(wrapper.dataset.questionId);
+        if(!question)return;
+        answers[question.id]=questionValue(question,wrapper);
+        if(question.followUp?.enabled){
+          answers[`${question.id}__followup`]=String(wrapper.querySelector(".followup-answer")?.value||"").trim();
+        }
+      });
+      return answers;
+    }
+
+    function validateDynamicAnswers(answers){
+      const sections=state.schema?.sections||[];
+      for(let si=0;si<sections.length;si++){
+        const section=sections[si];
+        for(let qi=0;qi<(section.questions||[]).length;qi++){
+          const question=section.questions[qi];
+          const answer=answers[question.id];
+          const hasValue=question.type==="checkbox"?Array.isArray(answer)&&answer.length>0:Boolean(String(answer||"").trim());
+          if(question.required&&!hasValue)return focusQuestion(question.id,`Vui lòng trả lời Câu ${si+2}.${qi+1}: ${question.title}`);
+          if(triggerSelected(question,answer)&&question.followUp?.required&&!String(answers[`${question.id}__followup`]||"").trim()){
+            return focusQuestion(question.id,`Vui lòng nhập nội dung giải thích cho Câu ${si+2}.${qi+1}.`);
+          }
+        }
+      }
+      return true;
     }
 
     function collectPayload(){
       return{
         timestamp:new Date().toISOString(),
-        fullName:value("fullName"),
+        schemaVersion:state.schema?.version||"",
         employeeId:value("employeeId").toUpperCase(),
+        fullName:value("fullName"),
         workDate:value("workDate"),
         department:value("department"),
+        jobTitle:value("jobTitle"),
+        workPosition:value("workPosition"),
+        gender:value("gender"),
+        idbp:value("idbp"),
         leaveDate:value("leaveDate"),
-        userAgent:navigator.userAgent,
-        answers:{
-          q1:checkedValues("q1"),
-          q1_other:value("q1Other"),
-          q2:checkedValues("q2"),
-          q3_overtime:radioValue("q3_overtime"),
-          q3_overtime_reason:value("q3OvertimeReason"),
-          q3_workload:radioValue("q3_workload"),
-          q4_support:radioValue("q4_support"),
-          q4_support_reason:value("q4SupportReason"),
-          q4_fairness:radioValue("q4_fairness"),
-          q4_fairness_reason:value("q4FairnessReason"),
-          q4_listening:radioValue("q4_listening"),
-          q4_listening_reason:value("q4ListeningReason"),
-          q44_manager_improve:value("q44ManagerImprove"),
-          q51_colleague:radioValue("q51_colleague"),
-          q52_environment:radioValue("q52_environment"),
-          q61_stay_improve:value("q61StayImprove"),
-          q62_return:radioValue("q62_return"),
-          q62_return_reason:value("q62ReturnReason"),
-          q63_refer:radioValue("q63_refer"),
-          q63_refer_reason:value("q63ReferReason"),
-          finalComment:value("finalComment")
-        }
+        answers:collectAnswers(),
+        userAgent:navigator.userAgent
       };
     }
 
     function validateClient(payload){
-      const required=[
-        ["fullName","Vui lòng nhập Họ và tên."],["employeeId","Vui lòng nhập MSNV."],
-        ["workDate","Vui lòng chọn Ngày vào làm."],["department","Vui lòng nhập Bộ phận / Chức danh."],
-        ["leaveDate","Vui lòng chọn Ngày nghỉ việc."]
-      ];
-      for(const [id,message] of required){if(!value(id))return focusError(id,message)}
-
-      if(payload.workDate>payload.leaveDate)return focusError("leaveDate","Ngày nghỉ việc không được trước Ngày vào làm.");
-      if(!payload.answers.q1.length)return focusGroup("q1","Vui lòng chọn ít nhất một lý do nghỉ việc.");
-      if(payload.answers.q1.includes("Ý kiến khác")&&!payload.answers.q1_other)return focusError("q1Other","Vui lòng nhập ý kiến khác.");
-      if(!payload.answers.q2.length)return focusGroup("q2","Vui lòng chọn ít nhất một điều hài lòng.");
-
-      const radios=[
-        ["q3_overtime","Vui lòng trả lời Câu 3.1."],["q3_workload","Vui lòng trả lời Câu 3.2."],
-        ["q4_support","Vui lòng trả lời Câu 4.1."],["q4_fairness","Vui lòng trả lời Câu 4.2."],
-        ["q4_listening","Vui lòng trả lời Câu 4.3."],["q51_colleague","Vui lòng trả lời Câu 5.1."],
-        ["q52_environment","Vui lòng trả lời Câu 5.2."],["q62_return","Vui lòng trả lời Câu 6.2."],
-        ["q63_refer","Vui lòng trả lời Câu 6.3."]
-      ];
-      for(const [name,message] of radios){if(!radioValue(name))return focusGroup(name,message)}
-
-      if(payload.answers.q4_support==="Không"&&!payload.answers.q4_support_reason)return focusError("q4SupportReason","Vui lòng nêu nguyên nhân ở Câu 4.1.");
-      if(payload.answers.q4_fairness==="Không"&&!payload.answers.q4_fairness_reason)return focusError("q4FairnessReason","Vui lòng nêu nguyên nhân ở Câu 4.2.");
-      if(payload.answers.q4_listening==="Không"&&!payload.answers.q4_listening_reason)return focusError("q4ListeningReason","Vui lòng nêu nguyên nhân ở Câu 4.3.");
-      if(!payload.answers.q44_manager_improve)return focusError("q44ManagerImprove","Vui lòng trả lời Câu 4.4.");
-      if(!payload.answers.q61_stay_improve)return focusError("q61StayImprove","Vui lòng trả lời Câu 6.1.");
-      if(payload.answers.q62_return==="Không"&&!payload.answers.q62_return_reason)return focusError("q62ReturnReason","Vui lòng nêu nguyên nhân ở Câu 6.2.");
-      if(payload.answers.q63_refer==="Không"&&!payload.answers.q63_refer_reason)return focusError("q63ReferReason","Vui lòng nêu nguyên nhân ở Câu 6.3.");
-      if(!payload.answers.finalComment)return focusError("finalComment","Vui lòng nhập Nhận xét chung.");
+      if(!payload.employeeId)return focusError("employeeId","Vui lòng nhập MSNV.");
+      if(!state.employee||state.employee.msnv!==payload.employeeId)return focusError("employeeId","MSNV chưa được xác nhận với danh sách nhân sự.");
+      if(!state.employee.complete)return focusError("employeeId","Thông tin nhân sự chưa đầy đủ. Vui lòng liên hệ quản trị cập nhật file Excel.");
+      if(!payload.leaveDate)return focusError("leaveDate","Vui lòng chọn Ngày nghỉ việc.");
+      if(payload.workDate&&payload.workDate>payload.leaveDate)return focusError("leaveDate","Ngày nghỉ việc không được trước Ngày vào làm.");
+      if(!validateDynamicAnswers(payload.answers))return false;
       if(!document.getElementById("consent").checked)return focusError("consent","Vui lòng xác nhận trước khi gửi.");
       return true;
     }
@@ -536,248 +500,357 @@
     async function submitSurvey(event){
       event.preventDefault();
       if(state.submitting)return;
-      if(!state.settings||!state.settings.isOn)return showToast(state.settings?.message||"Biểu mẫu đang đóng.",true);
-
+      if(!state.settings?.isOn)return showToast(state.settings?.message||"Biểu mẫu đang đóng.",true);
       const payload=collectPayload();
       if(!validateClient(payload))return;
-
-      state.submitting=true;
-      setLoading(true);
-      document.getElementById("submitButton").disabled=true;
+      state.submitting=true;setLoading(true);document.getElementById("submitButton").disabled=true;
       try{
         const result=await postApi("submitSurvey",payload);
-
         document.getElementById("surveyForm").classList.add("hidden");
         document.getElementById("progressWrap").classList.add("hidden");
         document.getElementById("successView").classList.add("on");
         document.getElementById("responseCode").textContent=result.responseId;
-        document.getElementById("viewResponseButton").onclick=()=>window.open(result.pdfUrl||`${WEB_APP_URL}?action=viewResponse&id=${encodeURIComponent(result.responseId)}`,"_blank","noopener");
+        document.getElementById("viewResponseButton").onclick=()=>window.open(result.pdfUrl,"_blank","noopener");
+        if(result.warning)showToast(result.warning,true);
         window.scrollTo({top:0,behavior:"smooth"});
       }catch(error){
         showToast(error.message||String(error),true);
         document.getElementById("submitButton").disabled=false;
-      }finally{
-        state.submitting=false;
-        setLoading(false);
-      }
+      }finally{state.submitting=false;setLoading(false)}
     }
 
-    function openAdmin(){
-      document.getElementById("adminModal").classList.add("on");
-      if(state.admin.email){
-        document.getElementById("adminWorkspace").classList.remove("hidden");
-        document.getElementById("adminAuth").classList.add("hidden");
-        document.getElementById("adminLoginNote").classList.add("hidden");
-      }else{
-        document.getElementById("adminEmail").focus();
-      }
+    function setLookupStatus(message,type){
+      const box=document.getElementById("employeeLookupStatus");
+      box.textContent=message;box.className="lookup-status"+(type?" "+type:"");
     }
 
+    function clearEmployeeDetails(){
+      state.employee=null;
+      ["fullName","department","jobTitle","workPosition","workDate","leaveDate","gender","idbp"].forEach(id=>document.getElementById(id).value="");
+      document.getElementById("leaveDate").min="";
+      setLookupStatus("Chưa kiểm tra MSNV.","");updateProgress();
+    }
+
+    function fillEmployeeDetails(employee){
+      state.employee=employee;
+      document.getElementById("fullName").value=employee.fullName||"";
+      document.getElementById("department").value=employee.department||"";
+      document.getElementById("jobTitle").value=employee.jobTitle||"";
+      document.getElementById("workPosition").value=employee.workPosition||"";
+      document.getElementById("workDate").value=employee.workDate||"";
+      document.getElementById("leaveDate").min=employee.workDate||"";
+      document.getElementById("gender").value=employee.gender||"";
+      document.getElementById("idbp").value=employee.idbp||"";
+      if(employee.complete)setLookupStatus(`Đã xác nhận: ${employee.fullName} · ${employee.department}`,"ok");
+      else setLookupStatus("Đã tìm thấy MSNV nhưng còn thiếu: "+(employee.missingFields||[]).join(", ")+".","warning");
+      updateProgress();
+    }
+
+    async function lookupEmployee(showMessage){
+      const msnv=value("employeeId").toUpperCase();
+      if(!msnv){clearEmployeeDetails();if(showMessage)showToast("Vui lòng nhập MSNV.",true);return}
+      setLookupStatus("Đang kiểm tra MSNV...","");document.getElementById("lookupEmployeeButton").disabled=true;
+      try{
+        const result=await postApi("lookupEmployee",{msnv});
+        fillEmployeeDetails(result.employee);
+        if(showMessage&&result.employee.complete)showToast("Đã tìm thấy thông tin nhân sự.");
+      }catch(error){
+        clearEmployeeDetails();setLookupStatus(error.message||String(error),"error");
+        if(showMessage)showToast(error.message||String(error),true);
+      }finally{document.getElementById("lookupEmployeeButton").disabled=false}
+    }
+
+    function updateProgress(){
+      const requiredQuestions=[];
+      for(const section of state.schema?.sections||[])for(const question of section.questions||[])if(question.required)requiredQuestions.push(question);
+      let completed=0;
+      const baseTotal=4;
+      if(value("employeeId"))completed++;
+      if(state.employee?.complete)completed++;
+      if(value("leaveDate"))completed++;
+      if(document.getElementById("consent").checked)completed++;
+
+      const answers=collectAnswers();
+      for(const question of requiredQuestions){
+        const answer=answers[question.id];
+        const hasValue=question.type==="checkbox"?Array.isArray(answer)&&answer.length>0:Boolean(String(answer||"").trim());
+        if(hasValue)completed++;
+      }
+      const total=baseTotal+requiredQuestions.length;
+      const percent=total?Math.round(completed/total*100):0;
+      document.getElementById("progressBar").style.width=percent+"%";
+      document.getElementById("progressPercent").textContent=percent+"%";
+    }
+
+    function openAdmin(){document.getElementById("adminModal").classList.add("on");document.getElementById("adminEmail").focus()}
     function closeAdmin(){document.getElementById("adminModal").classList.remove("on")}
 
     async function loginAdmin(){
-      const email=value("adminEmail"),passcode=value("adminPasscode");
-      if(!email)return focusError("adminEmail","Vui lòng nhập email quản trị.");
-      if(!passcode)return focusError("adminPasscode","Vui lòng nhập mật khẩu quản trị.");
-
-      state.admin.email=email;
-      state.admin.passcode=passcode;
+      const email=value("adminEmail").toLowerCase(),passcode=value("adminPasscode");
+      if(!email||!passcode)return showToast("Vui lòng nhập email và mật khẩu quản trị.",true);
       setLoading(true);
       try{
-        await postApi("adminLogin",{email:email,passcode:passcode});
+        await postApi("adminLogin",{email,passcode});
+        state.admin.email=email;state.admin.passcode=passcode;
         setDefaultResponseRange();
-        await requestAdminResponses();
+        await Promise.all([loadAdminResponses(false),loadAdminEmployees(false),loadFormConfig(false)]);
+        state.admin.builder=deepClone(state.schema);
+        renderQuestionBuilder();
         document.getElementById("adminAuth").classList.add("hidden");
         document.getElementById("adminLoginNote").classList.add("hidden");
         document.getElementById("adminWorkspace").classList.remove("hidden");
         document.getElementById("adminPasscode").value="";
-        renderAdminResponses();
         showToast("Đăng nhập quản trị thành công.");
       }catch(error){
-        state.admin.email="";
-        state.admin.passcode="";
+        state.admin.email="";state.admin.passcode="";
         showToast(error.message||String(error),true);
       }finally{setLoading(false)}
     }
 
     function logoutAdmin(){
-      state.admin={email:"",passcode:"",responses:[]};
+      state.admin={email:"",passcode:"",responses:[],employees:[],builder:null};
       document.getElementById("adminWorkspace").classList.add("hidden");
       document.getElementById("adminAuth").classList.remove("hidden");
       document.getElementById("adminLoginNote").classList.remove("hidden");
       document.getElementById("adminPasscode").value="";
-      document.getElementById("responseTableBody").innerHTML='<tr><td colspan="6">Chưa tải dữ liệu.</td></tr>';
-      document.getElementById("responseMobileList").innerHTML="";
-      document.getElementById("adminEmail").focus();
     }
 
     function openAdminTab(tab){
       document.querySelectorAll(".admin-tab").forEach(button=>button.classList.toggle("on",button.dataset.adminTab===tab));
-      document.getElementById("adminResponsesPanel").classList.toggle("on",tab==="responses");
-      document.getElementById("adminSettingsPanel").classList.toggle("on",tab==="settings");
-    }
-
-    async function requestAdminResponses(){
-      const result=await postApi("listResponses",{
-        email:state.admin.email,
-        passcode:state.admin.passcode,
-        filters:{
-          search:value("responseSearch"),
-          fromDate:value("responseFromDate"),
-          toDate:value("responseToDate"),
-          limit:500
-        }
-      });
-      state.admin.responses=result.result.rows||[];
-      state.admin.responseTotal=Number(result.result.total)||0;
-      state.admin.responseReturned=Number(result.result.returned)||0;
+      ["responses","employees","builder","settings"].forEach(name=>document.getElementById("admin"+capitalize(name)+"Panel").classList.toggle("on",name===tab));
+      if(tab==="builder"&&!state.admin.builder){state.admin.builder=deepClone(state.schema);renderQuestionBuilder()}
     }
 
     async function loadAdminResponses(showMessage){
-      if(!state.admin.email||!state.admin.passcode)return showToast("Vui lòng đăng nhập quản trị.",true);
-      setLoading(true);
+      if(!state.admin.email||!state.admin.passcode)return;
       try{
-        await requestAdminResponses();
-        renderAdminResponses();
+        const result=await postApi("listResponses",{email:state.admin.email,passcode:state.admin.passcode,filters:{search:value("responseSearch"),fromDate:value("responseFromDate"),toDate:value("responseToDate"),limit:500}});
+        state.admin.responses=result.result.rows||[];state.admin.responseTotal=result.result.total||0;renderAdminResponses();
         if(showMessage)showToast("Đã cập nhật danh sách phản hồi.");
-      }catch(error){showToast(error.message||String(error),true)}
-      finally{setLoading(false)}
+      }catch(error){if(showMessage)showToast(error.message||String(error),true)}
     }
 
     function renderAdminResponses(){
       const rows=state.admin.responses||[];
-      const total=state.admin.responseTotal||0;
-      const returned=state.admin.responseReturned||rows.length;
-      document.getElementById("responseCountText").textContent=
-        total>returned?`Hiển thị ${returned}/${total} phản hồi phù hợp.`:`Có ${total} phản hồi phù hợp.`;
+      document.getElementById("responseCountText").textContent=`Có ${state.admin.responseTotal||0} phản hồi phù hợp.`;
+      const body=document.getElementById("responseTableBody"),mobile=document.getElementById("responseMobileList");
+      if(!rows.length){body.innerHTML='<tr><td colspan="6"><div class="admin-note">Không có phản hồi phù hợp.</div></td></tr>';mobile.innerHTML='<div class="admin-note">Không có phản hồi phù hợp.</div>';return}
+      body.innerHTML=rows.map((row,index)=>`<tr><td>${index+1}</td><td><b>${escapeHtml(row.submittedAt||"—")}</b></td><td><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></td><td>${escapeHtml(row.department||"—")}</td><td>${escapeHtml(row.leaveDate||"—")}</td><td><button class="btn btn-primary btn-sm" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem PDF</button></td></tr>`).join("");
+      mobile.innerHTML=rows.map(row=>`<article class="mobile-card"><div class="mobile-top"><div><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></div><button class="btn btn-primary btn-sm" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem PDF</button></div><div class="mobile-grid">${mobileField("Ngày gửi",row.submittedAt||"—")}${mobileField("Bộ phận",row.department||"—")}${mobileField("Ngày nghỉ việc",row.leaveDate||"—")}</div></article>`).join("");
+    }
 
-      const body=document.getElementById("responseTableBody");
-      const mobile=document.getElementById("responseMobileList");
-      if(!rows.length){
-        body.innerHTML='<tr><td colspan="6"><div class="admin-note">Không có phản hồi phù hợp với bộ lọc.</div></td></tr>';
-        mobile.innerHTML='<div class="admin-note">Không có phản hồi phù hợp với bộ lọc.</div>';
-        return;
+    function openResponsePdf(id){window.open(`${WEB_APP_URL}?action=viewResponse&id=${encodeURIComponent(id)}`,"_blank","noopener")}
+    function setDefaultResponseRange(){if(value("responseFromDate")||value("responseToDate"))return;setResponseLast30Days(false)}
+    function setResponseLast30Days(load=true){const end=new Date(),start=new Date();start.setDate(start.getDate()-29);document.getElementById("responseFromDate").value=dateKey(start);document.getElementById("responseToDate").value=dateKey(end);if(load)loadAdminResponses(true)}
+    function clearResponseFilters(){document.getElementById("responseSearch").value="";document.getElementById("responseFromDate").value="";document.getElementById("responseToDate").value="";loadAdminResponses(true)}
+
+    async function loadAdminEmployees(showMessage){
+      if(!state.admin.email||!state.admin.passcode)return;
+      try{
+        const result=await postApi("listEmployees",{email:state.admin.email,passcode:state.admin.passcode,filters:{search:value("employeeAdminSearch"),limit:500}});
+        state.admin.employees=result.result.rows||[];state.admin.employeeTotal=result.result.total||0;renderAdminEmployees();
+        if(showMessage)showToast("Đã cập nhật danh sách nhân sự.");
+      }catch(error){if(showMessage)showToast(error.message||String(error),true)}
+    }
+
+    function renderAdminEmployees(){
+      const rows=state.admin.employees||[];
+      document.getElementById("employeeCountText").textContent=`Có ${state.admin.employeeTotal||0} nhân sự đang hoạt động.`;
+      const body=document.getElementById("employeeTableBody"),mobile=document.getElementById("employeeMobileList");
+      if(!rows.length){body.innerHTML='<tr><td colspan="7"><div class="admin-note">Không có nhân sự phù hợp.</div></td></tr>';mobile.innerHTML='<div class="admin-note">Không có nhân sự phù hợp.</div>';return}
+      body.innerHTML=rows.map((row,index)=>`<tr><td>${index+1}</td><td><b>${escapeHtml(row.msnv||"—")}</b></td><td><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">${escapeHtml(row.gender||"")}</div></td><td>${escapeHtml(row.department||"—")}</td><td>${escapeHtml(row.jobTitle||"—")}</td><td>${escapeHtml(row.workPosition||"—")}</td><td>${escapeHtml(row.workDate||"—")}</td></tr>`).join("");
+      mobile.innerHTML=rows.map(row=>`<article class="mobile-card"><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div><div class="mobile-grid">${mobileField("Bộ phận",row.department||"—")}${mobileField("Chức vụ",row.jobTitle||"—")}${mobileField("Vị trí",row.workPosition||"—")}${mobileField("Ngày vào làm",row.workDate||"—")}</div></article>`).join("");
+    }
+
+    const EXCEL_ALIASES={
+      msnv:["msnv","mã số","mã nhân viên","mã nv","employee id"],idbp:["idbp báo cáo tct","idbp"],
+      department:["bộ phận","phòng ban","đơn vị"],fullName:["họ và tên","họ tên","full name"],
+      lastMiddleName:["họ + đệm","họ và đệm","họ đệm"],firstName:["tên","first name"],gender:["giới tính","gender"],
+      jobTitle:["chức vụ","job title"],workPosition:["vị trí công việc","vị trí công","vị trí","position"],
+      workDate:["ngày vào làm","ngày nhận việc","start date"],leaveDate:["ngày nghỉ việc","ngày chính thức nghỉ việc","leave date"]
+    };
+
+    function detectExcelHeader(grid){
+      for(let r=0;r<Math.min(20,grid.length);r++){
+        const fields={};
+        (grid[r]||[]).forEach((header,index)=>{
+          const normalized=normalizeText(header);
+          for(const [field,aliases] of Object.entries(EXCEL_ALIASES))if(fields[field]===undefined&&aliases.some(alias=>normalizeText(alias)===normalized))fields[field]=index;
+        });
+        if(fields.msnv!==undefined&&(fields.fullName!==undefined||(fields.lastMiddleName!==undefined&&fields.firstName!==undefined)))return{rowIndex:r,fields};
       }
-
-      body.innerHTML=rows.map((row,index)=>`
-        <tr>
-          <td>${index+1}</td>
-          <td><b>${escapeHtml(row.submittedAt||"—")}</b></td>
-          <td><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></td>
-          <td>${escapeHtml(row.department||"—")}</td>
-          <td>${escapeHtml(row.leaveDate||"—")}</td>
-          <td><button class="btn btn-primary" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem phiếu PDF</button></td>
-        </tr>`).join("");
-
-      mobile.innerHTML=rows.map(row=>`
-        <article class="response-card">
-          <div class="response-card-top">
-            <div><div class="response-name">${escapeHtml(row.fullName||"—")}</div><div class="response-meta">MSNV: ${escapeHtml(row.msnv||"—")}</div></div>
-            <button class="btn btn-primary" type="button" onclick="openResponsePdf('${escapeJs(row.responseId)}')">Xem PDF</button>
-          </div>
-          <div class="response-card-grid">
-            ${responseField("Ngày gửi",row.submittedAt||"—")}
-            ${responseField("Bộ phận / Chức danh",row.department||"—")}
-            ${responseField("Ngày vào làm",row.workDate||"—")}
-            ${responseField("Ngày nghỉ việc",row.leaveDate||"—")}
-          </div>
-        </article>`).join("");
+      return null;
     }
 
-    function responseField(label,text){
-      return`<div class="response-field"><div class="response-label">${escapeHtml(label)}</div><div class="response-value">${escapeHtml(text)}</div></div>`;
+    function excelDateToKey(value){
+      if(value instanceof Date&&!Number.isNaN(value.getTime()))return dateKey(value);
+      if(typeof value==="number"&&window.XLSX?.SSF){const parsed=XLSX.SSF.parse_date_code(value);if(parsed)return`${parsed.y}-${String(parsed.m).padStart(2,"0")}-${String(parsed.d).padStart(2,"0")}`}
+      const text=String(value||"").trim();if(!text)return"";if(/^\d{4}-\d{2}-\d{2}$/.test(text))return text;
+      const match=text.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);if(match)return`${match[3]}-${String(match[2]).padStart(2,"0")}-${String(match[1]).padStart(2,"0")}`;
+      const parsed=new Date(text);return Number.isNaN(parsed.getTime())?text:dateKey(parsed);
     }
 
-    function openResponsePdf(responseId){
-      if(!responseId)return showToast("Không tìm thấy mã phản hồi.",true);
-      window.open(`${WEB_APP_URL}?action=viewResponse&id=${encodeURIComponent(responseId)}`,"_blank","noopener");
-    }
-
-    function setDefaultResponseRange(){
-      if(value("responseFromDate")||value("responseToDate"))return;
-      const end=new Date();
-      const start=new Date();
-      start.setDate(start.getDate()-29);
-      document.getElementById("responseFromDate").value=dateKey(start);
-      document.getElementById("responseToDate").value=dateKey(end);
-    }
-
-    function setResponseLast30Days(){
-      const end=new Date();
-      const start=new Date();
-      start.setDate(start.getDate()-29);
-      document.getElementById("responseFromDate").value=dateKey(start);
-      document.getElementById("responseToDate").value=dateKey(end);
-      loadAdminResponses(true);
-    }
-
-    function clearResponseFilters(){
-      document.getElementById("responseSearch").value="";
-      document.getElementById("responseFromDate").value="";
-      document.getElementById("responseToDate").value="";
-      loadAdminResponses(true);
-    }
-
-    async function saveAdminSettings(){
-      if(!state.admin.email||!state.admin.passcode)return showToast("Vui lòng đăng nhập quản trị.",true);
-
+    async function prepareEmployeeExcel(event){
+      const file=event.target.files?.[0];state.importPreview={rows:[],fileName:""};document.getElementById("importEmployeeButton").disabled=true;document.getElementById("employeePreviewWrap").classList.remove("on");
+      if(!file){document.getElementById("employeeImportSummary").textContent="Chưa chọn file Excel.";return}
+      if(!window.XLSX)return showToast("Không tải được thư viện đọc Excel.",true);
       setLoading(true);
       try{
-        const result=await postApi("saveSettings",{
-          email:state.admin.email,
-          passcode:state.admin.passcode,
-          isOn:document.getElementById("adminIsOn").checked,
-          message:value("adminMessage")
-        });
-        state.settings=result.settings;
-        applySettings();
-        showToast("Đã cập nhật trạng thái biểu mẫu.");
+        const workbook=XLSX.read(await file.arrayBuffer(),{type:"array",cellDates:true});
+        const sheetName=workbook.SheetNames[0];if(!sheetName)throw new Error("File Excel không có sheet dữ liệu.");
+        const grid=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:"",raw:true});
+        const detected=detectExcelHeader(grid);if(!detected)throw new Error("Không tìm thấy dòng tiêu đề có MSNV và Họ và tên.");
+        const cell=(row,field)=>detected.fields[field]===undefined?"":row[detected.fields[field]],rows=[];
+        for(let i=detected.rowIndex+1;i<grid.length;i++){
+          const row=grid[i]||[],msnv=String(cell(row,"msnv")||"").trim().toUpperCase(),lastMiddleName=String(cell(row,"lastMiddleName")||"").trim(),firstName=String(cell(row,"firstName")||"").trim(),fullName=String(cell(row,"fullName")||"").trim()||[lastMiddleName,firstName].filter(Boolean).join(" ");
+          if(!msnv&&!fullName)continue;
+          rows.push({msnv,idbp:String(cell(row,"idbp")||"").trim(),department:String(cell(row,"department")||"").trim(),fullName,lastMiddleName,firstName,gender:String(cell(row,"gender")||"").trim(),jobTitle:String(cell(row,"jobTitle")||"").trim(),workPosition:String(cell(row,"workPosition")||"").trim(),workDate:excelDateToKey(cell(row,"workDate")),leaveDate:excelDateToKey(cell(row,"leaveDate"))});
+        }
+        if(!rows.length)throw new Error("Không tìm thấy dòng nhân sự hợp lệ.");
+        state.importPreview={rows,fileName:file.name};
+        document.getElementById("employeeImportSummary").textContent=`Đã đọc ${rows.length} dòng từ sheet “${sheetName}”. Dòng tiêu đề: ${detected.rowIndex+1}.`;
+        document.getElementById("employeePreviewBody").innerHTML=rows.slice(0,10).map(row=>`<tr><td>${escapeHtml(row.msnv||"—")}</td><td>${escapeHtml(row.fullName||"—")}</td><td>${escapeHtml(row.department||"—")}</td><td>${escapeHtml(row.jobTitle||"—")}</td><td>${escapeHtml(row.workPosition||"—")}</td><td>${escapeHtml(row.workDate||"—")}</td></tr>`).join("");
+        document.getElementById("employeePreviewWrap").classList.add("on");document.getElementById("importEmployeeButton").disabled=false;
+      }catch(error){document.getElementById("employeeImportSummary").textContent=error.message||String(error);showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
+
+    async function importEmployeeExcel(){
+      if(!state.importPreview.rows.length)return showToast("Vui lòng chọn file Excel trước.",true);
+      const mode=value("employeeImportMode")||"merge";if(mode==="replace"&&!confirm("Thay toàn bộ danh sách NHÂN SỰ đang hoạt động?"))return;
+      setLoading(true);
+      try{
+        const result=await postApi("importEmployees",{email:state.admin.email,passcode:state.admin.passcode,mode,sourceFileName:state.importPreview.fileName,rows:state.importPreview.rows});
+        await loadAdminEmployees(false);
+        document.getElementById("employeeImportSummary").textContent=`Đã nhập/cập nhật ${result.result.imported} MSNV. Tổng đang hoạt động: ${result.result.totalActive}. Bỏ qua ${result.result.invalid} dòng không hợp lệ và ${result.result.skippedExited} MSNV đã nghỉ.`;
+        showToast("Đã cập nhật danh sách nhân sự.");
       }catch(error){showToast(error.message||String(error),true)}
       finally{setLoading(false)}
     }
 
-    function updateProgress(){
-      const fields=[
-        value("fullName"),value("employeeId"),value("workDate"),value("leaveDate"),value("department"),
-        checkedValues("q1").length,checkedValues("q2").length,radioValue("q3_overtime"),radioValue("q3_workload"),
-        radioValue("q4_support"),radioValue("q4_fairness"),radioValue("q4_listening"),value("q44ManagerImprove"),
-        radioValue("q51_colleague"),radioValue("q52_environment"),value("q61StayImprove"),radioValue("q62_return"),
-        radioValue("q63_refer"),value("finalComment"),document.getElementById("consent").checked
-      ];
-      const completed=fields.filter(Boolean).length;
-      const percent=Math.round(completed/fields.length*100);
-      document.getElementById("progressBar").style.width=percent+"%";
-      document.getElementById("progressPercent").textContent=percent+"%";
+    function deepClone(value){return JSON.parse(JSON.stringify(value))}
+    function clientId(prefix){return`${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,9)}`}
+
+    function renderQuestionBuilder(){
+      const container=document.getElementById("questionBuilderList"),schema=state.admin.builder;
+      if(!schema?.sections?.length){container.innerHTML='<div class="builder-empty">Chưa có phần câu hỏi.</div>';return}
+      container.innerHTML=schema.sections.map((section,si)=>`
+        <article class="builder-section">
+          <div class="builder-section-head">
+            <div class="builder-head-left">
+              <div class="builder-section-number">${si+2}</div>
+              <div class="builder-head-fields">
+                <div><label class="field-label required">Tên phần lớn</label><input value="${escapeAttr(section.title||"")}" oninput="builderSetSection(${si},'title',this.value)"></div>
+                <div><label class="field-label">Mô tả phần</label><textarea oninput="builderSetSection(${si},'description',this.value)">${escapeHtml(section.description||"")}</textarea></div>
+              </div>
+            </div>
+            <div class="builder-section-actions">
+              <button class="btn btn-light btn-sm" type="button" onclick="builderMoveSection(${si},-1)">↑</button>
+              <button class="btn btn-light btn-sm" type="button" onclick="builderMoveSection(${si},1)">↓</button>
+              <button class="btn btn-danger btn-sm" type="button" onclick="builderDeleteSection(${si})">Xóa phần</button>
+            </div>
+          </div>
+          <div style="padding:0 14px 12px"><label class="choice" style="display:inline-flex;min-height:auto"><input type="checkbox" ${section.pageBreakBefore?"checked":""} onchange="builderSetSection(${si},'pageBreakBefore',this.checked)"><span>Bắt đầu trang mới khi in PDF</span></label></div>
+          <div class="builder-questions">
+            ${(section.questions||[]).map((question,qi)=>renderBuilderQuestion(question,si,qi)).join("")}
+            <button class="btn btn-outline" type="button" onclick="builderAddQuestion(${si})">+ Thêm câu hỏi vào phần này</button>
+          </div>
+        </article>`).join("");
     }
 
-    function dateKey(date){return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
-    function escapeHtml(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-    function escapeJs(value){return String(value==null?"":value).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r/g,"\\r").replace(/\n/g,"\\n")}
+    function renderBuilderQuestion(question,si,qi){
+      const choiceType=question.type==="radio"||question.type==="checkbox";
+      return`<div class="builder-question">
+        <div class="builder-question-top">
+          <div class="builder-question-label">Câu ${si+2}.${qi+1}</div>
+          <div class="builder-question-actions">
+            <button class="btn btn-light btn-sm" type="button" onclick="builderMoveQuestion(${si},${qi},-1)">↑</button>
+            <button class="btn btn-light btn-sm" type="button" onclick="builderMoveQuestion(${si},${qi},1)">↓</button>
+            <button class="btn btn-danger btn-sm" type="button" onclick="builderDeleteQuestion(${si},${qi})">Xóa câu</button>
+          </div>
+        </div>
+        <div class="builder-question-grid">
+          <div><label class="field-label required">Nội dung câu hỏi</label><textarea oninput="builderSetQuestion(${si},${qi},'title',this.value)">${escapeHtml(question.title||"")}</textarea></div>
+          <div><label class="field-label">Kiểu trả lời</label><select onchange="builderChangeType(${si},${qi},this.value)">${typeOption("radio","Chọn một",question.type)}${typeOption("checkbox","Chọn nhiều",question.type)}${typeOption("text","Trả lời ngắn",question.type)}${typeOption("textarea","Đoạn văn",question.type)}</select></div>
+          <div><label class="field-label">Bắt buộc</label><label class="choice" style="min-height:51px"><input type="checkbox" ${question.required?"checked":""} onchange="builderSetQuestion(${si},${qi},'required',this.checked)"><span>Phải trả lời</span></label></div>
+        </div>
+        <div class="builder-extra-grid"><div><label class="field-label">Hướng dẫn thêm</label><textarea oninput="builderSetQuestion(${si},${qi},'help',this.value)">${escapeHtml(question.help||"")}</textarea></div>
+        ${choiceType?`<div class="builder-options"><label class="field-label required">Các phương án — mỗi dòng một đáp án</label><textarea onchange="builderSetOptions(${si},${qi},this.value)">${escapeHtml((question.options||[]).join("\n"))}</textarea></div>`:"<div></div>"}</div>
+        ${choiceType?renderBuilderFollowUp(question,si,qi):""}
+      </div>`;
+    }
 
+    function renderBuilderFollowUp(question,si,qi){
+      const follow=question.followUp||{enabled:false,trigger:"",label:"",required:false};
+      return`<div class="builder-followup">
+        <label class="choice" style="display:inline-flex;min-height:auto"><input type="checkbox" ${follow.enabled?"checked":""} onchange="builderToggleFollowUp(${si},${qi},this.checked)"><span>Hiện ô giải thích khi chọn một phương án</span></label>
+        ${follow.enabled?`<div class="builder-extra-grid" style="margin-top:10px">
+          <div><label class="field-label">Phương án kích hoạt</label><select onchange="builderSetFollowUp(${si},${qi},'trigger',this.value)">${(question.options||[]).map(option=>`<option value="${escapeAttr(option)}" ${option===follow.trigger?"selected":""}>${escapeHtml(option)}</option>`).join("")}</select></div>
+          <div><label class="field-label">Nhãn ô giải thích</label><input value="${escapeAttr(follow.label||"Vui lòng ghi rõ")}" oninput="builderSetFollowUp(${si},${qi},'label',this.value)"></div>
+        </div><label class="choice" style="display:inline-flex;min-height:auto;margin-top:9px"><input type="checkbox" ${follow.required?"checked":""} onchange="builderSetFollowUp(${si},${qi},'required',this.checked)"><span>Bắt buộc nhập giải thích khi phương án được chọn</span></label>`:""}
+      </div>`;
+    }
+
+    function typeOption(value,label,current){return`<option value="${value}" ${value===current?"selected":""}>${label}</option>`}
+    function builderSetSection(si,field,value){state.admin.builder.sections[si][field]=value}
+    function builderSetQuestion(si,qi,field,value){state.admin.builder.sections[si].questions[qi][field]=value}
+    function builderSetFollowUp(si,qi,field,value){state.admin.builder.sections[si].questions[qi].followUp[field]=value}
+    function builderSetOptions(si,qi,text){const question=state.admin.builder.sections[si].questions[qi];question.options=String(text||"").split(/\r?\n/).map(v=>v.trim()).filter(Boolean);if(!question.options.includes(question.followUp?.trigger))question.followUp.trigger=question.options[0]||"";renderQuestionBuilder()}
+    function builderChangeType(si,qi,type){const question=state.admin.builder.sections[si].questions[qi];question.type=type;if(type==="radio"||type==="checkbox"){if(!question.options?.length)question.options=["Có","Không"]}else{question.options=[];question.followUp={enabled:false,trigger:"",label:"",required:false}}renderQuestionBuilder()}
+    function builderToggleFollowUp(si,qi,enabled){const question=state.admin.builder.sections[si].questions[qi];question.followUp=question.followUp||{};question.followUp.enabled=enabled;question.followUp.trigger=question.options?.includes(question.followUp.trigger)?question.followUp.trigger:(question.options?.[0]||"");question.followUp.label=question.followUp.label||"Vui lòng ghi rõ";question.followUp.required=Boolean(question.followUp.required);renderQuestionBuilder()}
+    function builderMoveSection(si,dir){const sections=state.admin.builder.sections,target=si+dir;if(target<0||target>=sections.length)return;[sections[si],sections[target]]=[sections[target],sections[si]];renderQuestionBuilder()}
+    function builderDeleteSection(si){if(!confirm("Xóa phần lớn này và toàn bộ câu hỏi bên trong?"))return;state.admin.builder.sections.splice(si,1);renderQuestionBuilder()}
+    function builderAddSection(){state.admin.builder.sections.push({id:clientId("section"),title:"Phần mới",description:"",pageBreakBefore:false,questions:[newBuilderQuestion()]});renderQuestionBuilder();document.getElementById("questionBuilderList").lastElementChild?.scrollIntoView({behavior:"smooth"})}
+    function builderMoveQuestion(si,qi,dir){const questions=state.admin.builder.sections[si].questions,target=qi+dir;if(target<0||target>=questions.length)return;[questions[qi],questions[target]]=[questions[target],questions[qi]];renderQuestionBuilder()}
+    function builderDeleteQuestion(si,qi){if(!confirm("Xóa câu hỏi này?"))return;state.admin.builder.sections[si].questions.splice(qi,1);renderQuestionBuilder()}
+    function builderAddQuestion(si){state.admin.builder.sections[si].questions.push(newBuilderQuestion());renderQuestionBuilder()}
+    function newBuilderQuestion(){return{id:clientId("question"),title:"Câu hỏi mới",type:"radio",required:true,help:"",options:["Có","Không"],followUp:{enabled:false,trigger:"Có",label:"Vui lòng ghi rõ",required:false}}}
+
+    async function saveQuestionBuilder(){
+      if(!state.admin.builder)return;
+      setLoading(true);
+      try{
+        const result=await postApi("saveSurveySchema",{email:state.admin.email,passcode:state.admin.passcode,schema:state.admin.builder});
+        state.schema=result.schema;state.admin.builder=deepClone(result.schema);
+        renderSurveySchema();renderQuestionBuilder();showToast("Đã lưu cấu trúc câu hỏi.");
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
+
+    async function resetQuestionBuilder(){
+      if(!confirm("Khôi phục toàn bộ câu hỏi về mẫu mặc định? Cấu trúc hiện tại sẽ bị thay thế."))return;
+      setLoading(true);
+      try{
+        const result=await postApi("resetSurveySchema",{email:state.admin.email,passcode:state.admin.passcode});
+        state.schema=result.schema;state.admin.builder=deepClone(result.schema);
+        renderSurveySchema();renderQuestionBuilder();showToast("Đã khôi phục mẫu câu hỏi mặc định.");
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
+
+    async function saveAdminSettings(){
+      setLoading(true);
+      try{
+        const result=await postApi("saveSettings",{email:state.admin.email,passcode:state.admin.passcode,isOn:document.getElementById("adminIsOn").checked,message:value("adminMessage")});
+        state.settings=result.settings;applySettings();showToast("Đã cập nhật trạng thái biểu mẫu.");
+      }catch(error){showToast(error.message||String(error),true)}
+      finally{setLoading(false)}
+    }
+
+    function mobileField(label,text){return`<div class="mobile-field"><div class="mobile-label">${escapeHtml(label)}</div><div class="mobile-value">${escapeHtml(text)}</div></div>`}
+    function focusQuestion(id,message){const el=document.querySelector(`.dynamic-question[data-question-id="${cssEscape(id)}"]`);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.querySelector("input,textarea")?.focus(),250)}showToast(message,true);return false}
+    function focusError(id,message){const el=document.getElementById(id);if(el){el.disabled=false;el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}showToast(message,true);return false}
     function value(id){return String(document.getElementById(id)?.value||"").trim()}
-    function checkedValues(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el=>el.value)}
-    function radioValue(name){return document.querySelector(`input[name="${name}"]:checked`)?.value||""}
-
-    function focusError(id,message){
-      const el=document.getElementById(id);
-      if(el){el.disabled=false;el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}
-      showToast(message,true);return false;
-    }
-    function focusGroup(name,message){
-      const el=document.querySelector(`input[name="${name}"]`);
-      if(el){el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>el.focus(),250)}
-      showToast(message,true);return false;
-    }
-
+    function dateKey(date){return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
+    function normalizeText(text){return String(text||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/\s+/g," ")}
+    function escapeHtml(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+    function escapeAttr(value){return escapeHtml(value).replace(/`/g,"&#096;")}
+    function escapeJs(value){return String(value==null?"":value).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r/g,"\\r").replace(/\n/g,"\\n")}
+    function cssEscape(value){return window.CSS?.escape?CSS.escape(String(value)):String(value).replace(/["\\]/g,"\\$&")}
+    function capitalize(value){return String(value).charAt(0).toUpperCase()+String(value).slice(1)}
     function setLoading(on){document.getElementById("loading").classList.toggle("on",Boolean(on))}
     let toastTimer;
-    function showToast(message,error){
-      clearTimeout(toastTimer);
-      const toast=document.getElementById("toast");
-      toast.textContent=message;
-      toast.className="toast on"+(error?" error":"");
-      toastTimer=setTimeout(()=>toast.className="toast",4500);
-    }
+    function showToast(message,error){clearTimeout(toastTimer);const toast=document.getElementById("toast");toast.textContent=message;toast.className="toast on"+(error?" error":"");toastTimer=setTimeout(()=>toast.className="toast",4500)}
   </script>
 </body>
 </html>
