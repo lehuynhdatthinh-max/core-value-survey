@@ -215,6 +215,9 @@
       background:rgba(255,122,0,.05);
     }
     .explanation.active{display:block}
+    .open-answer{margin-top:9px}
+    .open-answer input,.open-answer textarea{width:100%}
+    .open-answer textarea{min-height:135px}
 
     .actions{
       display:flex;
@@ -744,24 +747,37 @@
               </div>
               <div>
                 <label class="field-label">Loại câu hỏi</label>
-                <select id="editQuestionType"><option value="single">Chọn 1 đáp án</option><option value="multi">Chọn nhiều đáp án</option></select>
+                <select id="editQuestionType" onchange="toggleQuestionTypeEditor()">
+                  <option value="single">Chọn 1 đáp án</option>
+                  <option value="multi">Chọn nhiều đáp án</option>
+                  <option value="short">Trả lời ngắn</option>
+                  <option value="paragraph">Đoạn văn</option>
+                </select>
               </div>
-              <div>
+              <div id="scoreModeField">
                 <label class="field-label">Cách tính điểm</label>
                 <select id="editScoreMode"><option value="exact">Đúng toàn bộ mới có điểm</option><option value="perOption">Tính theo từng đáp án đúng</option></select>
               </div>
-              <div>
+              <div id="questionPointsField">
                 <label class="field-label">Điểm câu hỏi</label>
                 <input id="editQuestionPoints" type="number" min="0" step="0.5" value="1">
               </div>
             </div>
-            <h3>Câu trả lời</h3>
-            <p class="note">Đánh dấu ô “Đúng” cho đáp án đúng. Nội dung đề xuất sẽ xuất hiện sau khi nộp bài.</p>
-            <div id="optionEditor"></div>
-            <button class="btn btn-light" type="button" onclick="addOptionEditorRow()">+ Thêm câu trả lời</button>
+            <div id="choiceQuestionEditor">
+              <h3>Câu trả lời</h3>
+              <p class="note">Đánh dấu ô “Đúng” cho đáp án đúng. Nội dung đề xuất sẽ xuất hiện sau khi nộp bài.</p>
+              <div id="optionEditor"></div>
+              <button class="btn btn-light" type="button" onclick="addOptionEditorRow()">+ Thêm câu trả lời</button>
+              <div style="margin-top:14px">
+                <label class="switch-row"><input id="editRequireExplanation" type="checkbox"> Bật phần giải thích khi người dùng chọn đáp án</label>
+                <label class="switch-row"><input id="editShowRecommendation" type="checkbox"> Hiển thị đề xuất sau khi nộp bài</label>
+              </div>
+            </div>
+            <div id="openTextQuestionNote" class="admin-note" style="display:none">
+              Câu trả lời ngắn và đoạn văn không có đáp án đúng và không tính vào điểm khảo sát.
+              Nội dung người tham gia nhập vẫn được lưu trong cột <b>Answers JSON</b>.
+            </div>
             <div style="margin-top:14px">
-              <label class="switch-row"><input id="editRequireExplanation" type="checkbox"> Bật phần giải thích khi người dùng chọn đáp án</label>
-              <label class="switch-row"><input id="editShowRecommendation" type="checkbox"> Hiển thị đề xuất sau khi nộp bài</label>
               <label class="switch-row"><input id="editQuestionRequired" type="checkbox" checked> Câu hỏi bắt buộc</label>
               <label class="switch-row"><input id="editQuestionActive" type="checkbox" checked> Đang sử dụng</label>
             </div>
@@ -778,7 +794,7 @@
 
   <script>
     const GOOGLE_SCRIPT_URL =
-      'https://script.google.com/macros/s/AKfycbzm4IrGIyW2nF9HWCWf16px0STt5BKOyGiwuxj_a9kVHiPuHj78Ppv-FI6ZmDaQG8ls/exec';
+      'https://script.google.com/macros/s/AKfycbylilQICN_RC1nFnsDo8PTgyQCZfN-95hhRMrKHEcNvUs4r2sZWr8iDoKI9oZbdXYq6/exec';
 
     const LOOKUP_DEBOUNCE_MS = 800;
     const SETTINGS_POLL_MS = 120000;
@@ -1156,22 +1172,50 @@
     }
 
     function renderQuestionCard(question,questionNumber){
+      const isOpenText = question.type === 'short' || question.type === 'paragraph';
+
+      if (isOpenText){
+        return `
+          <section class="question" data-question="${escapeAttribute(question.id)}">
+            <h3>${questionNumber}. ${escapeHtml(question.title)}
+              ${question.required ? '<span class="required">Bắt buộc</span>' : ''}
+            </h3>
+            <div class="open-answer">
+              ${question.type === 'paragraph'
+                ? `<textarea data-open-answer="${escapeAttribute(question.id)}"
+                    placeholder="Nhập nội dung trả lời"></textarea>`
+                : `<input type="text" data-open-answer="${escapeAttribute(question.id)}"
+                    placeholder="Nhập câu trả lời ngắn">`}
+            </div>
+          </section>`;
+      }
+
       const options = shuffle(question.options || []);
       return `
         <section class="question" data-question="${escapeAttribute(question.id)}">
-          <h3>${questionNumber}. ${escapeHtml(question.title)} ${question.required ? '<span class="required">Bắt buộc</span>' : ''}</h3>
+          <h3>${questionNumber}. ${escapeHtml(question.title)}
+            ${question.required ? '<span class="required">Bắt buộc</span>' : ''}
+          </h3>
           <div class="choices">
             ${options.map(option => `
               <div>
                 <label class="choice">
                   <input type="${question.type === 'single' ? 'radio' : 'checkbox'}"
-                    name="${escapeAttribute(question.id)}" value="${escapeAttribute(option.id)}"
-                    onchange="toggleDynamicExplanation('${escapeAttribute(question.id)}','${escapeAttribute(option.id)}',this.checked)">
+                    name="${escapeAttribute(question.id)}"
+                    value="${escapeAttribute(option.id)}"
+                    onchange="toggleDynamicExplanation(
+                      '${escapeAttribute(question.id)}',
+                      '${escapeAttribute(option.id)}',
+                      this.checked
+                    )">
                   <span>${escapeHtml(option.label)}</span>
                 </label>
                 ${question.requireExplanation ? `
-                  <div id="explanation_${escapeAttribute(question.id)}_${escapeAttribute(option.id)}" class="explanation">
-                    <label class="field-label">Giải thích lý do, tối thiểu ${MIN_MEANINGFUL_WORDS} từ</label>
+                  <div id="explanation_${escapeAttribute(question.id)}_${escapeAttribute(option.id)}"
+                    class="explanation">
+                    <label class="field-label">
+                      Giải thích lý do, tối thiểu ${MIN_MEANINGFUL_WORDS} từ
+                    </label>
                     <textarea data-explanation-key="${escapeAttribute(question.id)}::${escapeAttribute(option.id)}"></textarea>
                   </div>` : ''}
               </div>`).join('')}
@@ -1229,17 +1273,42 @@
     }
 
     function validateSurvey(){
-      if (!document.getElementById('fullName').value.trim()) return {ok:false,message:'Vui lòng nhập họ và tên.'};
-      if (!getFinalDepartment()) return {ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.'};
+      if (!document.getElementById('fullName').value.trim()) {
+        return {ok:false,message:'Vui lòng nhập họ và tên.'};
+      }
+      if (!getFinalDepartment()) {
+        return {ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.'};
+      }
+
       for (const question of QUESTIONS){
-        const selected=getSelectedValues(question.id);
-        if (question.required && !selected.length) return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
+        if (isOpenTextQuestion(question)){
+          const text = getOpenTextAnswer(question.id);
+          if (question.required && !text) {
+            return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
+          }
+          continue;
+        }
+
+        const selected = getSelectedValues(question.id);
+        if (question.required && !selected.length) {
+          return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
+        }
+
         if (question.requireExplanation){
           for (const optionId of selected){
-            const textarea=document.querySelector(`[data-explanation-key="${cssEscape(question.id+'::'+optionId)}"]`);
-            const text=textarea?textarea.value.trim():'';
-            if(countMeaningfulWords(text)<MIN_MEANINGFUL_WORDS) return {ok:false,message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`};
-            if(isTooRepetitive(text)) return {ok:false,message:'Nội dung giải thích đang lặp lại quá nhiều.'};
+            const textarea = document.querySelector(
+              `[data-explanation-key="${cssEscape(question.id+'::'+optionId)}"]`
+            );
+            const text = textarea ? textarea.value.trim() : '';
+            if (countMeaningfulWords(text) < MIN_MEANINGFUL_WORDS) {
+              return {
+                ok:false,
+                message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`
+              };
+            }
+            if (isTooRepetitive(text)) {
+              return {ok:false,message:'Nội dung giải thích đang lặp lại quá nhiều.'};
+            }
           }
         }
       }
@@ -1248,10 +1317,14 @@
 
     function calculateScores(){
       let knowScore=0,totalKnow=0,understandScore=0,totalUnderstand=0;
+
       QUESTIONS.forEach(question=>{
+        if (isOpenTextQuestion(question)) return;
+
         const selected=getSelectedValues(question.id).map(String);
         const correct=(question.correct||[]).map(String);
         let earned=0,possible=0;
+
         if(question.scoreMode==='perOption'){
           possible=correct.length;
           earned=selected.filter(value=>correct.includes(value)).length;
@@ -1259,29 +1332,65 @@
           possible=Number(question.points||1);
           earned=setsEqual(selected,correct)?possible:0;
         }
-        if(question.section==='understand'){understandScore+=earned;totalUnderstand+=possible;}
-        else{knowScore+=earned;totalKnow+=possible;}
+
+        if(question.section==='understand'){
+          understandScore+=earned;
+          totalUnderstand+=possible;
+        }else{
+          knowScore+=earned;
+          totalKnow+=possible;
+        }
       });
-      return {knowScore,totalKnow,understandScore,totalUnderstand,score:knowScore+understandScore,total:totalKnow+totalUnderstand};
+
+      return {
+        knowScore,
+        totalKnow,
+        understandScore,
+        totalUnderstand,
+        score:knowScore+understandScore,
+        total:totalKnow+totalUnderstand
+      };
     }
 
     function buildPayload(scores){
       const answers={}, explanations={};
+
       QUESTIONS.forEach(question=>{
+        if (isOpenTextQuestion(question)){
+          answers[question.id]=getOpenTextAnswer(question.id);
+          return;
+        }
+
         const selected=getSelectedValues(question.id);
-        answers[question.id]=question.type==='single'?(selected[0]||''):selected;
+        answers[question.id]=question.type==='single'
+          ? (selected[0]||'')
+          : selected;
+
         (question.options||[]).forEach(option=>{
           const key=question.id+'::'+option.id;
-          const textarea=document.querySelector(`[data-explanation-key="${cssEscape(key)}"]`);
+          const textarea=document.querySelector(
+            `[data-explanation-key="${cssEscape(key)}"]`
+          );
           if(textarea) explanations[key]=textarea.value.trim();
         });
       });
+
       return {
-        timestamp:new Date().toISOString(),employeeId:normalizeMSNV(document.getElementById('employeeId').value),
-        name:document.getElementById('fullName').value.trim(),fullName:document.getElementById('fullName').value.trim(),
-        department:getFinalDepartment(),position:state.employee?state.employee.position||'':'',
-        employeeLookupStatus:state.employeeLookupOk?'FOUND':normalizeMSNV(document.getElementById('employeeId').value)?'NOT_FOUND_OR_MANUAL':'MANUAL',
-        ...scores,answers,explanations,userAgent:navigator.userAgent
+        timestamp:new Date().toISOString(),
+        employeeId:normalizeMSNV(document.getElementById('employeeId').value),
+        name:document.getElementById('fullName').value.trim(),
+        fullName:document.getElementById('fullName').value.trim(),
+        department:getFinalDepartment(),
+        position:state.employee?state.employee.position||'':'',
+        employeeLookupStatus:state.employeeLookupOk
+          ? 'FOUND'
+          : normalizeMSNV(document.getElementById('employeeId').value)
+            ? 'NOT_FOUND_OR_MANUAL'
+            : 'MANUAL',
+        ...scores,
+        answers,
+        explanations,
+        userAgent:navigator.userAgent
       };
     }
 
@@ -1301,7 +1410,7 @@
 
     function buildRecommendations(){
       const cards=[];
-      QUESTIONS.filter(q=>q.showRecommendation).forEach(question=>{
+      QUESTIONS.filter(q=>q.showRecommendation && !isOpenTextQuestion(q)).forEach(question=>{
         const selected=getSelectedValues(question.id);
         (question.options||[]).filter(option=>option.suggestion).forEach(option=>{
           const chosen=selected.includes(option.id);
@@ -1323,6 +1432,19 @@
         .forEach(element => {
           element.disabled = true;
         });
+    }
+
+
+    function isOpenTextQuestion(question){
+      return question &&
+        (question.type === 'short' || question.type === 'paragraph');
+    }
+
+    function getOpenTextAnswer(questionId){
+      const element=document.querySelector(
+        `[data-open-answer="${cssEscape(questionId)}"]`
+      );
+      return element ? element.value.trim() : '';
     }
 
     function getSelectedValues(name){
@@ -1613,17 +1735,31 @@
           onclick="editAdminQuestion('${escapeAttribute(question.id)}')">
           <strong>${question.sortOrder}. ${escapeHtml(question.title)}</strong>
           <div class="note">
-            ${question.type==='single'?'Chọn 1':'Chọn nhiều'} · ${question.active?'Đang dùng':'Tắt'}
+            ${questionTypeLabel(question.type)} · ${question.active?'Đang dùng':'Tắt'}
           </div>
         </div>`;
+    }
+
+
+    function questionTypeLabel(type){
+      const labels={
+        single:'Chọn 1',
+        multi:'Chọn nhiều',
+        short:'Trả lời ngắn',
+        paragraph:'Đoạn văn'
+      };
+      return labels[type]||type||'Không xác định';
     }
 
     function newQuestionEditor(section='know',situationId=''){
       state.selectedAdminQuestionId='';
       document.getElementById('questionEditorTitle').textContent=
-        section === 'understand' ? 'Thêm câu hỏi phần Hiểu' : 'Thêm câu hỏi phần Biết';
+        section === 'understand'
+          ? 'Thêm câu hỏi phần Hiểu'
+          : 'Thêm câu hỏi phần Biết';
       document.getElementById('editQuestionId').value='';
-      document.getElementById('editQuestionOrder').value=state.adminQuestions.length+1;
+      document.getElementById('editQuestionOrder').value=
+        state.adminQuestions.length+1;
       document.getElementById('editQuestionSection').value=section;
       document.getElementById('editQuestionTitle').value='';
       document.getElementById('editQuestionType').value='single';
@@ -1645,6 +1781,7 @@
         clearSituationFields();
       }
       toggleSituationEditor();
+      toggleQuestionTypeEditor();
       renderAdminQuestionList();
     }
 
@@ -1659,25 +1796,42 @@
       document.getElementById('editQuestionSection').value=question.section;
       document.getElementById('editQuestionTitle').value=question.title;
       document.getElementById('editQuestionType').value=question.type;
-      document.getElementById('editScoreMode').value=question.scoreMode;
-      document.getElementById('editQuestionPoints').value=question.points;
-      document.getElementById('editRequireExplanation').checked=question.requireExplanation;
-      document.getElementById('editShowRecommendation').checked=question.showRecommendation;
+      document.getElementById('editScoreMode').value=question.scoreMode||'exact';
+      document.getElementById('editQuestionPoints').value=
+        isOpenTextQuestion(question) ? 0 : Number(question.points||1);
+      document.getElementById('editRequireExplanation').checked=
+        Boolean(question.requireExplanation);
+      document.getElementById('editShowRecommendation').checked=
+        Boolean(question.showRecommendation);
       document.getElementById('editQuestionRequired').checked=question.required;
       document.getElementById('editQuestionActive').checked=question.active;
 
       renderSituationSelect(question.situationId || '');
       document.getElementById('editSituationId').value=question.situationId || '';
-      document.getElementById('editSituationTitle').value=question.situationTitle || '';
-      document.getElementById('editSituationText').value=question.situationText || '';
+      document.getElementById('editSituationTitle').value=
+        question.situationTitle || '';
+      document.getElementById('editSituationText').value=
+        question.situationText || '';
       toggleSituationEditor();
 
       const box=document.getElementById('optionEditor');
       box.innerHTML='';
-      (question.options||[]).forEach(option =>
-        addOptionEditorRow(option,(question.correct||[]).includes(option.id))
-      );
-      document.getElementById('deleteQuestionButton').style.display='inline-block';
+      if (!isOpenTextQuestion(question)){
+        (question.options||[]).forEach(option =>
+          addOptionEditorRow(
+            option,
+            (question.correct||[]).includes(option.id)
+          )
+        );
+        if (!box.children.length){
+          addOptionEditorRow();
+          addOptionEditorRow();
+        }
+      }
+
+      document.getElementById('deleteQuestionButton').style.display=
+        'inline-block';
+      toggleQuestionTypeEditor();
       renderAdminQuestionList();
     }
 
@@ -1730,6 +1884,36 @@
       }
     }
 
+
+    function toggleQuestionTypeEditor(){
+      const type=document.getElementById('editQuestionType').value;
+      const isOpen=type==='short'||type==='paragraph';
+
+      document.getElementById('choiceQuestionEditor').style.display=
+        isOpen?'none':'block';
+      document.getElementById('scoreModeField').style.display=
+        isOpen?'none':'block';
+      document.getElementById('questionPointsField').style.display=
+        isOpen?'none':'block';
+      document.getElementById('openTextQuestionNote').style.display=
+        isOpen?'block':'none';
+
+      if(isOpen){
+        document.getElementById('editQuestionPoints').value=0;
+        document.getElementById('editRequireExplanation').checked=false;
+        document.getElementById('editShowRecommendation').checked=false;
+      }else{
+        const box=document.getElementById('optionEditor');
+        if(!box.children.length){
+          addOptionEditorRow();
+          addOptionEditorRow();
+        }
+        if(Number(document.getElementById('editQuestionPoints').value)<=0){
+          document.getElementById('editQuestionPoints').value=1;
+        }
+      }
+    }
+
     function addOptionEditorRow(option={id:'',label:'',suggestion:''},isCorrect=false){
       const box=document.getElementById('optionEditor');
       const row=document.createElement('div');row.className='option-editor-row';
@@ -1738,30 +1922,57 @@
     }
 
     async function saveCurrentQuestion(){
-      const rows=Array.from(document.querySelectorAll('#optionEditor .option-editor-row'));
-      const options=rows.map((row,index)=>({
-        id:row.querySelector('.option-id').value.trim()||('o'+(index+1)),
-        label:row.querySelector('.option-label').value.trim(),
-        suggestion:row.querySelector('.option-suggestion').value.trim()
-      }));
-      const correct=rows
-        .map((row,index)=>row.querySelector('.option-correct').checked?options[index].id:null)
-        .filter(Boolean);
+      const type=document.getElementById('editQuestionType').value;
+      const isOpen=type==='short'||type==='paragraph';
+      let options=[];
+      let correct=[];
+
+      if(!isOpen){
+        const rows=Array.from(
+          document.querySelectorAll('#optionEditor .option-editor-row')
+        );
+        options=rows.map((row,index)=>({
+          id:row.querySelector('.option-id').value.trim()||('o'+(index+1)),
+          label:row.querySelector('.option-label').value.trim(),
+          suggestion:row.querySelector('.option-suggestion').value.trim()
+        }));
+        correct=rows
+          .map((row,index)=>
+            row.querySelector('.option-correct').checked
+              ? options[index].id
+              : null
+          )
+          .filter(Boolean);
+      }
 
       const section=document.getElementById('editQuestionSection').value;
       const question={
         id:document.getElementById('editQuestionId').value.trim(),
         sortOrder:Number(document.getElementById('editQuestionOrder').value||1),
         section,
-        situationId:section==='understand'?document.getElementById('editSituationId').value.trim():'',
-        situationTitle:section==='understand'?document.getElementById('editSituationTitle').value.trim():'',
-        situationText:section==='understand'?document.getElementById('editSituationText').value.trim():'',
+        situationId:section==='understand'
+          ? document.getElementById('editSituationId').value.trim()
+          : '',
+        situationTitle:section==='understand'
+          ? document.getElementById('editSituationTitle').value.trim()
+          : '',
+        situationText:section==='understand'
+          ? document.getElementById('editSituationText').value.trim()
+          : '',
         title:document.getElementById('editQuestionTitle').value.trim(),
-        type:document.getElementById('editQuestionType').value,
-        scoreMode:document.getElementById('editScoreMode').value,
-        points:Number(document.getElementById('editQuestionPoints').value||1),
-        requireExplanation:document.getElementById('editRequireExplanation').checked,
-        showRecommendation:document.getElementById('editShowRecommendation').checked,
+        type,
+        scoreMode:isOpen
+          ? 'none'
+          : document.getElementById('editScoreMode').value,
+        points:isOpen
+          ? 0
+          : Number(document.getElementById('editQuestionPoints').value||1),
+        requireExplanation:isOpen
+          ? false
+          : document.getElementById('editRequireExplanation').checked,
+        showRecommendation:isOpen
+          ? false
+          : document.getElementById('editShowRecommendation').checked,
         required:document.getElementById('editQuestionRequired').checked,
         active:document.getElementById('editQuestionActive').checked,
         options,
@@ -1769,21 +1980,36 @@
       };
 
       if(section==='understand'&&!question.situationText){
-        showMessageElement('questionAdminMessage','Vui lòng nhập nội dung tình huống.','error');
+        showMessageElement(
+          'questionAdminMessage',
+          'Vui lòng nhập nội dung tình huống.',
+          'error'
+        );
         return;
       }
 
       setLoading(true);
       try{
-        const response=await apiPost('saveQuestion',{...state.admin,question});
+        const response=await apiPost(
+          'saveQuestion',
+          {...state.admin,question}
+        );
         state.selectedAdminQuestionId=response.question.id;
         await loadAdminQuestions();
         await loadQuestionConfig();
         renderQuestions();
         editAdminQuestion(state.selectedAdminQuestionId);
-        showMessageElement('questionAdminMessage','Đã lưu câu hỏi.','success');
+        showMessageElement(
+          'questionAdminMessage',
+          'Đã lưu câu hỏi.',
+          'success'
+        );
       }catch(error){
-        showMessageElement('questionAdminMessage',error.message,'error');
+        showMessageElement(
+          'questionAdminMessage',
+          error.message,
+          'error'
+        );
       }finally{
         setLoading(false);
       }
