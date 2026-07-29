@@ -1054,11 +1054,13 @@
 
   <script>
     const GOOGLE_SCRIPT_URL =
-      'https://script.google.com/macros/s/AKfycbxVppuNGPjsXslrQIy9XIoIuDeiiTu9jwYzNnvH3fiTD8vVpCkTnP6XuDv6NnW6hPo/exec';
+      'https://script.google.com/macros/s/AKfycbzIpPzCPtqZJH9EhMyx-sPVzWXXBQ57OkKZuy7De8x45QSb2f57N13rpX-H1bpL9bCr/exec';
 
     const LOOKUP_DEBOUNCE_MS = 800;
     const SETTINGS_POLL_MS = 120000;
     const MIN_MEANINGFUL_WORDS = 5;
+    const POST_TIMEOUT_MS = 60000;
+    const SUBMISSION_STATUS_POLL_MS = 1500;
 
     const state = {
       settings: { isOn: false, message: '' },
@@ -1075,6 +1077,7 @@
       settingsPollTimer: null,
       initialSettingsLoaded: false,
       questionLoadAttempts: 0,
+      currentSubmissionId: '',
       stress: {
         running: false,
         stopRequested: false,
@@ -1430,17 +1433,203 @@
     }
 
     async function apiPost(action, data){
+      if(action === 'submitSurvey'){
+        return iframeApiPost(action, data, POST_TIMEOUT_MS);
+      }
+
       const body = new URLSearchParams();
       body.set('action', action);
       body.set('data', JSON.stringify(data || {}));
 
-      const json = await fetchJson(GOOGLE_SCRIPT_URL, {
-        method:'POST',
-        body:body
-      }, 30000);
+      try{
+        const json = await fetchJson(GOOGLE_SCRIPT_URL, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body:body
+        }, 30000);
 
-      if (!json.ok) throw new Error(json.error || 'Yêu cầu thất bại.');
-      return json;
+        if(!json.ok){
+          throw new Error(json.error || 'Yêu cầu thất bại.');
+        }
+        return json;
+      }catch(error){
+        console.warn(
+          `POST ${action} bằng fetch không thành công, chuyển sang iframe:`,
+          error
+        );
+        return iframeApiPost(action, data, POST_TIMEOUT_MS);
+      }
+    }
+
+    function iframeApiPost(action, data, timeoutMs = POST_TIMEOUT_MS){
+      return new Promise((resolve,reject) => {
+        const requestId = createRequestId('request');
+        const iframeName = '__vhdnPostFrame_' + requestId.replace(/[^A-Za-z0-9_]/g,'_');
+        const deadline = Date.now() + timeoutMs;
+
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.setAttribute('aria-hidden','true');
+        iframe.style.display = 'none';
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = GOOGLE_SCRIPT_URL;
+        form.target = iframeName;
+        form.acceptCharset = 'UTF-8';
+        form.style.display = 'none';
+
+        appendHiddenField(form,'action',action);
+        appendHiddenField(form,'data',JSON.stringify(data || {}));
+        appendHiddenField(form,'transport','iframe');
+        appendHiddenField(form,'requestId',requestId);
+
+        let finished = false;
+        let timeoutTimer = null;
+        let polling = false;
+
+        function cleanup(){
+          window.removeEventListener('message',onMessage);
+          if(timeoutTimer) clearTimeout(timeoutTimer);
+          if(form.parentNode) form.parentNode.removeChild(form);
+          if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }
+
+        function finish(error,response){
+          if(finished) return;
+          finished = true;
+          cleanup();
+
+          if(error){
+            reject(error);
+          }else{
+            resolve(response);
+          }
+        }
+
+        function handleResponse(json){
+          if(!json || typeof json !== 'object'){
+            finish(new Error('Máy chủ không trả về dữ liệu hợp lệ.'));
+            return;
+          }
+
+          if(!json.ok){
+            finish(new Error(json.error || 'Yêu cầu thất bại.'));
+            return;
+          }
+
+          finish(null,json);
+        }
+
+        function onMessage(event){
+          if(!isTrustedAppsScriptOrigin(event.origin)) return;
+
+          const message = event.data;
+          if(!message || message.type !== 'VHDN_APPS_SCRIPT_RESPONSE') return;
+          if(message.requestId !== requestId) return;
+
+          handleResponse(message.response);
+        }
+
+        async function pollSubmissionStatus(){
+          if(polling || action !== 'submitSurvey') return;
+
+          const submissionId = String(
+            data && data.submissionId || ''
+          ).trim();
+          if(!submissionId) return;
+
+          polling = true;
+
+          while(!finished && Date.now() < deadline){
+            await waitMs(SUBMISSION_STATUS_POLL_MS);
+            if(finished) return;
+
+            try{
+              const statusResponse = await jsonpGet(
+                'getSubmissionStatus',
+                {submissionId:submissionId},
+                10000
+              );
+
+              const submission = statusResponse && statusResponse.submission;
+              if(!statusResponse || !statusResponse.ok || !submission || !submission.found){
+                continue;
+              }
+
+              if(submission.status === 'ERROR'){
+                finish(new Error(
+                  submission.error || 'Hệ thống nhận dữ liệu nhưng xử lý không thành công.'
+                ));
+                return;
+              }
+
+              finish(null,{
+                ok:true,
+                queued:true,
+                recovered:true,
+                queueId:submission.queueId || '',
+                submissionId:submission.submissionId || submissionId
+              });
+              return;
+            }catch(error){
+              console.warn('Chưa xác nhận được trạng thái lần nộp:',error);
+            }
+          }
+        }
+
+        window.addEventListener('message',onMessage);
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+
+        timeoutTimer = setTimeout(() => {
+          finish(new Error(
+            'Không xác nhận được dữ liệu sau ' + timeoutMs +
+            ' ms. Vui lòng kiểm tra mạng rồi bấm nộp lại; hệ thống sẽ tự chống ghi trùng.'
+          ));
+        },timeoutMs);
+
+        try{
+          form.submit();
+          pollSubmissionStatus();
+        }catch(error){
+          finish(error);
+        }
+      });
+    }
+
+    function appendHiddenField(form,name,value){
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = String(value == null ? '' : value);
+      form.appendChild(input);
+    }
+
+    function createRequestId(prefix = 'vhdn'){
+      if(window.crypto && typeof window.crypto.randomUUID === 'function'){
+        return prefix + '-' + window.crypto.randomUUID();
+      }
+
+      return prefix + '-' + Date.now() + '-' +
+        Math.random().toString(36).slice(2,12);
+    }
+
+    function isTrustedAppsScriptOrigin(origin){
+      if(origin === 'null') return true;
+
+      try{
+        const url = new URL(origin);
+        if(url.protocol !== 'https:') return false;
+
+        return url.hostname === 'script.google.com' ||
+          url.hostname === 'script.googleusercontent.com' ||
+          url.hostname.endsWith('.googleusercontent.com');
+      }catch(error){
+        return false;
+      }
     }
 
     async function refreshSettings(options = {}){
@@ -1792,7 +1981,15 @@
         renderLocalResult(response.scores || scores,response.queueId);
         lockSurveyForm();
       }catch(error){
-        showFormMessage('Không thể lưu vào hệ thống: ' + error.message,'error');
+        const detail = error && error.message
+          ? error.message
+          : 'Lỗi kết nối không xác định.';
+
+        showFormMessage(
+          'Không thể xác nhận việc lưu khảo sát: ' + detail +
+          '\nHãy giữ nguyên trang và bấm Nộp khảo sát lại. Mã lần nộp được giữ nguyên nên hệ thống không ghi trùng.',
+          'error'
+        );
         document.getElementById('submitButton').disabled = false;
       }finally{
         setLoading(false);
@@ -1882,6 +2079,10 @@
     function buildPayload(scores){
       const answers={}, explanations={};
 
+      if(!state.currentSubmissionId){
+        state.currentSubmissionId = createRequestId('submission');
+      }
+
       QUESTIONS.forEach(question=>{
         if (isOpenTextQuestion(question)){
           answers[question.id]=getOpenTextAnswer(question.id);
@@ -1903,6 +2104,7 @@
       });
 
       return {
+        submissionId:state.currentSubmissionId,
         timestamp:new Date().toISOString(),
         employeeId:normalizeMSNV(document.getElementById('employeeId').value),
         name:document.getElementById('fullName').value.trim(),
@@ -1931,7 +2133,7 @@
         <p><strong>Tổng điểm:</strong> ${scores.score}/${scores.total}</p>
         <p><strong>Phần biết:</strong> ${scores.knowScore}/${scores.totalKnow} · <strong>Phần hiểu:</strong> ${scores.understandScore}/${scores.totalUnderstand}</p>
         ${recommendations}
-        <p class="answer-note">Mã hàng đợi: ${escapeHtml(queueId||'')} · Kết quả sẽ được chuyển vào sheet Responses.</p>`;
+        <p class="answer-note">Mã hàng đợi: ${escapeHtml(queueId||'')} · Mã lần nộp: ${escapeHtml(state.currentSubmissionId||'')} · Kết quả sẽ được chuyển vào sheet Responses.</p>`;
       result.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
