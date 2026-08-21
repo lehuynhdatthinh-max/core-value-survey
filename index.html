@@ -726,61 +726,53 @@
         <div class="card" style="box-shadow:none;margin:0">
           <h3>Stress test trực tiếp trên trình duyệt</h3>
           <div class="stress-warning">
-            <b>Tải câu hỏi</b> và <b>tra cứu MSNV</b> chỉ đọc dữ liệu.
-            Chế độ tra cứu sử dụng MSNV thật lấy từ sheet nhân sự và gọi đúng API
-            <code>lookupEmployee</code>. <b>Nộp bài</b> sẽ tạo dữ liệu thật trong Queue
-            và Responses; nên thực hiện trên Google Sheet hoặc deployment test.
-            Trình duyệt có giới hạn kết nối nên đây là
-            bài kiểm tra tải thực tế ở mức vừa, không thay thế công cụ stress test phân tán.
+            Bài test này dùng <b>đúng cơ chế kết nối iframe đang dùng ngoài thực tế</b>,
+            không dùng fetch riêng cho stress test nữa.
+            <b>Mô phỏng người dùng thực tế</b>: mỗi người tải trạng thái khảo sát + tải câu hỏi,
+            sau đó tra cứu 1 MSNV thật.
+            <b>Stress cực hạn</b>: chạy nhiều lượt người liên tục với cùng luồng thực tế để tìm ngưỡng chịu tải.
+            Hai chế độ này chỉ đọc dữ liệu, <b>không ghi Queue/Responses</b>.
           </div>
 
           <div class="stress-grid">
             <div>
               <label class="field-label">Chế độ kiểm tra</label>
               <select id="stressMode" onchange="updateStressModeFields()">
-                <option value="load">Mở trang / tải câu hỏi</option>
-                <option value="employee">Tra cứu MSNV từ sheet nhân sự</option>
-                <option value="submit">Nộp bài</option>
-                <option value="mixed">Tải câu hỏi + tra MSNV + nộp bài</option>
+                <option value="realistic">Mô phỏng người dùng thực tế</option>
+                <option value="extreme">Stress cực hạn</option>
               </select>
             </div>
+
             <div>
               <label class="field-label">Run ID</label>
               <input id="stressRunId" type="text" maxlength="60">
             </div>
+
             <div>
-              <label class="field-label">Timeout mỗi request (ms)</label>
+              <label class="field-label">Timeout mỗi bước (ms)</label>
               <input id="stressTimeout" type="number" min="5000" max="120000" value="30000">
             </div>
+
             <div>
-              <label class="field-label">Khoảng nghỉ khi nộp (ms)</label>
-              <input id="stressSubmitDelay" type="number" min="0" max="10000" value="300">
+              <label class="field-label">Khoảng nghỉ giữa lượt (ms)</label>
+              <input id="stressSubmitDelay" type="number" min="0" max="10000" value="0">
             </div>
 
             <div id="stressLoadConcurrencyField">
-              <label class="field-label">Đồng thời tải câu hỏi</label>
-              <input id="stressLoadConcurrency" type="number" min="1" max="50" value="10">
-            </div>
-            <div id="stressLoadRequestsField">
-              <label class="field-label">Số lượt mở trang</label>
-              <input id="stressLoadRequests" type="number" min="1" max="2000" value="100">
+              <label class="field-label">Số người đồng thời</label>
+              <input id="stressLoadConcurrency" type="number" min="1" max="60" value="20">
             </div>
 
-            <div id="stressEmployeeConcurrencyField">
-              <label class="field-label">Đồng thời tra cứu MSNV</label>
-              <input id="stressEmployeeConcurrency" type="number"
-                min="1" max="30" value="10">
+            <div id="stressLoadRequestsField">
+              <label class="field-label">Tổng người mô phỏng</label>
+              <input id="stressLoadRequests" type="number" min="1" max="500" value="20">
             </div>
-            <div id="stressEmployeeRequestsField">
-              <label class="field-label">Số lượt tra cứu MSNV</label>
-              <input id="stressEmployeeRequests" type="number"
-                min="1" max="2000" value="100">
-            </div>
+
             <div id="stressEmployeeSampleField">
               <label class="field-label">Số MSNV thật lấy làm mẫu</label>
-              <input id="stressEmployeeSample" type="number"
-                min="1" max="2000" value="100">
+              <input id="stressEmployeeSample" type="number" min="1" max="500" value="20">
             </div>
+
             <div id="stressEmployeeCacheField">
               <label class="field-label">Kiểm tra cache</label>
               <label class="choice" style="min-height:48px">
@@ -788,40 +780,26 @@
                 <span>Xóa cache các MSNV mẫu trước khi chạy</span>
               </label>
             </div>
-
-            <div id="stressSubmitConcurrencyField">
-              <label class="field-label">Đồng thời nộp bài</label>
-              <input id="stressSubmitConcurrency" type="number" min="1" max="10" value="2">
-            </div>
-            <div id="stressSubmitRequestsField">
-              <label class="field-label">Số bài test</label>
-              <input id="stressSubmitRequests" type="number" min="1" max="200" value="10">
-            </div>
           </div>
 
-          <label class="stress-confirm">
-            <input id="stressConfirmWrite" type="checkbox">
+          <div class="stress-confirm">
             <span>
-              Tôi xác nhận đang sử dụng môi trường phù hợp. Tra cứu MSNV chỉ đọc
-              dữ liệu nhân sự. Khi chọn chế độ nộp bài, hệ thống sẽ tạo phản hồi có tên
-              bắt đầu bằng <b>STRESS_&lt;RUN_ID&gt;_</b>.
+              <b>Cách đọc kết quả:</b> 1 lượt thành công nghĩa là một người mô phỏng đã hoàn tất
+              cả 3 bước: tải trạng thái khảo sát, tải QuestionBank và tra cứu 1 MSNV.
+              P50/P95 là thời gian hoàn tất <b>toàn bộ luồng của một người</b>.
             </span>
-          </label>
+          </div>
 
           <div class="actions">
             <button id="stressStartButton" class="btn btn-primary" type="button"
               onclick="startHtmlStressTest()">Bắt đầu stress test</button>
             <button id="stressStopButton" class="btn btn-danger" type="button"
               onclick="stopHtmlStressTest()" disabled>Dừng</button>
-            <button class="btn btn-light" type="button"
-              onclick="loadStressRunStatus()">Kiểm tra Queue</button>
-            <button class="btn btn-outline" type="button"
-              onclick="cleanupStressRun()">Xóa dữ liệu test</button>
           </div>
 
           <div class="stress-metrics">
             <div class="stress-metric">
-              <div class="stress-metric-label">Tổng request</div>
+              <div class="stress-metric-label">Tổng người</div>
               <div id="stressMetricTotal" class="stress-metric-value">0</div>
             </div>
             <div class="stress-metric">
@@ -851,7 +829,7 @@
           </div>
 
           <div id="stressRunStatus" class="stress-status-box">
-            Chưa kiểm tra trạng thái Queue.
+            Chưa chạy bài test. Bài test này không ghi Queue/Responses.
           </div>
 
           <pre id="stressLog" class="stress-log">Sẵn sàng.</pre>
@@ -1083,6 +1061,7 @@
         stopRequested: false,
         controllers: new Set(),
         metrics: [],
+        endpointMetrics: [],
         startedAt: 0,
         expectedRequests: 0
       }
@@ -2823,303 +2802,173 @@
 
 
     function initializeStressPanel(){
-      const runIdInput=document.getElementById('stressRunId');
-      if(runIdInput&&!runIdInput.value){
-        runIdInput.value='HTML_'+new Date()
+      const runIdInput = document.getElementById('stressRunId');
+
+      if(runIdInput && !runIdInput.value){
+        runIdInput.value = 'HTML_' + new Date()
           .toISOString()
           .replace(/[-:.TZ]/g,'')
           .slice(0,14);
       }
+
       updateStressModeFields();
       updateStressMetrics();
+
+      const statusBox = document.getElementById('stressRunStatus');
+      if(statusBox && !state.stress.running){
+        statusBox.textContent =
+          'Chưa chạy bài test. Bài test này không ghi Queue/Responses.';
+      }
     }
 
     function updateStressModeFields(){
-      const mode=document.getElementById('stressMode')?.value||'load';
-      const showLoad=mode==='load'||mode==='mixed';
-      const showEmployee=mode==='employee'||mode==='mixed';
-      const showSubmit=mode==='submit'||mode==='mixed';
+      const mode = document.getElementById('stressMode')?.value || 'realistic';
+      const modeSelect = document.getElementById('stressMode');
 
-      ['stressLoadConcurrencyField','stressLoadRequestsField'].forEach(id=>{
-        document.getElementById(id).style.display=showLoad?'block':'none';
-      });
+      if(modeSelect && modeSelect.dataset.lastMode !== mode){
+        if(mode === 'realistic'){
+          document.getElementById('stressLoadConcurrency').value = 20;
+          document.getElementById('stressLoadRequests').value = 20;
+          document.getElementById('stressEmployeeSample').value = 20;
+          document.getElementById('stressSubmitDelay').value = 0;
+        }else{
+          document.getElementById('stressLoadConcurrency').value = 40;
+          document.getElementById('stressLoadRequests').value = 100;
+          document.getElementById('stressEmployeeSample').value = 100;
+          document.getElementById('stressSubmitDelay').value = 0;
+        }
 
-      [
-        'stressEmployeeConcurrencyField',
-        'stressEmployeeRequestsField',
-        'stressEmployeeSampleField',
-        'stressEmployeeCacheField'
-      ].forEach(id=>{
-        document.getElementById(id).style.display=showEmployee?'block':'none';
-      });
+        modeSelect.dataset.lastMode = mode;
+      }
 
-      ['stressSubmitConcurrencyField','stressSubmitRequestsField'].forEach(id=>{
-        document.getElementById(id).style.display=showSubmit?'block':'none';
-      });
+      const statusBox = document.getElementById('stressRunStatus');
+      if(statusBox && !state.stress.running){
+        statusBox.textContent =
+          mode === 'realistic'
+            ? 'Mô phỏng thực tế: mặc định 20 người vào cùng lúc, mỗi người tải form và tra 1 MSNV.'
+            : 'Stress cực hạn: mặc định 100 người mô phỏng, tối đa 40 người chạy đồng thời.';
+      }
     }
 
     function stressNumber(id,min,max,fallback){
-      const value=Number(document.getElementById(id)?.value);
-      if(!Number.isFinite(value))return fallback;
+      const value = Number(document.getElementById(id)?.value);
+      if(!Number.isFinite(value)) return fallback;
       return Math.min(max,Math.max(min,Math.floor(value)));
     }
 
     function validateStressRunIdClient(value){
-      const id=String(value||'').trim();
+      const id = String(value || '').trim();
+
       if(!/^[a-zA-Z0-9_-]{6,60}$/.test(id)){
         throw new Error(
           'Run ID phải dài 6–60 ký tự và chỉ chứa chữ, số, gạch ngang hoặc gạch dưới.'
         );
       }
+
       return id;
     }
 
     function stressLog(message){
-      const box=document.getElementById('stressLog');
-      const time=new Date().toLocaleTimeString('vi-VN');
-      box.textContent+=`\n[${time}] ${message}`;
-      box.scrollTop=box.scrollHeight;
+      const box = document.getElementById('stressLog');
+      const time = new Date().toLocaleTimeString('vi-VN');
+
+      box.textContent += `\n[${time}] ${message}`;
+      box.scrollTop = box.scrollHeight;
     }
 
     function resetStressDisplay(){
-      state.stress.metrics=[];
-      state.stress.startedAt=performance.now();
-      state.stress.expectedRequests=0;
-      document.getElementById('stressLog').textContent='Bắt đầu bài kiểm tra...';
-      document.getElementById('stressProgressBar').style.width='0%';
+      state.stress.metrics = [];
+      state.stress.endpointMetrics = [];
+      state.stress.startedAt = performance.now();
+      state.stress.expectedRequests = 0;
+
+      document.getElementById('stressLog').textContent =
+        'Bắt đầu bài kiểm tra bằng đúng transport iframe của trang thật...';
+
+      document.getElementById('stressProgressBar').style.width = '0%';
+
+      const statusBox = document.getElementById('stressRunStatus');
+      if(statusBox){
+        statusBox.textContent = 'Đang chuẩn bị MSNV thật...';
+      }
+
       updateStressMetrics();
     }
 
     function percentile(values,percent){
-      if(!values.length)return 0;
-      const sorted=values.slice().sort((a,b)=>a-b);
-      const index=Math.min(
-        sorted.length-1,
-        Math.max(0,Math.ceil(percent/100*sorted.length)-1)
+      if(!values.length) return 0;
+
+      const sorted = values.slice().sort((a,b) => a-b);
+      const index = Math.min(
+        sorted.length - 1,
+        Math.max(0,Math.ceil(percent / 100 * sorted.length) - 1)
       );
+
       return sorted[index];
     }
 
     function updateStressMetrics(){
-      const metrics=state.stress.metrics||[];
-      const success=metrics.filter(item=>item.ok);
-      const failed=metrics.filter(item=>!item.ok);
-      const durations=success.map(item=>item.durationMs);
-      const elapsed=state.stress.startedAt
-        ? (performance.now()-state.stress.startedAt)/1000
+      const metrics = state.stress.metrics || [];
+      const success = metrics.filter(item => item.ok);
+      const failed = metrics.filter(item => !item.ok);
+      const durations = success.map(item => item.durationMs);
+
+      const elapsed = state.stress.startedAt
+        ? (performance.now() - state.stress.startedAt) / 1000
         : 0;
 
-      document.getElementById('stressMetricTotal').textContent=metrics.length;
-      document.getElementById('stressMetricSuccess').textContent=success.length;
-      document.getElementById('stressMetricFailed').textContent=failed.length;
-      document.getElementById('stressMetricP50').textContent=
-        Math.round(percentile(durations,50))+' ms';
-      document.getElementById('stressMetricP95').textContent=
-        Math.round(percentile(durations,95))+' ms';
-      document.getElementById('stressMetricElapsed').textContent=
-        elapsed.toFixed(1)+' s';
+      document.getElementById('stressMetricTotal').textContent = metrics.length;
+      document.getElementById('stressMetricSuccess').textContent = success.length;
+      document.getElementById('stressMetricFailed').textContent = failed.length;
+      document.getElementById('stressMetricP50').textContent =
+        Math.round(percentile(durations,50)) + ' ms';
+      document.getElementById('stressMetricP95').textContent =
+        Math.round(percentile(durations,95)) + ' ms';
+      document.getElementById('stressMetricElapsed').textContent =
+        elapsed.toFixed(1) + ' s';
 
-      const expected=state.stress.expectedRequests||0;
-      const percent=expected
-        ? Math.min(100,Math.round(metrics.length/expected*100))
+      const expected = state.stress.expectedRequests || 0;
+      const progress = expected
+        ? Math.min(100,Math.round(metrics.length / expected * 100))
         : 0;
-      document.getElementById('stressProgressBar').style.width=percent+'%';
+
+      document.getElementById('stressProgressBar').style.width = progress + '%';
     }
-
-    async function stressRequest(label,url,options,timeoutMs){
-      if(state.stress.stopRequested){
-        throw new Error('Đã dừng theo yêu cầu người dùng.');
-      }
-
-      const controller=new AbortController();
-      state.stress.controllers.add(controller);
-      const timer=setTimeout(()=>{
-        controller.abort('Timeout sau '+timeoutMs+' ms');
-      },timeoutMs);
-      const started=performance.now();
-
-      try{
-        const response=await fetch(url,{
-          ...(options||{}),
-          cache:'no-store',
-          signal:controller.signal
-        });
-        const text=await response.text();
-        let json;
-        try{json=JSON.parse(text)}
-        catch(error){throw new Error('Phản hồi không phải JSON.')}
-
-        if(!response.ok||!json.ok){
-          throw new Error(json.error||('HTTP '+response.status));
-        }
-
-        state.stress.metrics.push({
-          label,
-          ok:true,
-          durationMs:performance.now()-started
-        });
-        return json;
-      }catch(error){
-        const message=controller.signal.aborted
-          ? String(controller.signal.reason||'Request đã bị hủy.')
-          : String(error.message||error);
-
-        state.stress.metrics.push({
-          label,
-          ok:false,
-          durationMs:performance.now()-started,
-          error:message
-        });
-
-        if(!state.stress.stopRequested){
-          stressLog(`${label} lỗi: ${message}`);
-        }
-        throw new Error(message);
-      }finally{
-        clearTimeout(timer);
-        state.stress.controllers.delete(controller);
-        updateStressMetrics();
-      }
-    }
-
-    async function stressApiGet(action,timeoutMs,params={}){
-      const url=new URL(GOOGLE_SCRIPT_URL);
-      url.searchParams.set('action',action);
-      Object.entries(params||{}).forEach(([key,value])=>{
-        if(value!==undefined&&value!==null&&String(value)!==''){
-          url.searchParams.set(key,String(value));
-        }
-      });
-      url.searchParams.set('stressTs',Date.now()+'_'+Math.random());
-      return stressRequest('GET '+action,url.toString(),{},timeoutMs);
-    }
-
-    async function stressApiPost(action,data,timeoutMs){
-      const body=new URLSearchParams();
-      body.set('action',action);
-      body.set('data',JSON.stringify(data||{}));
-      return stressRequest(
-        'POST '+action,
-        GOOGLE_SCRIPT_URL,
-        {method:'POST',body},
-        timeoutMs
-      );
-    }
-
-    async function stressPool(total,concurrency,task,delayMs){
-      let cursor=0;
-
-      async function worker(){
-        while(!state.stress.stopRequested){
-          const index=cursor++;
-          if(index>=total)return;
-          try{
-            await task(index);
-          }catch(error){
-            if(state.stress.stopRequested)return;
-          }
-          if(delayMs>0){
-            await new Promise(resolve=>setTimeout(resolve,delayMs));
-          }
-        }
-      }
-
-      await Promise.all(
-        Array.from(
-          {length:Math.min(total,concurrency)},
-          ()=>worker()
-        )
-      );
-    }
-
-    function stressAnswerForQuestion(question,sequence,runId){
-      const type=String(question.type||'').toLowerCase();
-
-      if(type==='short'){
-        return `Câu trả lời ngắn stress test ${runId} lượt ${sequence}`;
-      }
-      if(type==='paragraph'){
-        return `Đây là nội dung đoạn văn dùng để kiểm tra khả năng tải và lưu dữ liệu `+
-          `của khảo sát VHDN. Run ID ${runId}, lượt ${sequence}.`;
-      }
-
-      const valid=(question.options||[]).map(option=>String(option.id));
-      const correct=(question.correct||[])
-        .map(String)
-        .filter(id=>valid.includes(id));
-
-      if(type==='single'){
-        return correct[0]||valid[0]||'';
-      }
-      return correct.length?correct:valid.slice(0,1);
-    }
-
-    function buildStressPayload(sequence,runId){
-      const answers={};
-      const explanations={};
-
-      QUESTIONS.forEach(question=>{
-        const answer=stressAnswerForQuestion(question,sequence,runId);
-        answers[question.id]=answer;
-
-        if(question.requireExplanation){
-          const selected=Array.isArray(answer)?answer:(answer?[answer]:[]);
-          selected.forEach(optionId=>{
-            explanations[question.id+'::'+optionId]=
-              `Đây là nội dung giải thích hợp lệ cho bài stress test ${runId}.`;
-          });
-        }
-      });
-
-      const suffix=String(sequence).padStart(5,'0');
-
-      return{
-        timestamp:new Date().toISOString(),
-        employeeId:'',
-        name:`STRESS_${runId}_${suffix}`,
-        fullName:`STRESS_${runId}_${suffix}`,
-        department:'IT',
-        position:'STRESS TEST',
-        employeeLookupStatus:'MANUAL',
-        answers,
-        explanations,
-        userAgent:'Browser-VHDN-Stress-Test/1.0',
-        stressTest:true,
-        stressTestRunId:runId
-      };
-    }
-
 
     function shuffleStressValues(values){
-      const copy=(values||[]).slice();
-      for(let index=copy.length-1;index>0;index--){
-        const target=Math.floor(Math.random()*(index+1));
-        [copy[index],copy[target]]=[copy[target],copy[index]];
+      const copy = (values || []).slice();
+
+      for(let index = copy.length - 1; index > 0; index--){
+        const target = Math.floor(Math.random() * (index + 1));
+        [copy[index],copy[target]] = [copy[target],copy[index]];
       }
+
       return copy;
     }
 
     async function prepareStressEmployeeIds(config){
-      stressLog(
-        `Đang lấy tối đa ${config.employeeSample} MSNV thật từ sheet nhân sự...`
+      stressLog(`Đang lấy tối đa ${config.employeeSample} MSNV thật từ sheet nhân sự...`);
+
+      const response = await iframeApiPost(
+        'adminStressEmployeeIds',
+        {
+          ...state.admin,
+          limit: config.employeeSample,
+          clearCache: config.clearEmployeeCache
+        },
+        config.timeoutMs
       );
 
-      const response=await apiPost('adminStressEmployeeIds',{
-        ...state.admin,
-        limit:config.employeeSample,
-        clearCache:config.clearEmployeeCache
-      });
-
-      const result=response.result||{};
-      const msnvs=shuffleStressValues(result.msnvs||[]);
+      const result = response.result || {};
+      const msnvs = shuffleStressValues(result.msnvs || []);
 
       if(!msnvs.length){
         throw new Error('Không nhận được MSNV hợp lệ từ sheet nhân sự.');
       }
 
       stressLog(
-        `Sheet ${result.sheetName}: có ${result.totalAvailable} MSNV, `+
-        `đã lấy ${result.returned} MSNV làm mẫu.`+
+        `Sheet ${result.sheetName}: có ${result.totalAvailable} MSNV, ` +
+        `đã lấy ${result.returned} MSNV làm mẫu.` +
         (result.cacheCleared
           ? ` Đã xóa ${result.cacheKeysCleared} khóa cache.`
           : ' Giữ nguyên cache hiện tại.')
@@ -3128,287 +2977,270 @@
       return msnvs;
     }
 
-    async function runStressEmployeeLookupPhase(config){
-      const msnvs=await prepareStressEmployeeIds(config);
+    async function stressIframeGet(label,action,params,timeoutMs){
+      if(state.stress.stopRequested){
+        throw new Error('Đã dừng theo yêu cầu người dùng.');
+      }
 
-      stressLog(
-        `Tra cứu MSNV: ${config.employeeRequests} lượt, `+
-        `đồng thời ${config.employeeConcurrency}, `+
-        `${msnvs.length} MSNV mẫu.`
-      );
+      const started = performance.now();
 
-      await stressPool(
-        config.employeeRequests,
-        config.employeeConcurrency,
-        async index=>{
-          const msnv=msnvs[index%msnvs.length];
-          const response=await stressApiGet(
-            'lookupEmployee',
-            config.timeoutMs,
-            {msnv}
+      try{
+        const response = await iframeApiGet(action, params || {}, timeoutMs);
+
+        state.stress.endpointMetrics.push({
+          label,
+          ok:true,
+          durationMs:performance.now() - started
+        });
+
+        return response;
+      }catch(error){
+        state.stress.endpointMetrics.push({
+          label,
+          ok:false,
+          durationMs:performance.now() - started,
+          error:String(error && error.message ? error.message : error)
+        });
+
+        throw error;
+      }
+    }
+
+    async function runVirtualUser(sequence,msnv,config){
+      const started = performance.now();
+
+      try{
+        const initial = await Promise.all([
+          stressIframeGet('GET getSettings','getSettings',{},config.timeoutMs),
+          stressIframeGet('GET getQuestionConfig','getQuestionConfig',{},config.timeoutMs)
+        ]);
+
+        const settingsResponse = initial[0];
+        const questionResponse = initial[1];
+
+        if(!settingsResponse || !settingsResponse.settings){
+          throw new Error('getSettings không trả về settings hợp lệ.');
+        }
+
+        if(!questionResponse || !Array.isArray(questionResponse.questions) || !questionResponse.questions.length){
+          throw new Error('getQuestionConfig không trả về QuestionBank hợp lệ.');
+        }
+
+        const employeeResponse = await stressIframeGet(
+          'GET lookupEmployee',
+          'lookupEmployee',
+          {msnv},
+          config.timeoutMs
+        );
+
+        if(!employeeResponse || !employeeResponse.employee ||
+          String(employeeResponse.employee.msnv || '') !== String(msnv)){
+          throw new Error(`MSNV ${msnv} trả về dữ liệu không khớp.`);
+        }
+
+        state.stress.metrics.push({
+          label:'USER FLOW',
+          sequence,
+          msnv,
+          ok:true,
+          durationMs:performance.now() - started
+        });
+      }catch(error){
+        state.stress.metrics.push({
+          label:'USER FLOW',
+          sequence,
+          msnv,
+          ok:false,
+          durationMs:performance.now() - started,
+          error:String(error && error.message ? error.message : error)
+        });
+
+        if(!state.stress.stopRequested){
+          stressLog(
+            `Người mô phỏng #${sequence} (${msnv}) lỗi: ` +
+            String(error && error.message ? error.message : error)
           );
+        }
+      }finally{
+        updateStressMetrics();
+      }
+    }
 
-          if(
-            !response.employee ||
-            String(response.employee.msnv||'')!==String(msnv)
-          ){
-            throw new Error(
-              `MSNV ${msnv} trả về dữ liệu không khớp.`
-            );
+    async function stressPool(total,concurrency,task,delayMs){
+      let cursor = 0;
+
+      async function worker(){
+        while(!state.stress.stopRequested){
+          const index = cursor++;
+          if(index >= total) return;
+
+          await task(index);
+
+          if(delayMs > 0 && !state.stress.stopRequested){
+            await new Promise(resolve => setTimeout(resolve,delayMs));
           }
-        },
-        0
+        }
+      }
+
+      await Promise.all(
+        Array.from({length:Math.min(total,concurrency)},() => worker())
       );
     }
 
     function logStressEndpointSummary(){
-      const labels=Array.from(
-        new Set((state.stress.metrics||[]).map(item=>item.label))
-      );
+      const metrics = state.stress.endpointMetrics || [];
 
-      labels.forEach(label=>{
-        const rows=state.stress.metrics.filter(item=>item.label===label);
-        const success=rows.filter(item=>item.ok);
-        const durations=success.map(item=>item.durationMs);
-        const rate=rows.length
-          ? (success.length/rows.length*100).toFixed(1)
+      ['GET getSettings','GET getQuestionConfig','GET lookupEmployee'].forEach(label => {
+        const rows = metrics.filter(item => item.label === label);
+        if(!rows.length) return;
+
+        const success = rows.filter(item => item.ok);
+        const durations = success.map(item => item.durationMs);
+        const successRate = rows.length
+          ? (success.length / rows.length * 100).toFixed(1)
           : '0.0';
 
         stressLog(
-          `${label}: ${success.length}/${rows.length} thành công `+
-          `(${rate}%), p95=${Math.round(percentile(durations,95))} ms.`
+          `${label}: ${success.length}/${rows.length} thành công ` +
+          `(${successRate}%), p50=${Math.round(percentile(durations,50))} ms, ` +
+          `p95=${Math.round(percentile(durations,95))} ms.`
         );
       });
     }
 
-    async function runStressLoadPhase(config){
-      stressLog(
-        `Tải câu hỏi: ${config.loadRequests} lượt, `+
-        `đồng thời ${config.loadConcurrency}.`
-      );
+    function renderStressFinalStatus(config){
+      const metrics = state.stress.metrics || [];
+      const success = metrics.filter(item => item.ok);
+      const failed = metrics.filter(item => !item.ok);
+      const durations = success.map(item => item.durationMs);
+      const successRate = metrics.length
+        ? Math.round(success.length / metrics.length * 10000) / 100
+        : 0;
+      const p50 = Math.round(percentile(durations,50));
+      const p95 = Math.round(percentile(durations,95));
 
-      await stressPool(
-        config.loadRequests,
-        config.loadConcurrency,
-        async()=>{
-          await Promise.all([
-            stressApiGet('getSettings',config.timeoutMs),
-            stressApiGet('getQuestionConfig',config.timeoutMs)
-          ]);
-        },
-        0
-      );
-    }
+      const statusBox = document.getElementById('stressRunStatus');
+      if(!statusBox) return;
 
-    async function runStressSubmitPhase(config){
-      if(!state.settings?.isOn){
-        throw new Error('Khảo sát đang OFF. Hãy mở khảo sát trước khi test nộp bài.');
-      }
-      if(!QUESTIONS.length){
-        await loadQuestionConfig();
-      }
-
-      stressLog(
-        `Nộp bài: ${config.submitRequests} bài, `+
-        `đồng thời ${config.submitConcurrency}, nghỉ ${config.submitDelay} ms.`
-      );
-
-      await stressPool(
-        config.submitRequests,
-        config.submitConcurrency,
-        async index=>{
-          const result=await stressApiPost(
-            'submitSurvey',
-            buildStressPayload(index+1,config.runId),
-            config.timeoutMs
-          );
-          if(!result.queued||!result.queueId){
-            throw new Error('Không nhận được queueId.');
-          }
-        },
-        config.submitDelay
-      );
+      statusBox.innerHTML = `
+        <b>Chế độ:</b> ${
+          config.mode === 'realistic'
+            ? 'Mô phỏng người dùng thực tế'
+            : 'Stress cực hạn'
+        }<br>
+        <b>Người mô phỏng:</b> ${metrics.length}/${config.totalUsers}<br>
+        <b>Thành công:</b> ${success.length} (${successRate}%)<br>
+        <b>Thất bại:</b> ${failed.length}<br>
+        <b>P50 toàn luồng:</b> ${p50} ms<br>
+        <b>P95 toàn luồng:</b> ${p95} ms<br>
+        <b>Dữ liệu ghi:</b> Không ghi Queue/Responses.
+      `;
     }
 
     async function startHtmlStressTest(){
-      if(state.stress.running)return;
+      if(state.stress.running) return;
 
       try{
-        const mode=document.getElementById('stressMode').value;
-        const runId=validateStressRunIdClient(
+        const mode = document.getElementById('stressMode').value || 'realistic';
+        const runId = validateStressRunIdClient(
           document.getElementById('stressRunId').value
         );
-        const employeeMode=mode==='employee'||mode==='mixed';
-        const submitMode=mode==='submit'||mode==='mixed';
 
-        if(
-          submitMode &&
-          !document.getElementById('stressConfirmWrite').checked
-        ){
-          throw new Error(
-            'Vui lòng tích xác nhận trước khi chạy stress test nộp bài.'
-          );
-        }
-
-        const config={
+        const config = {
           mode,
           runId,
           timeoutMs:stressNumber('stressTimeout',5000,120000,30000),
-
-          loadConcurrency:stressNumber(
-            'stressLoadConcurrency',1,50,10
+          delayMs:stressNumber('stressSubmitDelay',0,10000,0),
+          concurrency:stressNumber(
+            'stressLoadConcurrency',1,60,mode === 'realistic' ? 20 : 40
           ),
-          loadRequests:stressNumber(
-            'stressLoadRequests',1,2000,100
-          ),
-
-          employeeConcurrency:stressNumber(
-            'stressEmployeeConcurrency',1,30,10
-          ),
-          employeeRequests:stressNumber(
-            'stressEmployeeRequests',1,2000,100
+          totalUsers:stressNumber(
+            'stressLoadRequests',1,500,mode === 'realistic' ? 20 : 100
           ),
           employeeSample:stressNumber(
-            'stressEmployeeSample',1,2000,100
+            'stressEmployeeSample',1,500,mode === 'realistic' ? 20 : 100
           ),
           clearEmployeeCache:Boolean(
             document.getElementById('stressClearEmployeeCache')?.checked
-          ),
-
-          submitConcurrency:stressNumber(
-            'stressSubmitConcurrency',1,10,2
-          ),
-          submitRequests:stressNumber(
-            'stressSubmitRequests',1,200,10
-          ),
-          submitDelay:stressNumber(
-            'stressSubmitDelay',0,10000,300
           )
         };
 
-        state.stress.running=true;
-        state.stress.stopRequested=false;
+        state.stress.running = true;
+        state.stress.stopRequested = false;
         resetStressDisplay();
+        state.stress.expectedRequests = config.totalUsers;
 
-        state.stress.expectedRequests=
-          (mode==='load'||mode==='mixed'
-            ? config.loadRequests*2
-            : 0)+
-          (employeeMode
-            ? config.employeeRequests
-            : 0)+
-          (submitMode
-            ? config.submitRequests
-            : 0);
+        document.getElementById('stressStartButton').disabled = true;
+        document.getElementById('stressStopButton').disabled = false;
 
-        document.getElementById('stressStartButton').disabled=true;
-        document.getElementById('stressStopButton').disabled=false;
+        stressLog(
+          `Chế độ: ${
+            mode === 'realistic'
+              ? 'Mô phỏng người dùng thực tế'
+              : 'Stress cực hạn'
+          }. Run ID: ${runId}.`
+        );
 
-        stressLog(`Chế độ: ${mode}. Run ID: ${runId}.`);
+        stressLog(
+          `Tổng ${config.totalUsers} người mô phỏng, ` +
+          `${config.concurrency} người đồng thời, ` +
+          `timeout ${config.timeoutMs} ms/bước.`
+        );
 
-        if(mode==='load'||mode==='mixed'){
-          await runStressLoadPhase(config);
-        }
+        const msnvs = await prepareStressEmployeeIds(config);
 
-        if(!state.stress.stopRequested&&employeeMode){
-          await runStressEmployeeLookupPhase(config);
-        }
-
-        if(!state.stress.stopRequested&&submitMode){
-          await runStressSubmitPhase(config);
-        }
+        await stressPool(
+          config.totalUsers,
+          config.concurrency,
+          async index => {
+            const msnv = msnvs[index % msnvs.length];
+            await runVirtualUser(index + 1,msnv,config);
+          },
+          config.delayMs
+        );
 
         if(state.stress.stopRequested){
-          stressLog('Đã dừng bài kiểm tra.');
+          stressLog(
+            'Đã dừng. Các iframe đang chạy có thể cần chờ đến khi phản hồi hoặc hết timeout.'
+          );
         }else{
           stressLog('Hoàn thành bài kiểm tra.');
         }
 
         updateStressMetrics();
         logStressEndpointSummary();
+        renderStressFinalStatus(config);
 
-        if(submitMode&&!state.stress.stopRequested){
-          await loadStressRunStatus();
-        }
       }catch(error){
-        stressLog('Dừng do lỗi: '+String(error.message||error));
-        alert(error.message||String(error));
+        stressLog(
+          'Dừng do lỗi: ' + String(error && error.message ? error.message : error)
+        );
+
+        const statusBox = document.getElementById('stressRunStatus');
+        if(statusBox){
+          statusBox.textContent =
+            'Bài test dừng do lỗi: ' +
+            String(error && error.message ? error.message : error);
+        }
+
+        alert(error && error.message ? error.message : String(error));
       }finally{
-        state.stress.running=false;
-        document.getElementById('stressStartButton').disabled=false;
-        document.getElementById('stressStopButton').disabled=true;
+        state.stress.running = false;
+        document.getElementById('stressStartButton').disabled = false;
+        document.getElementById('stressStopButton').disabled = true;
         updateStressMetrics();
       }
     }
 
     function stopHtmlStressTest(){
-      if(!state.stress.running)return;
-      state.stress.stopRequested=true;
-      state.stress.controllers.forEach(controller=>{
-        try{controller.abort('Người dùng đã nhấn Dừng stress test.')}
-        catch(error){}
-      });
-      stressLog('Đang dừng các request còn lại...');
-    }
+      if(!state.stress.running) return;
 
-    async function loadStressRunStatus(){
-      try{
-        const runId=validateStressRunIdClient(
-          document.getElementById('stressRunId').value
-        );
+      state.stress.stopRequested = true;
 
-        const response=await apiPost('adminStressStatus',{
-          ...state.admin,
-          runId
-        });
-        const status=response.status;
-        const queue=status.queue||{};
-
-        document.getElementById('stressRunStatus').innerHTML=`
-          <b>Run ID:</b> ${escapeHtml(status.runId)}<br>
-          <b>Queue:</b> ${Number(queue.matched||0)} dòng —
-          NEW: ${Number(queue.NEW||0)},
-          PROCESSING: ${Number(queue.PROCESSING||0)},
-          DONE: ${Number(queue.DONE||0)},
-          ERROR: ${Number(queue.ERROR||0)}<br>
-          <b>Responses:</b> ${Number(status.responses||0)} dòng<br>
-          <b>Có thể xóa:</b> ${status.readyForCleanup?'Có':'Chưa'}
-        `;
-      }catch(error){
-        document.getElementById('stressRunStatus').textContent=
-          'Không kiểm tra được: '+String(error.message||error);
-      }
-    }
-
-    async function cleanupStressRun(){
-      try{
-        const runId=validateStressRunIdClient(
-          document.getElementById('stressRunId').value
-        );
-
-        if(!confirm(
-          `Xóa toàn bộ dữ liệu stress test của Run ID "${runId}" `+
-          `trong Queue và Responses?`
-        )){
-          return;
-        }
-
-        setLoading(true);
-        const response=await apiPost('adminStressCleanup',{
-          ...state.admin,
-          runId
-        });
-
-        alert(
-          `Đã xóa ${response.result.queueDeleted} dòng Queue và `+
-          `${response.result.responsesDeleted} dòng Responses.`
-        );
-        await loadStressRunStatus();
-      }catch(error){
-        alert(error.message||String(error));
-      }finally{
-        setLoading(false);
-      }
+      stressLog(
+        'Đã yêu cầu dừng. Hệ thống sẽ không tạo thêm lượt mới; ' +
+        'các lượt iframe đang chạy sẽ kết thúc hoặc timeout.'
+      );
     }
 
     function switchAdminPanel(panelId, button){
