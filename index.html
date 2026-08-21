@@ -728,7 +728,7 @@
           <div class="stress-warning">
             Bài test này dùng <b>đúng cơ chế kết nối iframe đang dùng ngoài thực tế</b>.
             Khi mở trang, trạng thái khảo sát và QuestionBank được gộp trong <b>1 request getBootstrap</b>,
-            sau đó người dùng tra cứu 1 MSNV thật. Mỗi người mô phỏng cũng có jitter 0–400 ms giống trang thật.
+            sau đó người dùng tra cứu 1 MSNV thật. Employee lookup dùng employee index cache 64 bucket và mỗi người mô phỏng có jitter 0–1800 ms giống trang thật.
             Các kịch bản bên dưới dùng để kiểm tra tải vận hành, tải kéo dài, high bar và extreme bar.
             Bài test chỉ đọc dữ liệu, <b>không ghi Queue/Responses</b>.
           </div>
@@ -793,6 +793,8 @@
           </div>
 
           <div class="actions">
+            <button class="btn btn-success" type="button"
+              onclick="warmPerformanceCacheFromAdmin()">Làm nóng cache</button>
             <button id="stressStartButton" class="btn btn-primary" type="button"
               onclick="startHtmlStressTest()">Bắt đầu stress test</button>
             <button id="stressStopButton" class="btn btn-danger" type="button"
@@ -1041,7 +1043,12 @@
     const MIN_MEANINGFUL_WORDS = 5;
     const POST_TIMEOUT_MS = 60000;
     const SUBMISSION_STATUS_POLL_MS = 1500;
-    const STARTUP_JITTER_MAX_MS = 400;
+    const STARTUP_JITTER_MAX_MS = 1800;
+    const LOCAL_BOOTSTRAP_KEY = 'vhdn_bootstrap_fast_v2';
+    const LOCAL_BOOTSTRAP_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+    // Snapshot dự phòng để câu hỏi xuất hiện ngay trên thiết bị mở lần đầu.
+    const FALLBACK_QUESTIONS = [{"id":"q1","sortOrder":1,"section":"know","title":"Tầm nhìn của TBS Logistics: “Đến 2035, TBS Logistics trở thành [1] ___ hàng đầu Việt Nam về [2] ___ và [3] ___.”","type":"single","options":[{"id":"a","label":"[1] trung tâm dịch vụ / [2] vận tải đường bộ / [3] quản lý chuỗi cung ứng","suggestion":""},{"id":"b","label":"[1] công ty vận tải / [2] giao nhận hàng hóa / [3] dịch vụ kho bãi","suggestion":""},{"id":"c","label":"[1] doanh nghiệp hậu cần / [2] quản lý kho / [3] giao hàng tận nơi","suggestion":""},{"id":"d","label":"[1] trung tâm logistics / [2] cung cấp dịch vụ / [3] giải pháp chuỗi cung ứng","suggestion":""},{"id":"f","label":"[1] nhà cung cấp giải pháp / [2] dịch vụ logistics / [3] kho vận thông minh","suggestion":""},{"id":"g","label":"[1] cảng cạn ICD / [2] xử lý hàng hóa / [3] phân phối nội địa","suggestion":""}],"correct":["d"],"scoreMode":"exact","points":1,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"","situationTitle":"","situationText":""},{"id":"q2","sortOrder":2,"section":"know","title":"Sứ mệnh của TBS Logistics: “Góp phần nâng cao [1] ___ cho ngành Logistics Việt Nam, tạo [2] ___ phát triển bền vững cho khách hàng, [3] ___ đời sống người lao động.”","type":"single","options":[{"id":"a","label":"[1] năng lực / [2] cơ hội / [3] chăm sóc","suggestion":""},{"id":"b","label":"[1] hiệu suất / [2] giá trị / [3] bảo vệ","suggestion":""},{"id":"c","label":"[1] năng lực cạnh tranh / [2] giá trị / [3] chăm lo","suggestion":""},{"id":"d","label":"[1] năng lực / [2] giá trị / [3] hỗ trợ","suggestion":""},{"id":"e","label":"[1] năng lực cạnh tranh / [2] lợi nhuận / [3] đảm bảo","suggestion":""},{"id":"f","label":"[1] hiệu quả / [2] cơ hội / [3] cải thiện","suggestion":""}],"correct":["c"],"scoreMode":"exact","points":1,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"","situationTitle":"","situationText":""},{"id":"q3","sortOrder":3,"section":"know","title":"Đâu là những giá trị thuộc hệ 6 giá trị cốt lõi của TBS Logistics?","type":"multi","options":[{"id":"a","label":"Đoàn kết","suggestion":""},{"id":"b","label":"Sáng tạo","suggestion":""},{"id":"c","label":"Chính trực","suggestion":""},{"id":"d","label":"Trách nhiệm","suggestion":""},{"id":"e","label":"Kỷ luật","suggestion":""},{"id":"f","label":"Hiệu quả","suggestion":""},{"id":"g","label":"Đáng tin","suggestion":""},{"id":"h","label":"Tôn trọng","suggestion":""}],"correct":["a","c","d","e","f","g"],"scoreMode":"exact","points":1,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"","situationTitle":"","situationText":""},{"id":"q4","sortOrder":4,"section":"know","title":"Trong triết lý kinh doanh của TBS Logistics, cân bằng lợi ích 5 bên gồm những bên nào?","type":"multi","options":[{"id":"a","label":"Khách hàng","suggestion":""},{"id":"b","label":"Cơ quan nhà nước","suggestion":""},{"id":"c","label":"Đối tác / Nhà cung cấp","suggestion":""},{"id":"d","label":"Cổ đông","suggestion":""},{"id":"e","label":"Cạnh tranh thị trường","suggestion":""},{"id":"f","label":"Người lao động","suggestion":""},{"id":"g","label":"Cộng đồng","suggestion":""},{"id":"h","label":"Công nghệ và đổi mới sáng tạo","suggestion":""}],"correct":["a","c","d","f","g"],"scoreMode":"exact","points":1,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"","situationTitle":"","situationText":""},{"id":"discipline","sortOrder":5,"section":"understand","title":"Hành động trong tình huống có vi phạm kỷ luật Công ty không?","type":"single","options":[{"id":"yes","label":"Có","suggestion":""},{"id":"no","label":"Không","suggestion":""}],"correct":["yes"],"scoreMode":"exact","points":1,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"situation_1","situationTitle":"Tình huống 1","situationText":"Bối cảnh\nTại kho logistics, Công ty quy định người lao động phải có thái độ ứng xử văn minh, tôn trọng đồng nghiệp; nghiêm cấm hành vi gây gổ, đe dọa, xô xát hoặc đánh nhau tại nơi làm việc.\nKhi phát sinh mâu thuẫn, người lao động phải kiềm chế, trao đổi trên tinh thần hợp tác hoặc báo cáo Tổ trưởng/Quản lý để được hỗ trợ giải quyết.\nDiễn biến\n•\tNhân viên A và nhân viên B cùng làm việc tại khu vực xuất nhập hàng.\n•\tTrong quá trình làm việc, hai người xảy ra bất đồng liên quan đến việc phối hợp xử lý hàng.\n•\tA cho rằng B không hỗ trợ công việc đúng thời điểm; B cho rằng A có thái độ thiếu tôn trọng khi trao đổi.\n•\tHai bên bắt đầu tranh cãi, lớn tiếng với nhau.\n•\tMặc dù đồng nghiệp đã can ngăn, A và B vẫn tiếp tục lời qua tiếng lại.\n•\tMâu thuẫn sau đó chuyển thành xô đẩy và đánh nhau tại khu vực làm việc.\n•\tTổ trưởng cùng các nhân viên khác phải can thiệp, tách hai người và báo cáo sự việc cho cấp quản lý.\nHậu quả\n•\tCó nguy cơ gây thương tích cho A, B và những người xung quanh.\n•\tGây mất an ninh, trật tự và an toàn tại nơi làm việc.\n•\tLàm gián đoạn hoạt động của bộ phận.\n•\tẢnh hưởng đến tinh thần làm việc của đồng nghiệp.\n•\tTạo hình ảnh không chuyên nghiệp nếu sự việc xảy ra trước khách hàng, tài xế, nhà cung cấp hoặc đối tác.\n•\tMâu thuẫn cá nhân có thể phát triển thành mâu thuẫn giữa các nhóm nếu không được xử lý phù hợp.\n•\tCông ty có thể phải xử lý sự cố, điều tra và xem xét trách nhiệm của những người liên quan."},{"id":"fdcab48d-a39c-415a-8731-1e2f82a46404","sortOrder":6,"section":"understand","title":"Nếu xảy ra bất đồng trong công việc, A và B nên xử lý như thế nào để phù hợp với văn hóa Công ty?","type":"short","options":[],"correct":[],"scoreMode":"none","points":0,"requireExplanation":false,"showRecommendation":false,"required":true,"active":true,"situationId":"situation_1","situationTitle":"Tình huống 1","situationText":"Bối cảnh\nTại kho logistics, Công ty quy định người lao động phải có thái độ ứng xử văn minh, tôn trọng đồng nghiệp; nghiêm cấm hành vi gây gổ, đe dọa, xô xát hoặc đánh nhau tại nơi làm việc.\nKhi phát sinh mâu thuẫn, người lao động phải kiềm chế, trao đổi trên tinh thần hợp tác hoặc báo cáo Tổ trưởng/Quản lý để được hỗ trợ giải quyết.\nDiễn biến\n•\tNhân viên A và nhân viên B cùng làm việc tại khu vực xuất nhập hàng.\n•\tTrong quá trình làm việc, hai người xảy ra bất đồng liên quan đến việc phối hợp xử lý hàng.\n•\tA cho rằng B không hỗ trợ công việc đúng thời điểm; B cho rằng A có thái độ thiếu tôn trọng khi trao đổi.\n•\tHai bên bắt đầu tranh cãi, lớn tiếng với nhau.\n•\tMặc dù đồng nghiệp đã can ngăn, A và B vẫn tiếp tục lời qua tiếng lại.\n•\tMâu thuẫn sau đó chuyển thành xô đẩy và đánh nhau tại khu vực làm việc.\n•\tTổ trưởng cùng các nhân viên khác phải can thiệp, tách hai người và báo cáo sự việc cho cấp quản lý.\nHậu quả\n•\tCó nguy cơ gây thương tích cho A, B và những người xung quanh.\n•\tGây mất an ninh, trật tự và an toàn tại nơi làm việc.\n•\tLàm gián đoạn hoạt động của bộ phận.\n•\tẢnh hưởng đến tinh thần làm việc của đồng nghiệp.\n•\tTạo hình ảnh không chuyên nghiệp nếu sự việc xảy ra trước khách hàng, tài xế, nhà cung cấp hoặc đối tác.\n•\tMâu thuẫn cá nhân có thể phát triển thành mâu thuẫn giữa các nhóm nếu không được xử lý phù hợp.\n•\tCông ty có thể phải xử lý sự cố, điều tra và xem xét trách nhiệm của những người liên quan."},{"id":"scenario","sortOrder":7,"section":"understand","title":"Trong 6 giá trị cốt lõi STRIDE, những giá trị nào bị tác động/ ảnh hưởng trực tiếp","type":"multi","options":[{"id":"s1","label":"Đoàn kết","suggestion":"•\tMâu thuẫn trong công việc là điều có thể phát sinh, nhưng sử dụng bạo lực để giải quyết mâu thuẫn làm phá vỡ tinh thần hợp tác giữa đồng nghiệp.\n•\tViệc đánh nhau không chỉ ảnh hưởng đến hai cá nhân mà còn tạo căng thẳng cho cả tập thể.\n•\tĐồng nghiệp phải dừng công việc để can ngăn và xử lý sự việc.\n•\tCó thể hình thành tâm lý chia phe, mất thiện chí và ảnh hưởng đến sự phối hợp lâu dài giữa các thành viên."},{"id":"s2","label":"Trách nhiệm","suggestion":"•\tMỗi người lao động có trách nhiệm kiểm soát hành vi của mình tại nơi làm việc.\n•\tA và B đã để cảm xúc cá nhân ảnh hưởng đến công việc và môi trường làm việc chung.\n•\tHành vi xô xát có thể gây thương tích cho bản thân, đồng nghiệp và những người xung quanh.\n•\tTrong môi trường kho có xe nâng, phương tiện, hàng hóa và thiết bị đang hoạt động, việc mất kiểm soát hành vi còn có thể dẫn đến hậu quả an toàn nghiêm trọng hơn."},{"id":"s3","label":"Đáng tin","suggestion":"Hành vi đánh nhau cũng có thể ảnh hưởng đến giá trị Đáng tin:\n•\tĐồng nghiệp có thể mất niềm tin vào khả năng phối hợp và kiểm soát hành vi của những người liên quan.\n•\tNếu khách hàng hoặc đối tác chứng kiến, hình ảnh chuyên nghiệp của Công ty có thể bị ảnh hưởng."},{"id":"s4","label":"Chính trực","suggestion":"Chính trực là giá trị liên quan nhưng mức độ trực tiếp thấp hơn ba giá trị trên.\n•\tKhi xảy ra sự việc, A và B cần trung thực khi báo cáo nguyên nhân và diễn biến.\n•\tKhông đổ lỗi, che giấu, kích động người khác hoặc cung cấp thông tin sai lệch.\n•\tMỗi cá nhân cần nhìn nhận đúng hành vi của mình và chịu trách nhiệm đối với phần việc mình đã gây ra."},{"id":"s5","label":"Kỷ luật","suggestion":"•\tGây gổ, xô xát hoặc đánh nhau tại nơi làm việc là hành vi không phù hợp với nội quy và chuẩn mực ứng xử của Công ty.\n•\tViệc tiếp tục tranh cãi, xô xát sau khi đã được đồng nghiệp can ngăn thể hiện sự thiếu kiểm soát và không tuân thủ trật tự tại nơi làm việc.\n•\tNếu Công ty đã có quy định cụ thể trong Nội quy lao động, hành vi phải được xem xét và xử lý theo đúng nội quy và quy định pháp luật."},{"id":"s6","label":"Hiệu quả","suggestion":"•\tCông việc bị gián đoạn để xử lý sự việc.\n•\tQuản lý, HSSE/HR và các bộ phận liên quan phải dành thời gian xác minh, điều tra và xử lý.\n•\tNếu có thương tích, sự việc còn có thể dẫn đến nghỉ việc, chi phí điều trị và thiếu hụt nhân sự."}],"correct":["s1","s2","s5"],"scoreMode":"perOption","points":1,"requireExplanation":true,"showRecommendation":true,"required":true,"active":true,"situationId":"situation_1","situationTitle":"Tình huống 1","situationText":"Bối cảnh\nTại kho logistics, Công ty quy định người lao động phải có thái độ ứng xử văn minh, tôn trọng đồng nghiệp; nghiêm cấm hành vi gây gổ, đe dọa, xô xát hoặc đánh nhau tại nơi làm việc.\nKhi phát sinh mâu thuẫn, người lao động phải kiềm chế, trao đổi trên tinh thần hợp tác hoặc báo cáo Tổ trưởng/Quản lý để được hỗ trợ giải quyết.\nDiễn biến\n•\tNhân viên A và nhân viên B cùng làm việc tại khu vực xuất nhập hàng.\n•\tTrong quá trình làm việc, hai người xảy ra bất đồng liên quan đến việc phối hợp xử lý hàng.\n•\tA cho rằng B không hỗ trợ công việc đúng thời điểm; B cho rằng A có thái độ thiếu tôn trọng khi trao đổi.\n•\tHai bên bắt đầu tranh cãi, lớn tiếng với nhau.\n•\tMặc dù đồng nghiệp đã can ngăn, A và B vẫn tiếp tục lời qua tiếng lại.\n•\tMâu thuẫn sau đó chuyển thành xô đẩy và đánh nhau tại khu vực làm việc.\n•\tTổ trưởng cùng các nhân viên khác phải can thiệp, tách hai người và báo cáo sự việc cho cấp quản lý.\nHậu quả\n•\tCó nguy cơ gây thương tích cho A, B và những người xung quanh.\n•\tGây mất an ninh, trật tự và an toàn tại nơi làm việc.\n•\tLàm gián đoạn hoạt động của bộ phận.\n•\tẢnh hưởng đến tinh thần làm việc của đồng nghiệp.\n•\tTạo hình ảnh không chuyên nghiệp nếu sự việc xảy ra trước khách hàng, tài xế, nhà cung cấp hoặc đối tác.\n•\tMâu thuẫn cá nhân có thể phát triển thành mâu thuẫn giữa các nhóm nếu không được xử lý phù hợp.\n•\tCông ty có thể phải xử lý sự cố, điều tra và xem xét trách nhiệm của những người liên quan."}];
 
     const state = {
       settings: { isOn: false, message: '' },
@@ -1059,6 +1066,9 @@
       initialSettingsLoaded: false,
       questionLoadAttempts: 0,
       currentSubmissionId: '',
+      userInteracted: false,
+      bootstrapSynced: false,
+      instantQuestionSource: '',
       stress: {
         running: false,
         stopRequested: false,
@@ -1078,60 +1088,185 @@
     async function initialize(){
       bindEmployeeLookup();
       bindAdminTabs();
-      setQuestionLoadStatus('Đang kết nối hệ thống và tải câu hỏi...');
+      bindSurveyInteractionTracking();
+      loadInstantQuestions();
 
       try{
-        // Jitter 0–400 ms để tránh nhiều máy quét QR cùng đập vào Apps Script đúng một thời điểm.
-        const startupDelay = Math.floor(Math.random() * (STARTUP_JITTER_MAX_MS + 1));
+        const startupDelay = Math.floor(
+          Math.random() * (STARTUP_JITTER_MAX_MS + 1)
+        );
         if(startupDelay > 0){
           await waitMs(startupDelay);
         }
 
-        await loadBootstrap();
-        renderQuestions();
+        await loadBootstrap({backgroundSync:true});
         setQuestionLoadStatus('');
         hideConnectionWarning();
       }catch(error){
-        console.error('Không tải được dữ liệu khởi tạo:', error);
-        document.getElementById('surveyArea').classList.remove('hidden');
-        document.getElementById('closedCard').classList.remove('active');
+        console.error('Không đồng bộ được dữ liệu khởi tạo:', error);
         showConnectionWarning(
-          'Không tải được dữ liệu khảo sát ở lần đầu. Vui lòng thử tải lại.'
+          'Câu hỏi đã tải từ bộ nhớ nhanh, nhưng chưa xác nhận được trạng thái khảo sát. ' +
+          'Vui lòng bấm tải lại trước khi nộp.'
         );
-        showQuestionLoadError(error);
+        document.getElementById('submitButton').disabled = true;
       }
 
       startSettingsPolling();
     }
 
-    async function loadBootstrap(){
+
+    function bindSurveyInteractionTracking(){
+      const form = document.getElementById('surveyForm');
+      if(!form) return;
+      form.addEventListener('input', () => {
+        state.userInteracted = true;
+      }, { passive:true });
+      form.addEventListener('change', () => {
+        state.userInteracted = true;
+      }, { passive:true });
+    }
+
+    function questionFingerprint(questions){
+      try{
+        return JSON.stringify(
+          (questions || []).map(question => ({
+            id:question.id,
+            sortOrder:question.sortOrder,
+            section:question.section,
+            title:question.title,
+            type:question.type,
+            options:question.options,
+            correct:question.correct,
+            scoreMode:question.scoreMode,
+            points:question.points,
+            requireExplanation:question.requireExplanation,
+            showRecommendation:question.showRecommendation,
+            required:question.required,
+            active:question.active,
+            situationId:question.situationId,
+            situationTitle:question.situationTitle,
+            situationText:question.situationText
+          }))
+        );
+      }catch(error){
+        return '';
+      }
+    }
+
+    function readLocalBootstrap(){
+      try{
+        const raw = localStorage.getItem(LOCAL_BOOTSTRAP_KEY);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        const cachedAt = Number(parsed.cachedAt || 0);
+        if(
+          !cachedAt ||
+          Date.now() - cachedAt > LOCAL_BOOTSTRAP_MAX_AGE_MS ||
+          !Array.isArray(parsed.questions) ||
+          !parsed.questions.length
+        ){
+          return null;
+        }
+        return parsed;
+      }catch(error){
+        return null;
+      }
+    }
+
+    function saveLocalBootstrap(response){
+      try{
+        if(!response || !Array.isArray(response.questions) || !response.questions.length){
+          return;
+        }
+        localStorage.setItem(
+          LOCAL_BOOTSTRAP_KEY,
+          JSON.stringify({
+            cachedAt:Date.now(),
+            version:response.version || '',
+            questions:response.questions
+          })
+        );
+      }catch(error){}
+    }
+
+    function loadInstantQuestions(){
+      const cached = readLocalBootstrap();
+      if(cached){
+        QUESTIONS = cached.questions;
+        state.instantQuestionSource = 'localStorage';
+      }else{
+        QUESTIONS = FALLBACK_QUESTIONS;
+        state.instantQuestionSource = 'embedded';
+      }
+
+      document.getElementById('surveyArea').classList.remove('hidden');
+      document.getElementById('closedCard').classList.remove('active');
+
+      if(QUESTIONS.length){
+        renderQuestions();
+        setQuestionLoadStatus(
+          'Câu hỏi đã sẵn sàng. Đang đồng bộ trạng thái khảo sát ở nền...'
+        );
+      }
+
+      document.getElementById('submitButton').disabled = true;
+    }
+
+    async function loadBootstrap(options = {}){
       state.questionLoadAttempts += 1;
 
-      setQuestionLoadStatus(
-        state.questionLoadAttempts > 1
-          ? `Đang tải lại dữ liệu khảo sát lần ${state.questionLoadAttempts}...`
-          : 'Đang tải trạng thái và ngân hàng câu hỏi...'
-      );
+      if(!options.backgroundSync){
+        setQuestionLoadStatus(
+          state.questionLoadAttempts > 1
+            ? `Đang tải lại dữ liệu khảo sát lần ${state.questionLoadAttempts}...`
+            : 'Đang tải trạng thái và ngân hàng câu hỏi...'
+        );
+      }
 
+      const previousFingerprint = questionFingerprint(QUESTIONS);
       const response = await apiGet('getBootstrap');
 
-      state.settings = response.settings || {
-        isOn:false,
-        message:''
-      };
+      state.settings = response.settings || {isOn:false,message:''};
       state.initialSettingsLoaded = true;
-      applySurveyState();
+      state.bootstrapSynced = true;
 
-      QUESTIONS = Array.isArray(response.questions)
+      const latestQuestions = Array.isArray(response.questions)
         ? response.questions
         : [];
 
-      if(!QUESTIONS.length){
+      if(!latestQuestions.length){
         throw new Error(
           'Ngân hàng câu hỏi đang trống. ' +
           'Hãy chạy setupQuestionBank() hoặc setupSystem() trong Apps Script.'
         );
       }
+
+      const latestFingerprint = questionFingerprint(latestQuestions);
+      const changed =
+        previousFingerprint && latestFingerprint &&
+        previousFingerprint !== latestFingerprint;
+
+      QUESTIONS = latestQuestions;
+      saveLocalBootstrap(response);
+
+      if(changed){
+        if(!state.userInteracted || options.forceRender){
+          renderQuestions();
+        }else{
+          showConnectionWarning(
+            'QuestionBank vừa được cập nhật trong lúc Anh/Chị đang làm. ' +
+            'Vui lòng bấm “Làm lại” để nhận phiên bản mới trước khi nộp.'
+          );
+          document.getElementById('submitButton').disabled = true;
+          return response;
+        }
+      }else if(!document.querySelector('#questionContainer .question')){
+        renderQuestions();
+      }
+
+      applySurveyState();
+      document.getElementById('submitButton').disabled =
+        !Boolean(state.settings.isOn);
 
       return response;
     }
@@ -1195,7 +1330,7 @@
     async function retryLoadQuestions(){
       setLoading(true);
       try{
-        await loadBootstrap();
+        await loadBootstrap({forceRender:true});
         renderQuestions();
         setQuestionLoadStatus('');
         hideConnectionWarning();
@@ -2827,6 +2962,43 @@
       setLoading(true);try{await apiPost('deleteQuestion',{...state.admin,questionId:id});state.selectedAdminQuestionId='';await loadAdminQuestions();await loadQuestionConfig();renderQuestions();newQuestionEditor();}catch(error){showMessageElement('questionAdminMessage',error.message,'error');}finally{setLoading(false);}
     }
 
+
+
+    async function warmPerformanceCacheFromAdmin(){
+      if(!state.admin.email){
+        alert('Vui lòng đăng nhập quản trị trước.');
+        return;
+      }
+
+      setLoading(true);
+      try{
+        const started = performance.now();
+        const response = await apiPost(
+          'adminWarmPerformanceCache',
+          {...state.admin}
+        );
+        const result = response.result || {};
+        const employeeIndex = result.employeeIndex || {};
+        const elapsed = Math.round(performance.now() - started);
+
+        alert(
+          'Đã làm nóng cache hiệu năng.\n\n' +
+          'Version: ' + (result.version || '') + '\n' +
+          'QuestionBank: ' + (result.bootstrapQuestions || 0) + ' câu\n' +
+          'Employee index: ' + (employeeIndex.count || 0) + ' nhân sự / ' +
+          (employeeIndex.buckets || 0) + ' bucket\n' +
+          'Thời gian warm: ' + elapsed + ' ms\n\n' +
+          'Nên chạy stress test ngay sau bước này.'
+        );
+      }catch(error){
+        alert(
+          'Không làm nóng cache được: ' +
+          String(error && error.message ? error.message : error)
+        );
+      }finally{
+        setLoading(false);
+      }
+    }
 
     function initializeStressPanel(){
       const runIdInput = document.getElementById('stressRunId');
