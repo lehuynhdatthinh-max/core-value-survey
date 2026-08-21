@@ -1242,46 +1242,7 @@
     }
 
     async function apiGet(action, params = {}){
-      let fetchError = null;
-
-      try{
-        const url = buildApiUrl(action, params);
-        const json = await fetchJson(url, {}, 10000);
-
-        if(!json.ok){
-          throw new Error(json.error || 'Yêu cầu thất bại.');
-        }
-
-        return json;
-      }catch(error){
-        fetchError = error;
-        console.warn(
-          `Fetch ${action} không thành công, chuyển sang JSONP:`,
-          error
-        );
-      }
-
-      try{
-        const json = await jsonpGet(action, params, 15000);
-
-        if(!json.ok){
-          throw new Error(json.error || 'Yêu cầu JSONP thất bại.');
-        }
-
-        return json;
-      }catch(jsonpError){
-        throw new Error(
-          `Không thể kết nối Apps Script. Fetch: ${
-            fetchError && fetchError.message
-              ? fetchError.message
-              : 'không xác định'
-          }. JSONP: ${
-            jsonpError && jsonpError.message
-              ? jsonpError.message
-              : jsonpError
-          }`
-        );
-      }
+      return iframeApiGet(action, params, 20000);
     }
 
     function waitMs(milliseconds){
@@ -1429,6 +1390,84 @@
         'Hãy bấm menu ⋮ hoặc nút Chia sẻ của ứng dụng quét QR, ' +
         'sau đó chọn “Mở bằng Chrome” hoặc “Mở trong Safari”.'
       );
+    }
+
+    function iframeApiGet(action, params = {}, timeoutMs = 20000){
+      return new Promise((resolve,reject) => {
+        const requestId = createRequestId('get');
+        const iframe = document.createElement('iframe');
+
+        iframe.setAttribute('aria-hidden','true');
+        iframe.style.display = 'none';
+
+        const url = new URL(GOOGLE_SCRIPT_URL);
+        url.searchParams.set('action', action);
+        url.searchParams.set('transport', 'iframe');
+        url.searchParams.set('requestId', requestId);
+        url.searchParams.set('ts', String(Date.now()));
+
+        Object.entries(params || {}).forEach(([key,value]) => {
+          if(value !== undefined && value !== null){
+            url.searchParams.set(key, String(value));
+          }
+        });
+
+        let finished = false;
+        let timeoutTimer = null;
+
+        function cleanup(){
+          window.removeEventListener('message', onMessage);
+          if(timeoutTimer) clearTimeout(timeoutTimer);
+          if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }
+
+        function finish(error,response){
+          if(finished) return;
+          finished = true;
+          cleanup();
+
+          if(error){
+            reject(error);
+          }else{
+            resolve(response);
+          }
+        }
+
+        function onMessage(event){
+          if(!isTrustedAppsScriptOrigin(event.origin)) return;
+
+          const message = event.data;
+          if(!message || message.type !== 'VHDN_APPS_SCRIPT_RESPONSE') return;
+          if(message.requestId !== requestId) return;
+
+          const response = message.response;
+
+          if(!response || typeof response !== 'object'){
+            finish(new Error('Máy chủ không trả về dữ liệu hợp lệ.'));
+            return;
+          }
+
+          if(!response.ok){
+            finish(new Error(response.error || 'Yêu cầu thất bại.'));
+            return;
+          }
+
+          finish(null,response);
+        }
+
+        window.addEventListener('message', onMessage);
+
+        timeoutTimer = setTimeout(() => {
+          finish(new Error(
+            'Không nhận được phản hồi từ Apps Script sau ' +
+            Math.round(timeoutMs / 1000) +
+            ' giây.'
+          ));
+        }, timeoutMs);
+
+        iframe.src = url.toString();
+        document.body.appendChild(iframe);
+      });
     }
 
     async function apiPost(action, data){
