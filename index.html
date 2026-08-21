@@ -1241,7 +1241,50 @@
       }
     }
 
-    async function apiGet(action, params = {}){
+    async async function apiGet(action, params = {}){
+      let fetchError = null;
+
+      // Thử fetch 1 lần trước để tránh chờ lâu trên một số trình duyệt/mobile.
+      try{
+        const url = buildApiUrl(action, params);
+        const json = await fetchJson(url, {}, 10000);
+
+        if(!json.ok){
+          throw new Error(json.error || 'Yêu cầu thất bại.');
+        }
+
+        return json;
+      }catch(error){
+        fetchError = error;
+        console.warn(
+          `Fetch ${action} không thành công, chuyển sang JSONP:`,
+          error
+        );
+      }
+
+      // Nếu fetch không ổn, chuyển sang JSONP ngay.
+      try{
+        const json = await jsonpGet(action, params, 15000);
+
+        if(!json.ok){
+          throw new Error(json.error || 'Yêu cầu JSONP thất bại.');
+        }
+
+        return json;
+      }catch(jsonpError){
+        throw new Error(
+          `Không thể kết nối Apps Script. Fetch: ${
+            fetchError && fetchError.message
+              ? fetchError.message
+              : 'không xác định'
+          }. JSONP: ${
+            jsonpError && jsonpError.message
+              ? jsonpError.message
+              : jsonpError
+          }`
+        );
+      }
+    }){
       const maxAttempts = 3;
       let lastError = null;
 
@@ -1432,35 +1475,19 @@
       );
     }
 
-    async function apiPost(action, data){
-      if(action === 'submitSurvey'){
-        return iframeApiPost(action, data, POST_TIMEOUT_MS);
-      }
+    async async function apiPost(action, data){
+      // GitHub Pages -> Apps Script POST:
+      // dùng iframe trực tiếp để tránh mất thời gian thử fetch/CORS trước.
+      const timeoutMs =
+        action === 'submitSurvey'
+          ? POST_TIMEOUT_MS
+          : 20000;
 
-      const body = new URLSearchParams();
-      body.set('action', action);
-      body.set('data', JSON.stringify(data || {}));
-
-      try{
-        const json = await fetchJson(GOOGLE_SCRIPT_URL, {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body:body
-        }, 30000);
-
-        if(!json.ok){
-          throw new Error(json.error || 'Yêu cầu thất bại.');
-        }
-        return json;
-      }catch(error){
-        console.warn(
-          `POST ${action} bằng fetch không thành công, chuyển sang iframe:`,
-          error
-        );
-        return iframeApiPost(action, data, POST_TIMEOUT_MS);
-      }
+      return iframeApiPost(
+        action,
+        data,
+        timeoutMs
+      );
     }
 
     function iframeApiPost(action, data, timeoutMs = POST_TIMEOUT_MS){
@@ -1585,10 +1612,21 @@
         document.body.appendChild(form);
 
         timeoutTimer = setTimeout(() => {
-          finish(new Error(
-            'Không xác nhận được dữ liệu sau ' + timeoutMs +
-            ' ms. Vui lòng kiểm tra mạng rồi bấm nộp lại; hệ thống sẽ tự chống ghi trùng.'
-          ));
+          const message =
+            action === 'submitSurvey'
+              ? (
+                  'Không xác nhận được dữ liệu sau ' +
+                  timeoutMs +
+                  ' ms. Vui lòng kiểm tra mạng rồi bấm nộp lại; ' +
+                  'hệ thống sẽ tự chống ghi trùng.'
+                )
+              : (
+                  'Máy chủ phản hồi quá chậm sau ' +
+                  Math.round(timeoutMs / 1000) +
+                  ' giây. Vui lòng thử lại.'
+                );
+
+          finish(new Error(message));
         },timeoutMs);
 
         try{
@@ -2222,9 +2260,12 @@
       openModal('adminLoginModal');
     }
 
-    async function adminLogin(){
-      const email = document.getElementById('adminEmail').value.trim();
-      const passcode = document.getElementById('adminPasscode').value.trim();
+    async async function adminLogin(){
+      const email =
+        document.getElementById('adminEmail').value.trim();
+
+      const passcode =
+        document.getElementById('adminPasscode').value.trim();
 
       if (!email || !passcode){
         showMessageElement(
@@ -2235,22 +2276,58 @@
         return;
       }
 
-      state.admin = { email:email,passcode:passcode };
+      state.admin = {
+        email: email,
+        passcode: passcode
+      };
+
       setLoading(true);
 
       try{
-        await loadDashboard(false);
-        await loadAdminQuestions();
+        // Chỉ xác minh tài khoản, không tải Dashboard/QuestionBank ở bước login.
+        await apiPost('adminLogin', {
+          email: email,
+          passcode: passcode
+        });
+
         document.getElementById('adminSurveyStatus').value =
           String(Boolean(state.settings.isOn));
+
         document.getElementById('adminSurveyMessage').value =
           state.settings.message || '';
 
+        const settingsButton =
+          document.querySelector(
+            '.admin-tab[data-panel="settingsPanel"]'
+          );
+
+        switchAdminPanel(
+          'settingsPanel',
+          settingsButton
+        );
+
+        showMessageElement(
+          'adminLoginMessage',
+          '',
+          ''
+        );
+
         closeModal('adminLoginModal');
         openModal('adminDashboardModal');
+
       }catch(error){
-        state.admin = { email:'',passcode:'' };
-        showMessageElement('adminLoginMessage',error.message,'error');
+        state.admin = {
+          email: '',
+          passcode: ''
+        };
+
+        showMessageElement(
+          'adminLoginMessage',
+          error && error.message
+            ? error.message
+            : 'Không đăng nhập được.',
+          'error'
+        );
       }finally{
         setLoading(false);
       }
