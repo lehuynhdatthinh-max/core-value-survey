@@ -1241,10 +1241,9 @@
       }
     }
 
-    async async function apiGet(action, params = {}){
+    async function apiGet(action, params = {}){
       let fetchError = null;
 
-      // Thử fetch 1 lần trước để tránh chờ lâu trên một số trình duyệt/mobile.
       try{
         const url = buildApiUrl(action, params);
         const json = await fetchJson(url, {}, 10000);
@@ -1262,7 +1261,6 @@
         );
       }
 
-      // Nếu fetch không ổn, chuyển sang JSONP ngay.
       try{
         const json = await jsonpGet(action, params, 15000);
 
@@ -1284,49 +1282,7 @@
           }`
         );
       }
-    }){
-      const maxAttempts = 3;
-      let lastError = null;
-
-      for(let attempt = 1; attempt <= maxAttempts; attempt++){
-        try{
-          const url = buildApiUrl(action, params);
-          const json = await fetchJson(url, {}, 30000);
-
-          if(!json.ok){
-            throw new Error(json.error || 'Yêu cầu thất bại.');
-          }
-          return json;
-        }catch(error){
-          lastError = error;
-          console.warn(
-            `API ${action} lỗi lần ${attempt}:`,
-            error
-          );
-
-          if(attempt < maxAttempts){
-            await waitMs(500 * attempt);
-          }
-        }
-      }
-
-      try{
-        const json = await jsonpGet(action, params, 30000);
-        if(!json.ok){
-          throw new Error(json.error || 'Yêu cầu JSONP thất bại.');
-        }
-        return json;
-      }catch(jsonpError){
-        throw new Error(
-          `Không thể kết nối Apps Script. Fetch: ${
-            lastError && lastError.message
-              ? lastError.message
-              : 'không xác định'
-          }. JSONP: ${jsonpError.message || jsonpError}`
-        );
-      }
     }
-
 
     function waitMs(milliseconds){
       return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -1475,7 +1431,7 @@
       );
     }
 
-    async async function apiPost(action, data){
+    async function apiPost(action, data){
       // GitHub Pages -> Apps Script POST:
       // dùng iframe trực tiếp để tránh mất thời gian thử fetch/CORS trước.
       const timeoutMs =
@@ -2260,7 +2216,7 @@
       openModal('adminLoginModal');
     }
 
-    async async function adminLogin(){
+    async function adminLogin(){
       const email =
         document.getElementById('adminEmail').value.trim();
 
