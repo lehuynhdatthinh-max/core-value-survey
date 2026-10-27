@@ -169,11 +169,17 @@ function getMyResult_(msnv) {
   return response;
 }
 
+const RETAKE_MERGE_TMP_SHEET = 'Responses (đang gộp)';
+const RETAKE_MERGE_CHUNK_ROWS = 200;
+
 /**
  * Chạy MỘT LẦN từ trình soạn thảo: gộp các dòng trùng đã có trong Responses, theo MSNV + THÁNG.
  * Mỗi nhóm (MSNV, tháng) giữ VỊ TRÍ dòng đầu tiên, nội dung = lần nộp MỚI NHẤT của tháng đó, "Số lần làm" = tổng số lần
- * trong tháng. Tháng khác nhau không gộp. Dòng Stress Test và dòng không có MSNV giữ nguyên. Tự chép một tab sao lưu.
- * Đọc cả bảng một lần, ghi lại một lần, xóa phần thừa ở cuối một lần.
+ * trong tháng. Tháng khác nhau không gộp. Dòng Stress Test và dòng không có MSNV giữ nguyên.
+ *
+ * Cách làm an toàn với sheet lớn: KHÔNG sửa / xóa gì trên tab cũ. Ghi kết quả vào một tab MỚI theo từng đợt nhỏ,
+ * rồi đổi tên: tab cũ -> "Responses (sao lưu trước gộp …)" (chính là bản sao lưu), tab mới -> "Responses".
+ * Mỗi bước ghi nhật ký để biết dừng ở đâu nếu có lỗi.
  */
 function mergeDuplicateResponsesByMsnv() {
   const ss = getSpreadsheet_();
@@ -182,22 +188,22 @@ function mergeDuplicateResponsesByMsnv() {
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
+  let tmp = null;
   try {
+    log_('1/5 Đọc tab ' + sheet.getName() + ': ' + sheet.getLastRow() + ' dòng × ' + sheet.getLastColumn() + ' cột.');
     const lastRow = sheet.getLastRow();
-    let lastColumn = sheet.getLastColumn();
+    const lastColumn = sheet.getLastColumn();
     let headers = sheet.getRange(1, 1, 1, lastColumn).getDisplayValues()[0].map(header => String(header || '').trim());
     const msnvIndex = headers.indexOf('MSNV');
     if (msnvIndex < 0) throw new Error('Sheet Responses không có cột MSNV ở dòng 1.');
     const timestampIndex = headers.indexOf('Timestamp');
     const stressIndex = headers.indexOf('Stress Test');
-
     const data = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
+
     const groupOf = row => {
       if (stressIndex >= 0 && isStressValue_(row[stressIndex])) return '';
       return retakeGroupKey_(row[msnvIndex], timestampIndex >= 0 ? row[timestampIndex] : '');
     };
-
-    // Gom dòng theo (MSNV, tháng)
     const groups = {};
     data.forEach((row, i) => {
       const group = groupOf(row);
@@ -205,24 +211,17 @@ function mergeDuplicateResponsesByMsnv() {
     });
     const duplicateGroups = Object.keys(groups).filter(group => groups[group].length > 1);
     const needsAttemptsColumn = headers.indexOf(RETAKE_ATTEMPTS_HEADER) < 0;
+    log_('2/5 ' + Object.keys(groups).length + ' nhóm MSNV + tháng, ' + duplicateGroups.length + ' nhóm có dòng trùng.');
     if (!duplicateGroups.length && !needsAttemptsColumn) return log_('Không có dòng trùng trong cùng tháng, không cần gộp.');
 
-    // Sao lưu nguyên tab trước khi sửa
-    const backupName = 'Responses (sao lưu trước gộp ' +
-      Utilities.formatDate(new Date(), retakeTimeZone_(), 'dd-MM-yyyy HH.mm') + ')';
-    sheet.copyTo(ss).setName(backupName);
-
-    // Cột "Số lần làm": thêm ở cuối nếu chưa có (mở rộng lưới trước để không vượt kích thước sheet)
     if (needsAttemptsColumn) {
-      if (sheet.getMaxColumns() < lastColumn + 1) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
-      sheet.getRange(1, lastColumn + 1).setValue(RETAKE_ATTEMPTS_HEADER);
       headers = headers.concat(RETAKE_ATTEMPTS_HEADER);
-      lastColumn += 1;
       data.forEach(row => row.push(''));
     }
+    const width = headers.length;
     const attemptsIndex = headers.indexOf(RETAKE_ATTEMPTS_HEADER);
 
-    // Dựng lại bảng: dòng đầu của mỗi nhóm mang nội dung lần mới nhất trong tháng, các dòng sau của nhóm bị bỏ
+    // Dựng bảng mới trong bộ nhớ
     const firstOf = {};
     Object.keys(groups).forEach(group => { firstOf[groups[group][0]] = group; });
     const output = [];
@@ -238,9 +237,28 @@ function mergeDuplicateResponsesByMsnv() {
       output.push(latest);
     });
 
-    sheet.getRange(2, 1, output.length, lastColumn).setValues(output);
-    const leftover = data.length - output.length;
-    if (leftover > 0) sheet.deleteRows(2 + output.length, leftover);
+    // Tab tạm: xóa bản dở dang của lần chạy trước (nếu có), tạo mới đủ kích thước
+    const leftoverTmp = ss.getSheetByName(RETAKE_MERGE_TMP_SHEET);
+    if (leftoverTmp) ss.deleteSheet(leftoverTmp);
+    tmp = ss.insertSheet(RETAKE_MERGE_TMP_SHEET);
+    if (tmp.getMaxColumns() < width) tmp.insertColumnsAfter(tmp.getMaxColumns(), width - tmp.getMaxColumns());
+    if (tmp.getMaxRows() < output.length + 1) tmp.insertRowsAfter(tmp.getMaxRows(), output.length + 1 - tmp.getMaxRows());
+    tmp.getRange(1, 1, 1, width).setValues([headers]);
+    log_('3/5 Ghi ' + output.length + ' dòng sang tab tạm "' + RETAKE_MERGE_TMP_SHEET + '" (mỗi đợt ' + RETAKE_MERGE_CHUNK_ROWS + ' dòng)…');
+    for (let start = 0; start < output.length; start += RETAKE_MERGE_CHUNK_ROWS) {
+      const chunk = output.slice(start, start + RETAKE_MERGE_CHUNK_ROWS);
+      tmp.getRange(2 + start, 1, chunk.length, width).setValues(chunk);
+      SpreadsheetApp.flush();
+    }
+    tmp.setFrozenRows(1);
+
+    // Đổi tên: tab cũ thành bản sao lưu, tab mới thành Responses
+    const backupName = 'Responses (sao lưu trước gộp ' +
+      Utilities.formatDate(new Date(), retakeTimeZone_(), 'dd-MM-yyyy HH.mm') + ')';
+    log_('4/5 Đổi tên tab cũ thành "' + backupName + '", tab mới thành "' + CFG.SHEETS.RESPONSES + '".');
+    sheet.setName(backupName);
+    tmp.setName(CFG.SHEETS.RESPONSES);
+    tmp = null;
     SpreadsheetApp.flush();
 
     const cache = CacheService.getScriptCache();
@@ -249,11 +267,38 @@ function mergeDuplicateResponsesByMsnv() {
       cache.remove(retakeResultCacheKey_(parts[0], parts[1]));
     });
 
-    return log_('Đã gộp ' + duplicateGroups.length + ' nhóm MSNV + tháng (giữ lần nộp mới nhất của tháng), xóa ' + leftover +
-      ' dòng trùng. Còn ' + output.length + ' dòng. Bản sao lưu: tab "' + backupName + '".');
+    return log_('5/5 Xong: gộp ' + duplicateGroups.length + ' nhóm MSNV + tháng (giữ lần nộp mới nhất của tháng), bỏ ' +
+      (data.length - output.length) + ' dòng trùng, Responses còn ' + output.length + ' dòng. Tab cũ giữ nguyên tên "' +
+      backupName + '" để đối chiếu / khôi phục.');
+  } catch (error) {
+    log_('LỖI khi gộp: ' + errorMessage_(error) + ' — tab Responses cũ KHÔNG bị sửa.' +
+      (tmp ? ' Có thể xóa tab "' + RETAKE_MERGE_TMP_SHEET + '".' : ''));
+    throw error;
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Chạy từ trình soạn thảo nếu gộp vẫn lỗi: in ra kích thước / đặc điểm của tab Responses để tìm nguyên nhân. */
+function diagnoseResponsesSheet() {
+  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
+  if (!sheet) return log_('Không có tab ' + CFG.SHEETS.RESPONSES);
+  const lastRow = sheet.getLastRow();
+  const lastColumn = sheet.getLastColumn();
+  const info = {
+    lastRow: lastRow, lastColumn: lastColumn, maxRows: sheet.getMaxRows(), maxColumns: sheet.getMaxColumns(),
+    frozenRows: sheet.getFrozenRows(), hasFilter: Boolean(sheet.getFilter()),
+    protections: sheet.getProtections(SpreadsheetApp.ProtectionType.RANGE).length + sheet.getProtections(SpreadsheetApp.ProtectionType.SHEET).length,
+    mergedRanges: lastRow && lastColumn ? sheet.getRange(1, 1, lastRow, lastColumn).getMergedRanges().length : 0
+  };
+  if (lastRow > 1) {
+    const values = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
+    let chars = 0, longest = 0;
+    values.forEach(row => row.forEach(v => { const n = String(v).length; chars += n; if (n > longest) longest = n; }));
+    info.totalCharacters = chars;
+    info.longestCell = longest;
+  }
+  return log_('Responses: ' + JSON.stringify(info));
 }
 
 function log_(message) {
