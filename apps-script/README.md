@@ -5,7 +5,7 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. |
 | `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
 
@@ -30,6 +30,18 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.12.0: chịu được 75–100 người cùng lúc
+
+Đo trên bản 4.11.0 (100 người cùng lúc): tra MSNV ~2 giây (ổn), nhưng tra điểm tháng này mất 5,7–10,5 giây và nộp bài phải xếp hàng qua một khóa (chờ tối đa 7 giây rồi báo lỗi).
+- **Tra MSNV trả kèm điểm tháng này** (một lần gọi thay vì hai).
+- **Bộ nhớ điểm của tháng** (CacheService, 32 ngăn): dựng một lần từ Responses, cập nhật ngay mỗi lần ghi kết quả → tra điểm không phải đọc sheet.
+- **Nộp bài không cần khóa**: bài mới thêm vào Queue bằng `appendRow` (nhiều người cùng nộp không đè nhau); chống trùng bằng bộ nhớ mã lần nộp.
+- **processQueue ghi cả đợt một lần** (tối đa 200 bài/phút), đọc cột khóa của Responses một lần cho cả đợt.
+- **Trang khảo sát tự thử lại** khi máy chủ bận / quá giờ (tra MSNV và nộp bài; cùng mã lần nộp nên không tạo bài trùng).
+
+Cài: dán đè `Code.gs` 4.12.0 và `SurveyRetake.gs` mới › **Lưu** › chạy **`warmMonthResultIndex`** (dựng sẵn bộ nhớ điểm) › **Triển khai › Phiên bản mới**.
+Sau khi Claude thử tải bằng dữ liệu đánh dấu Stress Test (run ID `claude-load-test`), chạy **`cleanupClaudeLoadTest`** để xóa dữ liệu thử.
 
 ## Cập nhật 4.11.0: gộp MSNV theo TỪNG THÁNG
 

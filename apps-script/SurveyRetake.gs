@@ -40,25 +40,154 @@ function retakeGroupKey_(msnv, timestampValue) {
   return key ? key + '|' + retakeMonthOf_(timestampValue) : '';
 }
 
-function retakeResultCacheKey_(msnv, month) {
-  return 'vhdn_my_result_v2_' + retakeMsnvKey_(msnv) + '_' + (month || retakeCurrentMonth_());
+/*
+ * Bộ nhớ điểm của tháng (CacheService), để tra điểm nhanh khi nhiều người cùng mở khảo sát:
+ * mỗi tháng một bộ 32 "ngăn" JSON { MSNV: [giờ nộp ISO, điểm, tổng, biết, tổng biết, hiểu, tổng hiểu, số lần làm] },
+ * dựng một lần từ sheet Responses (chỉ đọc các cột cần, không đọc nội dung bài làm), cập nhật ngay mỗi lần ghi kết quả.
+ */
+const RESULT_INDEX_BUCKETS = 32;
+const RESULT_INDEX_SECONDS = 21600;
+
+function resultIndexPrefix_(month) {
+  return 'vhdn_residx_v1_' + month + '_';
 }
 
-/** Các cột MSNV / Timestamp / Stress Test / Số lần làm của mọi dòng dữ liệu (chỉ đọc các cột cần thiết). */
-function readResponseKeys_(sheet, headers) {
+function resultIndexMetaKey_(month) {
+  return resultIndexPrefix_(month) + 'meta';
+}
+
+function resultIndexBucketKey_(month, msnvKey) {
+  let hash = 0;
+  for (let i = 0; i < msnvKey.length; i++) hash = (hash * 31 + msnvKey.charCodeAt(i)) >>> 0;
+  return resultIndexPrefix_(month) + 'b' + (hash % RESULT_INDEX_BUCKETS);
+}
+
+/** Giữ tên cũ cho Code.gs: xóa khóa này = bỏ bộ nhớ điểm của tháng (lần tra sau dựng lại). */
+function retakeResultCacheKey_(msnv, month) {
+  return resultIndexMetaKey_(month || retakeCurrentMonth_());
+}
+
+/** Đọc một số cột của Responses (gộp các cột liền nhau thành một lần đọc). Trả về { tên cột: mảng giá trị }. */
+function readResponseColumns_(sheet, headers, names) {
   const lastRow = sheet.getLastRow();
   const count = Math.max(lastRow - 1, 0);
-  const column = name => {
-    const index = headers.indexOf(name);
-    return index >= 0 && count
-      ? sheet.getRange(2, index + 1, count, 1).getValues().map(row => row[0])
-      : new Array(count).fill('');
+  const out = {};
+  const wanted = names.map(name => ({ name: name, index: headers.indexOf(name) }));
+  wanted.filter(w => w.index < 0).forEach(w => { out[w.name] = new Array(count).fill(''); });
+  const present = wanted.filter(w => w.index >= 0).sort((a, b) => a.index - b.index);
+  let i = 0;
+  while (i < present.length) {
+    let j = i;
+    while (j + 1 < present.length && present[j + 1].index <= present[j].index + 2) j++;
+    const from = present[i].index;
+    const to = present[j].index;
+    const block = count ? sheet.getRange(2, from + 1, count, to - from + 1).getValues() : [];
+    for (let k = i; k <= j; k++) out[present[k].name] = block.map(row => row[present[k].index - from]);
+    i = j + 1;
+  }
+  return out;
+}
+
+function resultIndexEntryFromRow_(get) {
+  const timestamp = parseDate_(get('Timestamp'));
+  return [
+    timestamp ? timestamp.toISOString() : String(get('Timestamp') || ''),
+    number_(get('Điểm - TỔNG'), 0), number_(get('Tổng câu'), 0),
+    number_(get('Điểm - BIẾT'), 0), number_(get('Tổng - BIẾT'), 0),
+    number_(get('Điểm - HIỂU'), 0), number_(get('Tổng - HIỂU'), 0),
+    Math.max(number_(get(RETAKE_ATTEMPTS_HEADER), 1), 1)
+  ];
+}
+
+const RESULT_INDEX_COLUMNS = ['MSNV', 'Timestamp', 'Stress Test', 'Điểm - BIẾT', 'Tổng - BIẾT', 'Điểm - HIỂU',
+  'Tổng - HIỂU', 'Điểm - TỔNG', 'Tổng câu', RETAKE_ATTEMPTS_HEADER];
+
+/** Dựng bộ nhớ điểm của một tháng từ sheet Responses. */
+function buildMonthResultIndex_(month) {
+  const cache = CacheService.getScriptCache();
+  const startedAt = Date.now();
+  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
+  const buckets = {};
+  for (let b = 0; b < RESULT_INDEX_BUCKETS; b++) buckets[resultIndexPrefix_(month) + 'b' + b] = {};
+  let entries = 0;
+
+  if (sheet && sheet.getLastRow() >= 2) {
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
+    const cols = readResponseColumns_(sheet, headers, RESULT_INDEX_COLUMNS);
+    cols.MSNV.forEach((value, i) => {
+      if (isStressValue_(cols['Stress Test'][i])) return;
+      const key = retakeMsnvKey_(value);
+      if (!key || retakeMonthOf_(cols.Timestamp[i]) !== month) return;
+      const bucket = buckets[resultIndexBucketKey_(month, key)];
+      if (!bucket[key]) entries++;
+      bucket[key] = resultIndexEntryFromRow_(name => cols[name][i]); // dòng dưới cùng = mới nhất
+    });
+  }
+
+  const values = {};
+  Object.keys(buckets).forEach(k => { values[k] = JSON.stringify(buckets[k]); });
+  values[resultIndexMetaKey_(month)] = JSON.stringify({ month: month, builtAt: startedAt, entries: entries });
+  cache.putAll(values, RESULT_INDEX_SECONDS);
+
+  // Có kết quả mới được ghi trong lúc đang dựng -> bỏ bản vừa dựng, lần sau dựng lại
+  const lastWrite = Number(cache.get(resultIndexPrefix_(month) + 'lastWriteAt') || 0);
+  if (lastWrite >= startedAt) cache.remove(resultIndexMetaKey_(month));
+  return entries;
+}
+
+/** Tra một MSNV trong bộ nhớ điểm của tháng; tự dựng nếu chưa có. { ready, entry } */
+function readMonthResultIndex_(month, msnvKey) {
+  const cache = CacheService.getScriptCache();
+  const tryRead = () => {
+    const got = cache.getAll([resultIndexMetaKey_(month), resultIndexBucketKey_(month, msnvKey)]);
+    const meta = got[resultIndexMetaKey_(month)];
+    const bucket = got[resultIndexBucketKey_(month, msnvKey)];
+    if (!meta || bucket == null) return null;
+    return { ready: true, entry: JSON.parse(bucket)[msnvKey] || null };
   };
+
+  let found = tryRead();
+  if (found) return found;
+
+  // Nhiều người cùng tra khi bộ nhớ trống: chỉ một người dựng, người khác chờ tối đa ~8 giây
+  const buildingKey = resultIndexPrefix_(month) + 'building';
+  if (!cache.get(buildingKey)) {
+    cache.put(buildingKey, '1', 30);
+    try { buildMonthResultIndex_(month); } finally { cache.remove(buildingKey); }
+    found = tryRead();
+    if (found) return found;
+  } else {
+    for (let waited = 0; waited < 8000; waited += 400) {
+      Utilities.sleep(400);
+      found = tryRead();
+      if (found) return found;
+    }
+  }
+  return { ready: false, entry: null };
+}
+
+/** Ghi kết quả mới vào bộ nhớ điểm của tháng (gọi trong khóa ghi). */
+function updateMonthResultIndex_(month, msnvKey, entry) {
+  const cache = CacheService.getScriptCache();
+  cache.put(resultIndexPrefix_(month) + 'lastWriteAt', String(Date.now()), RESULT_INDEX_SECONDS);
+  if (!cache.get(resultIndexMetaKey_(month))) return; // chưa dựng: lần tra sau dựng từ sheet
+  const bucketKey = resultIndexBucketKey_(month, msnvKey);
+  const raw = cache.get(bucketKey);
+  if (raw == null) { cache.remove(resultIndexMetaKey_(month)); return; }
+  const bucket = JSON.parse(raw);
+  bucket[msnvKey] = entry;
+  cache.put(bucketKey, JSON.stringify(bucket), RESULT_INDEX_SECONDS);
+}
+
+function resultFromIndexEntry_(entry) {
+  const timestamp = parseDate_(entry[0]);
   return {
-    msnvs: column('MSNV'),
-    timestamps: column('Timestamp'),
-    stress: column('Stress Test'),
-    attempts: column(RETAKE_ATTEMPTS_HEADER)
+    submittedAt: timestamp ? Utilities.formatDate(timestamp, retakeTimeZone_(), 'dd/MM/yyyy HH:mm') : String(entry[0] || ''),
+    score: entry[1], total: entry[2],
+    knowScore: entry[3], totalKnow: entry[4],
+    understandScore: entry[5], totalUnderstand: entry[6],
+    percent: entry[2] > 0 ? Math.round(entry[1] / entry[2] * 10000) / 100 : 0,
+    attempts: entry[7]
   };
 }
 
@@ -67,106 +196,127 @@ function isStressValue_(value) {
 }
 
 /**
- * Ghi một kết quả vào Responses: ghi đè dòng cùng MSNV + cùng tháng, hoặc thêm dòng mới.
- * headers = tiêu đề dòng 1 (đã gồm mọi cột của rowObject). Trả về số dòng đã ghi.
+ * Ghi MỘT LẦN nhiều kết quả vào Responses (processQueue gọi cho cả đợt): mỗi kết quả ghi đè dòng cùng MSNV + cùng tháng,
+ * hoặc thêm dòng mới; "Số lần làm" cộng dồn trong tháng. Đọc các cột khóa một lần cho cả đợt, ghi phần thêm mới một lần.
+ * Dòng Stress Test / không MSNV luôn thêm mới. Trả về số kết quả đã ghi.
  */
-function upsertResponseRow_(sheet, headers, rowObject) {
-  const valuesFor = object => headers.map(header =>
-    Object.prototype.hasOwnProperty.call(object, header) ? object[header] : ''
-  );
-  const group = retakeGroupKey_(rowObject['MSNV'], rowObject['Timestamp']);
-
-  if (!group || isStressValue_(rowObject['Stress Test'])) {
-    const rowNumber = sheet.getLastRow() + 1;
-    sheet.getRange(rowNumber, 1, 1, headers.length).setValues([valuesFor(rowObject)]);
-    return rowNumber;
-  }
-
+function appendResponsesBatch_(rowObjects) {
+  if (!rowObjects.length) return 0;
+  const sheet = ensureResponsesSheet_();
   const lock = LockService.getScriptLock();
-  lock.waitLock(CFG.LOCK_WAIT_MS);
+  lock.waitLock(20000);
   try {
-    const keys = readResponseKeys_(sheet, headers);
-    let existing = -1;
-    let previousCount = 0;
-    for (let i = 0; i < keys.msnvs.length; i++) {
-      if (isStressValue_(keys.stress[i])) continue;
-      if (retakeGroupKey_(keys.msnvs[i], keys.timestamps[i]) !== group) continue;
-      if (existing < 0) existing = i;
-      previousCount += Math.max(number_(keys.attempts[i], 1), 1);
+    // Tiêu đề: thêm các cột còn thiếu (giống appendResponse_)
+    const allKeys = [];
+    rowObjects.forEach(obj => Object.keys(obj).forEach(k => { if (allKeys.indexOf(k) < 0) allKeys.push(k); }));
+    if (allKeys.indexOf(RETAKE_ATTEMPTS_HEADER) < 0) allKeys.push(RETAKE_ATTEMPTS_HEADER);
+    let headers = sheet.getLastColumn() > 0
+      ? sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim())
+      : [];
+    if (sheet.getLastRow() === 0) headers = [];
+    const missing = allKeys.filter(k => headers.indexOf(k) < 0);
+    if (missing.length) {
+      if (sheet.getMaxColumns() < headers.length + missing.length) {
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), headers.length + missing.length - sheet.getMaxColumns());
+      }
+      sheet.getRange(1, headers.length + 1, 1, missing.length).setValues([missing]);
+      headers = headers.concat(missing);
+    }
+    const width = headers.length;
+    const valuesFor = obj => headers.map(h => Object.prototype.hasOwnProperty.call(obj, h) ? obj[h] : '');
+    const attemptsIndex = headers.indexOf(RETAKE_ATTEMPTS_HEADER);
+
+    const cols = readResponseColumns_(sheet, headers, ['MSNV', 'Timestamp', 'Stress Test', RETAKE_ATTEMPTS_HEADER]);
+    const target = {};   // nhóm -> { row: số dòng trên sheet } hoặc { append: vị trí trong appendRows }
+    const attempts = {}; // nhóm -> số lần đã làm trong tháng
+    cols.MSNV.forEach((value, i) => {
+      if (isStressValue_(cols['Stress Test'][i])) return;
+      const group = retakeGroupKey_(value, cols.Timestamp[i]);
+      if (!group) return;
+      if (!target[group]) target[group] = { row: i + 2 };
+      attempts[group] = (attempts[group] || 0) + Math.max(number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), 1);
+    });
+
+    const overwrites = {}; // số dòng -> giá trị
+    const appendRows = [];
+    const indexUpdates = [];
+    rowObjects.forEach(obj => {
+      const group = retakeGroupKey_(obj['MSNV'], obj['Timestamp']);
+      if (!group || isStressValue_(obj['Stress Test'])) { appendRows.push(valuesFor(obj)); return; }
+      const row = Object.assign({}, obj);
+      row[RETAKE_ATTEMPTS_HEADER] = (attempts[group] || 0) + 1;
+      attempts[group] = row[RETAKE_ATTEMPTS_HEADER];
+      const values = valuesFor(row);
+      if (target[group] && target[group].row) overwrites[target[group].row] = values;
+      else if (target[group]) appendRows[target[group].append] = values;
+      else { target[group] = { append: appendRows.length }; appendRows.push(values); }
+      indexUpdates.push({
+        month: retakeMonthOf_(obj['Timestamp']), key: retakeMsnvKey_(obj['MSNV']),
+        entry: resultIndexEntryFromRow_(name => name === RETAKE_ATTEMPTS_HEADER ? row[RETAKE_ATTEMPTS_HEADER] : obj[name])
+      });
+    });
+
+    // Ghi đè: gom các dòng liền nhau thành một lần ghi
+    const rows = Object.keys(overwrites).map(Number).sort((a, b) => a - b);
+    for (let i = 0; i < rows.length;) {
+      let j = i;
+      while (j + 1 < rows.length && rows[j + 1] === rows[j] + 1) j++;
+      sheet.getRange(rows[i], 1, j - i + 1, width).setValues(rows.slice(i, j + 1).map(r => overwrites[r]));
+      i = j + 1;
     }
 
-    const row = Object.assign({}, rowObject);
-    row[RETAKE_ATTEMPTS_HEADER] = previousCount + 1;
+    // Thêm mới: một khối ở cuối (chia đợt 200 dòng)
+    if (appendRows.length) {
+      const start = Math.max(sheet.getLastRow(), 1) + 1;
+      const need = start + appendRows.length - 1;
+      if (sheet.getMaxRows() < need) sheet.insertRowsAfter(sheet.getMaxRows(), need - sheet.getMaxRows());
+      for (let k = 0; k < appendRows.length; k += 200) {
+        const chunk = appendRows.slice(k, k + 200);
+        sheet.getRange(start + k, 1, chunk.length, width).setValues(chunk);
+      }
+    }
 
-    const rowNumber = existing >= 0 ? existing + 2 : sheet.getLastRow() + 1;
-    sheet.getRange(rowNumber, 1, 1, headers.length).setValues([valuesFor(row)]);
-    CacheService.getScriptCache().remove(
-      retakeResultCacheKey_(rowObject['MSNV'], retakeMonthOf_(rowObject['Timestamp']))
-    );
-    return rowNumber;
+    indexUpdates.forEach(u => updateMonthResultIndex_(u.month, u.key, u.entry));
+    return rowObjects.length;
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Ghi một kết quả (giữ cho appendResponse_ trong Code.gs). */
+function upsertResponseRow_(sheet, headers, rowObject) {
+  return appendResponsesBatch_([rowObject]);
 }
 
 /** Action GET getMyResult: điểm lần nộp gần nhất TRONG THÁNG HIỆN TẠI của một MSNV, result = null nếu tháng này chưa làm. */
 function getMyResult_(msnv) {
   const key = retakeMsnvKey_(msnv);
   if (!key) return { ok: false, error: 'Thiếu MSNV.' };
-
   const month = retakeCurrentMonth_();
-  const cache = CacheService.getScriptCache();
-  const cacheKey = retakeResultCacheKey_(key, month);
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
 
-  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
-  let response = { ok: true, month: month, result: null };
-
-  if (sheet && sheet.getLastRow() >= 2) {
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn())
-      .getDisplayValues()[0].map(header => String(header || '').trim());
-    const keys = readResponseKeys_(sheet, headers);
-    const group = key + '|' + month;
-
-    let latest = -1;
-    let rows = 0;
-    for (let i = 0; i < keys.msnvs.length; i++) {
-      if (isStressValue_(keys.stress[i])) continue;
-      if (retakeGroupKey_(keys.msnvs[i], keys.timestamps[i]) !== group) continue;
-      latest = i; // dòng dưới cùng = mới nhất (trường hợp còn dòng trùng chưa gộp)
-      rows++;
-    }
-
-    if (latest >= 0) {
-      const values = sheet.getRange(latest + 2, 1, 1, headers.length).getValues()[0];
-      const get = name => {
-        const index = headers.indexOf(name);
-        return index < 0 ? '' : values[index];
-      };
-      const score = number_(get('Điểm - TỔNG'), 0);
-      const total = number_(get('Tổng câu'), 0);
-      const timestamp = parseDate_(get('Timestamp'));
-      response = {
-        ok: true,
-        month: month,
-        result: {
-          submittedAt: timestamp ? Utilities.formatDate(timestamp, retakeTimeZone_(), 'dd/MM/yyyy HH:mm') : String(get('Timestamp') || ''),
-          score: score,
-          total: total,
-          knowScore: number_(get('Điểm - BIẾT'), 0),
-          totalKnow: number_(get('Tổng - BIẾT'), 0),
-          understandScore: number_(get('Điểm - HIỂU'), 0),
-          totalUnderstand: number_(get('Tổng - HIỂU'), 0),
-          percent: total > 0 ? Math.round(score / total * 10000) / 100 : 0,
-          attempts: Math.max(number_(get(RETAKE_ATTEMPTS_HEADER), rows), rows)
-        }
-      };
-    }
+  const indexed = readMonthResultIndex_(month, key);
+  if (indexed.ready) {
+    return { ok: true, month: month, result: indexed.entry ? resultFromIndexEntry_(indexed.entry) : null };
   }
 
-  cache.put(cacheKey, JSON.stringify(response), RETAKE_RESULT_CACHE_SECONDS);
-  return response;
+  // Dự phòng (bộ nhớ không dùng được): đọc thẳng sheet
+  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
+  if (!sheet || sheet.getLastRow() < 2) return { ok: true, month: month, result: null };
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
+  const cols = readResponseColumns_(sheet, headers, RESULT_INDEX_COLUMNS);
+  let entry = null;
+  cols.MSNV.forEach((value, i) => {
+    if (isStressValue_(cols['Stress Test'][i]) || retakeMsnvKey_(value) !== key) return;
+    if (retakeMonthOf_(cols.Timestamp[i]) !== month) return;
+    entry = resultIndexEntryFromRow_(name => cols[name][i]);
+  });
+  return { ok: true, month: month, result: entry ? resultFromIndexEntry_(entry) : null };
+}
+
+/** Dựng sẵn bộ nhớ điểm tháng này (gọi kèm warmPerformanceCache hoặc chạy tay trước giờ cao điểm). */
+function warmMonthResultIndex() {
+  const entries = buildMonthResultIndex_(retakeCurrentMonth_());
+  return log_('Đã dựng bộ nhớ điểm tháng ' + retakeCurrentMonth_() + ': ' + entries + ' MSNV.');
 }
 
 const RETAKE_MERGE_TMP_SHEET = 'Responses (đang gộp)';
@@ -309,4 +459,9 @@ function log_(message) {
 /** Thử nhanh từ trình soạn thảo: đổi MSNV rồi bấm Chạy, xem Nhật ký thực thi. */
 function testGetMyResult() {
   console.log(JSON.stringify(getMyResult_('622412005')));
+}
+
+/** Xóa dữ liệu thử tải của Claude (run ID "claude-load-test") khỏi Queue và Responses — chạy sau khi thử tải xong. */
+function cleanupClaudeLoadTest() {
+  return log_(JSON.stringify(cleanupVhdnStressTest_('claude-load-test')));
 }

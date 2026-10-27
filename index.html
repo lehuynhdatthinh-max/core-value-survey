@@ -1550,6 +1550,34 @@
       return iframeApiGet(action, params, 20000);
     }
 
+    // Lỗi tạm thời khi nhiều người cùng dùng (quá giờ, máy chủ bận, khóa) -> tự thử lại, không phải lỗi dữ liệu
+    function isTransientError(error){
+      const message = String(error && error.message || '');
+      if (error && error.fromServer){
+        return /too many|simultaneous|quá nhiều|service|bận|lock|khóa|timed out|quá thời gian|try again|thử lại sau/i.test(message);
+      }
+      return true; // lỗi mạng / không nhận được phản hồi
+    }
+
+    async function withRetry(task, attempts = 3){
+      let lastError;
+      for (let attempt = 1; attempt <= attempts; attempt++){
+        try{
+          return await task();
+        }catch(error){
+          lastError = error;
+          if (attempt === attempts || !isTransientError(error)) throw error;
+          // chờ tăng dần + ngẫu nhiên để 100 người không cùng thử lại một lúc
+          await waitMs(attempt * 1200 + Math.floor(Math.random() * 1500));
+        }
+      }
+      throw lastError;
+    }
+
+    function apiGetWithRetry(action, params = {}){
+      return withRetry(() => apiGet(action, params));
+    }
+
     function waitMs(milliseconds){
       return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
@@ -1842,7 +1870,9 @@
           }
 
           if(!json.ok){
-            finish(new Error(json.error || 'Yêu cầu thất bại.'));
+            const serverError = new Error(json.error || 'Yêu cầu thất bại.');
+            serverError.fromServer = true; // Apps Script đã trả lời (vd. lỗi kiểm tra bài) -> không tự thử lại
+            finish(serverError);
             return;
           }
 
@@ -2077,13 +2107,17 @@
 
       try{
         let employee;
+        let prefetched = null; // điểm tháng này trả kèm lookupEmployee (Apps Script 4.12.0+)
 
         if (state.employeeCache.has(msnv)){
           employee = state.employeeCache.get(msnv);
         }else{
-          const response = await apiGet('lookupEmployee',{ msnv:msnv });
+          const response = await apiGetWithRetry('lookupEmployee',{ msnv:msnv });
           employee = response.employee;
           if (employee) state.employeeCache.set(msnv,employee);
+          if (Object.prototype.hasOwnProperty.call(response, 'myResult')){
+            prefetched = { month: response.month, result: response.myResult };
+          }
         }
 
         if (sequence !== state.lookupSequence) return;
@@ -2095,7 +2129,8 @@
           return;
         }
         applyEmployee(employee);
-        loadPreviousResult(msnv, sequence);
+        if (prefetched) applyPreviousResult(prefetched);
+        else loadPreviousResult(msnv, sequence);
       }catch(error){
         if (sequence !== state.lookupSequence) return;
 
@@ -2160,9 +2195,16 @@
     }
 
     // Điểm lần làm trước (nếu Apps Script đã có hành động getMyResult). Lỗi / chưa có -> coi như chưa làm.
+    function applyPreviousResult(response){
+      state.previousResult = response && response.result ? response.result : null;
+      if (state.previousResult && response.month) state.previousResult.month = response.month;
+      state.previousResultLoading = false;
+      renderEmployeeCard();
+    }
+
     async function loadPreviousResult(msnv, sequence){
       try{
-        const response = await apiGet('getMyResult',{ msnv:msnv });
+        const response = await apiGetWithRetry('getMyResult',{ msnv:msnv });
         if (sequence !== state.lookupSequence) return;
         state.previousResult = response && response.result ? response.result : null;
         if (state.previousResult && response.month) state.previousResult.month = response.month;
@@ -2537,7 +2579,8 @@
       setLoading(true);
 
       try{
-        const response = await apiPost('submitSurvey',payload);
+        // Cùng mã lần nộp nên thử lại không tạo bài trùng
+        const response = await withRetry(() => apiPost('submitSurvey',payload), 3);
 
         renderLocalResult(response.scores || scores,response.queueId);
         lockSurveyForm();
