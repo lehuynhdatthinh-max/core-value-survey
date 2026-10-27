@@ -7,18 +7,25 @@
 
   <style>
     :root{
-      --orange:#ff7a00;
-      --orange2:#ff9a3d;
-      --navy:#123b5d;
-      --ink:#1f2937;
-      --muted:#6b7280;
-      --bg:#f4f7fa;
+      /* Bộ quy chuẩn trình bày & nhận diện TBS Logistics 2026 (giống SafetyHub): cam #E45620, xám than #4D4D4F,
+         chữ #1A1A1A, Arial, nền trắng. Xanh lá / đỏ chỉ dùng cho trạng thái (đúng / sai, lỗi). */
+      --orange:#E45620;
+      --orange2:#E45620;
+      --orange-d:#C24714;
+      --navy:#4D4D4F;
+      --ink:#1A1A1A;
+      --muted:#6B6B6E;
+      --bg:#FFFFFF;
+      --panel:#F2F2F3;
       --card:#ffffff;
-      --border:#dfe6ec;
-      --success:#16865c;
-      --danger:#c9363e;
-      --shadow:0 12px 30px rgba(18,59,93,.10);
-      --radius:16px;
+      --border:#DADADC;
+      --field:#8A8A8D;
+      --tint:#FFF6F1;
+      --tint-bd:#F3C9B5;
+      --success:#16A34A;
+      --danger:#DC2626;
+      --shadow:none;
+      --radius:14px;
     }
 
     *{box-sizing:border-box}
@@ -529,6 +536,143 @@
       .page{width:min(100% - 18px,1080px);margin-top:12px}
       .card{padding:17px}
     }
+
+    /* ===== Giao diện theo nhận diện TBS Logistics — đồng bộ với SafetyHub (trang Bài kiểm tra sau đào tạo) ===== */
+    body{background:#fff;color:var(--ink);font-size:16px;line-height:1.5}
+
+    .topbar{background:#fff;color:var(--ink);box-shadow:none;border-bottom:3px solid var(--orange)}
+    .topbar-inner{min-height:66px;padding:7px 0;width:min(860px,calc(100% - 28px))}
+    .logo{display:block;width:auto;height:52px;border-radius:0;background:none;overflow:visible}
+    .admin-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 14px;border:1.5px solid var(--navy);border-radius:10px;color:var(--navy);background:#fff;font-weight:700;font-size:14px}
+    .admin-btn:hover{background:var(--panel)}
+    .admin-btn:focus-visible,.btn:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--navy)}
+
+    .page{width:min(860px,calc(100% - 28px));margin:0 auto 48px}
+    .intro{padding:22px 0 10px}
+    .eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+    .intro h1{margin:0;font-size:25px;line-height:1.4;color:var(--navy);text-transform:uppercase;letter-spacing:.01em}
+    .intro-sub{margin:6px 0 0;color:var(--muted);font-size:15px}
+
+    .card{margin:12px 0;padding:20px;border:1px solid var(--border);border-radius:var(--radius);box-shadow:none}
+    .card h2,.card h3{color:var(--navy)}
+    .card h2{font-size:21px;line-height:1.35}
+    .h-step{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:20px;line-height:1.35;color:var(--navy)}
+    .step-num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--orange);color:#fff;font-weight:700;font-size:18px;display:grid;place-items:center}
+    .subtitle{margin:0 0 16px;color:var(--muted);font-size:15px;line-height:1.55}
+
+    label.field-label{font-size:15px;font-weight:700;color:var(--navy)}
+    input[type="text"],input[type="password"],input[type="date"],input[type="number"],select,textarea{
+      min-height:48px;padding:10px 14px;border:1.5px solid var(--field);border-radius:10px;color:var(--ink);font-size:16px
+    }
+    textarea{min-height:105px}
+    input::placeholder,textarea::placeholder{color:#8F8F92}
+    input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 4px rgba(228,86,32,.22)}
+    input[readonly]{background:var(--panel);color:var(--navy);border-style:dashed}
+    #employeeId{font-size:22px;font-weight:700;letter-spacing:.04em;min-height:58px}
+    #employeeId::placeholder{font-size:17px;font-weight:400;letter-spacing:0}
+    .note{font-size:14px;color:var(--muted)}
+    .required{margin-left:6px;padding:2px 8px;color:#7F1D1D;background:#FDECEC;font-size:12px;font-weight:700;vertical-align:2px}
+    .lookup-status{font-size:14px;font-weight:700}
+    .lookup-status:empty{display:none}
+    .lookup-status.loading{color:var(--muted)}
+
+    /* Thẻ nhân viên sau khi tra MSNV */
+    .employee-card-slot:empty{display:none}
+    .is-confirmed .auto-field{display:none !important}
+    .employee-card-slot{margin-top:12px}
+    .emp{border:1px solid var(--border);border-left:6px solid var(--orange);border-radius:12px;padding:14px;background:#fff}
+    .emp-top{display:flex;gap:12px;align-items:center}
+    .avatar{flex:none;width:48px;height:48px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:19px;display:grid;place-items:center}
+    .emp h3{margin:0;font-size:20px;line-height:1.3;color:var(--navy)}
+    .emp p{margin:2px 0 0;font-size:15px;color:var(--muted)}
+    .chip{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:700}
+    .chip.ok{background:#E8F6EE;color:#14532D}
+
+    /* Câu hỏi */
+    .question-section{margin-top:24px}
+    .section-heading{padding:12px 16px;border-radius:12px;color:var(--navy);background:var(--panel);border-left:6px solid var(--orange)}
+    .section-heading h2{color:var(--navy);font-size:19px;text-transform:uppercase;letter-spacing:.01em}
+    .section-heading p{color:var(--muted);font-size:14px;opacity:1}
+    .question{margin-top:12px;padding:16px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .question h3{margin:0 0 12px;font-size:17px;font-weight:700;line-height:1.5;color:var(--ink)}
+    .scenario-group{margin:14px 0 22px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
+    .scenario-box{border-left:5px solid var(--orange);border-radius:10px;background:#fff}
+    .scenario-box h3{color:var(--navy);font-size:18px}
+    .scenario-box p{color:var(--ink);font-size:16px}
+    .choices{gap:8px}
+    .choice{min-height:56px;align-items:flex-start;gap:12px;padding:12px 13px;border:2px solid var(--panel);border-radius:12px;background:var(--panel);font-size:16px;line-height:1.5}
+    .choice:hover{background:#E9E9EB;border-color:#E9E9EB}
+    .choice:has(input:checked){border-color:var(--orange);background:var(--tint)}
+    .choice input{width:22px;height:22px;flex:0 0 auto;margin:1px 0 0;accent-color:var(--orange)}
+    .choice span{min-width:0;overflow-wrap:anywhere}
+    .explanation{margin:8px 0 4px;border:1px solid var(--tint-bd);border-left:4px solid var(--orange);background:var(--tint)}
+
+    /* Nút */
+    .actions{margin-top:20px}
+    .btn{min-height:48px;padding:0 20px;border-radius:10px;font-weight:700;font-size:16px;transition:background .15s,transform .05s}
+    .btn:active{transform:translateY(1px)}
+    .btn:disabled{background:#B4B4B7;color:#fff;opacity:1}
+    .btn-primary{color:#fff;background:var(--orange)}
+    .btn-primary:hover:not(:disabled){background:var(--orange-d)}
+    .btn-navy{color:#fff;background:var(--navy)}
+    .btn-navy:hover:not(:disabled){background:#3A3A3C}
+    .btn-light{color:var(--navy);background:#fff;border:2px solid var(--navy)}
+    .btn-light:hover:not(:disabled){background:var(--panel)}
+    .btn-outline{color:var(--navy);background:#fff;border:1.5px solid var(--border)}
+    .btn-success{background:var(--success)}
+    .btn-danger{background:var(--danger)}
+
+    /* Thông báo + kết quả */
+    .message{border-radius:12px;font-size:15px}
+    .message.info{color:var(--navy);background:var(--panel);border:1px solid var(--border)}
+    .message.error{color:#7F1D1D;background:#FDECEC;border:1px solid #F5B5B5}
+    .message.success{color:#14532D;background:#E8F6EE;border:1px solid #A9DFC7}
+    .connection-warning,.stress-warning{color:#7A2E0B;background:#FFF1E8;border:1px solid var(--tint-bd)}
+    .result{color:var(--ink);background:#fff;border:1px solid var(--border);border-left:6px solid var(--success);border-radius:12px}
+    .result h3{color:var(--navy);font-size:20px}
+    .recommendation-title{color:var(--navy);font-size:17px}
+    .recommendation-card{border:1px solid var(--tint-bd);background:var(--tint);border-radius:12px}
+    .recommendation-head{color:var(--navy)}
+    .recommendation-card ul{color:var(--ink);font-weight:400}
+    .answer-note{font-size:13px;color:var(--muted)}
+    .closed{border-left:6px solid var(--orange)}
+    .result,.question,.card,input,select,textarea{scroll-margin-top:84px}
+
+    /* Quản trị: cùng bảng màu */
+    .modal{background:rgba(26,26,26,.55)}
+    .modal-card{box-shadow:0 18px 50px rgba(0,0,0,.25)}
+    .modal-head h2{color:var(--navy)}
+    .close{color:var(--navy);background:var(--panel)}
+    .admin-tab{border:1.5px solid var(--border)}
+    .admin-tab.active{color:#fff;background:var(--navy);border-color:var(--navy)}
+    .admin-parent-header{background:var(--navy)}
+    .admin-situation-group,.situation-editor{border-color:var(--tint-bd);background:var(--tint)}
+    .admin-situation-head{color:var(--navy)}
+    .question-list-item.selected{border-color:var(--orange);background:var(--tint)}
+    .metric,.stress-metric{background:var(--panel);border-color:var(--border);border-radius:12px}
+    .metric-value,.stress-metric-value{color:var(--navy)}
+    th{background:var(--navy)}
+    tbody tr:hover{background:#F7F7F8}
+    .stress-progress{background:var(--panel)}
+    .stress-progress-bar{background:var(--orange)}
+    .stress-log{color:#F2F2F3;background:#2A2A2C}
+    .stress-confirm,.stress-status-box{background:var(--panel)}
+    .loader{background:rgba(255,255,255,.75)}
+    .spinner{border-color:var(--panel);border-top-color:var(--orange)}
+
+    @media(max-width:720px), (hover:none) and (pointer:coarse){
+      .topbar-inner{width:100%;padding:6px 14px}
+      .logo{height:44px}
+      .page{width:100%;padding:0 max(14px,env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));margin:0 auto}
+      .intro h1{font-size:23px}
+      .card{padding:18px 14px}
+      .question{padding:14px 12px}
+      .scenario-group{padding:10px}
+      .choice{min-height:62px;padding:14px 13px}
+      .actions{display:grid;grid-template-columns:1fr;gap:10px}
+      .actions .btn{width:100%;min-height:54px;font-size:18px}
+      #surveyForm .actions .btn-light{order:2}
+    }
   </style>
 </head>
 
@@ -537,23 +681,21 @@
 
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand">
-        <div class="logo">
-          <img src="images/logo.png" alt="TBS Logistics" onerror="this.style.display='none'">
-        </div>
-        <div>
-          <h1>Khảo sát VHDN “Hiểu” và “Biết” tháng 9</h1>
-          <p>Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</p>
-        </div>
-      </div>
+      <img class="logo" src="images/logo.png" alt="TBS Logistics" width="89" height="52" onerror="this.style.display='none'">
 
-      <button class="btn btn-outline" type="button" onclick="openAdminLogin()">
+      <button class="admin-btn" type="button" onclick="openAdminLogin()">
         Quản trị
       </button>
     </div>
   </header>
 
   <main class="page">
+    <div class="intro">
+      <p class="eyebrow">TBS Logistics · Văn hóa doanh nghiệp</p>
+      <h1>Khảo sát VHDN “Hiểu” và “Biết” tháng 9</h1>
+      <p class="intro-sub">Hiểu giá trị cốt lõi – Biết cách thể hiện mỗi ngày</p>
+    </div>
+
     <section id="closedCard" class="card closed">
       <h2>Khảo sát hiện đang tạm đóng</h2>
       <p id="closedMessage" class="subtitle"></p>
@@ -561,20 +703,21 @@
 
     <section id="surveyArea" class="survey-area">
       <section class="card">
-        <h2>Thông tin người tham gia</h2>
+        <h2 class="h-step"><span class="step-num">1</span>Thông tin người tham gia</h2>
         <p class="subtitle">
           Nhập MSNV để hệ thống tự điền thông tin.
         </p>
 
-        <div class="grid">
-          <div>
-            <label class="field-label" for="employeeId">MSNV</label>
-            <input id="employeeId" type="text" autocomplete="off" placeholder="Nhập MSNV">
-            <small class="note">Không bắt buộc.</small>
+        <div id="participantGrid" class="grid">
+          <div class="full">
+            <label class="field-label" for="employeeId">Mã số nhân viên (MSNV)</label>
+            <input id="employeeId" type="text" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 622412005">
+            <small class="note">Không bắt buộc. Có MSNV, hệ thống tự hiện họ tên, bộ phận để bạn xác nhận.</small>
             <div id="lookupStatus" class="lookup-status"></div>
+            <div id="employeeCard" class="employee-card-slot" aria-live="polite"></div>
           </div>
 
-          <div>
+          <div class="auto-field">
             <label class="field-label" for="fullName">
               Họ và tên <span class="required">Bắt buộc</span>
             </label>
@@ -611,7 +754,7 @@
             </select>
           </div>
 
-          <div id="autoDepartmentBox" style="display:none">
+          <div id="autoDepartmentBox" class="auto-field" style="display:none">
             <label class="field-label" for="departmentAuto">Bộ phận</label>
             <input id="departmentAuto" type="text" readonly>
           </div>
@@ -630,7 +773,7 @@
             </select>
           </div>
 
-          <div>
+          <div class="auto-field">
             <label class="field-label" for="position">Chức vụ</label>
             <input id="position" type="text" readonly placeholder="Tự động điền nếu tìm thấy MSNV">
           </div>
@@ -638,11 +781,10 @@
       </section>
 
       <form id="surveyForm" class="card" novalidate>
-        <h2>Bảng khảo sát</h2>
+        <h2 class="h-step"><span class="step-num">2</span>Bảng khảo sát</h2>
         <p class="subtitle">Đáp án được xáo trộn khi tải trang. Điểm được tính ngay sau khi nộp.</p>
 
-        <div id="questionLoadStatus" class="message"
-          style="display:block;background:#eef5f9;color:#123b5d;border:1px solid #cfdee8">
+        <div id="questionLoadStatus" class="message info" style="display:block">
           Đang tải câu hỏi, vui lòng chờ...
         </div>
         <div id="questionContainer"></div>
@@ -1489,10 +1631,7 @@
       }
 
       box.style.display = 'block';
-      box.className = 'message';
-      box.style.background = '#eef5f9';
-      box.style.color = '#123b5d';
-      box.style.border = '1px solid #cfdee8';
+      box.className = 'message info';
       box.textContent = message;
     }
 
@@ -1951,7 +2090,40 @@
         document.getElementById('departmentAuto').value = employee.department || '';
       }
 
-      setLookupStatus('Đã xác nhận MSNV.','ok');
+      setLookupStatus('','ok');
+      renderEmployeeCard(employee);
+      document.getElementById('participantGrid').classList.add('is-confirmed');
+    }
+
+    function renderEmployeeCard(employee){
+      const slot = document.getElementById('employeeCard');
+      if (!slot) return;
+      if (!employee){
+        slot.innerHTML = '';
+        return;
+      }
+      const name = String(employee.name || '').trim();
+      const words = name.split(/\s+/).filter(Boolean);
+      const initials = (words.length > 1
+        ? words[words.length - 2].charAt(0) + words[words.length - 1].charAt(0)
+        : name.charAt(0)).toUpperCase();
+      const parts = [];
+      [employee.department || (employee.isWorker ? 'Công nhân' : ''), employee.position].forEach(value => {
+        const text = String(value || '').trim();
+        if (text && !parts.some(p => p.toLowerCase() === text.toLowerCase())) parts.push(text);
+      });
+      const detail = parts.join(' · ');
+      slot.innerHTML = `
+        <div class="emp">
+          <div class="emp-top">
+            <div class="avatar" aria-hidden="true">${escapeHtml(initials || '?')}</div>
+            <div>
+              <h3>${escapeHtml(name || 'Nhân viên')}</h3>
+              ${detail ? `<p>${escapeHtml(detail)}</p>` : ''}
+            </div>
+          </div>
+          <span class="chip ok">✓ Đã xác nhận MSNV</span>
+        </div>`;
     }
 
     function resetEmployeeToManual(message){
@@ -1967,6 +2139,8 @@
       document.getElementById('workerDepartmentBox').style.display = 'none';
       document.getElementById('departmentAuto').value = '';
       document.getElementById('departmentWorker').value = '';
+      renderEmployeeCard(null);
+      document.getElementById('participantGrid').classList.remove('is-confirmed');
 
       setLookupStatus(message || 'Bạn có thể nhập thông tin thủ công.','error');
     }
@@ -2323,7 +2497,7 @@
           const explanationKey=question.id+'::'+option.id;
           const textarea=document.querySelector(`[data-explanation-key="${cssEscape(explanationKey)}"]`);
           const userExplanation=textarea&&textarea.value.trim()?escapeHtml(textarea.value.trim()):'(Bạn không chọn mục này nên không có giải thích)';
-          cards.push(`<div class="recommendation-card"><div class="recommendation-head">${escapeHtml(option.label)} ${icon} (${status})</div><ul>${escapeHtml(option.suggestion).split(/\n|\.\s+/).filter(Boolean).map(x=>`<li>${x}${/[.!?]$/.test(x)?'':'.'}</li>`).join('')}</ul><div class="answer-note">Giải thích của Anh/Chị:<br>${userExplanation}</div></div>`);
+          cards.push(`<div class="recommendation-card"><div class="recommendation-head">${escapeHtml(option.label)} ${icon} (${status})</div><ul>${escapeHtml(option.suggestion).split(/\n|\.\s+/).map(x=>x.replace(/^[\s•·\-–]+/,'')).filter(Boolean).map(x=>`<li>${x}${/[.!?]$/.test(x)?'':'.'}</li>`).join('')}</ul><div class="answer-note">Giải thích của Anh/Chị:<br>${userExplanation}</div></div>`);
         });
       });
       return cards.length?`<div class="recommendation-wrap"><div class="recommendation-title">Dưới đây là đề xuất các giá trị cốt lõi phù hợp với tình huống này:</div>${cards.join('')}</div>`:'';

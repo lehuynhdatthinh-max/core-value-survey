@@ -4,13 +4,15 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ff7a00">
+  <meta name="theme-color" content="#E45620">
   <title>Phiếu phỏng vấn nghỉ việc</title>
   <style>
     :root{
-      --primary:#ff7a00;--primary2:#ff9a3d;--accent:#123b5d;--success:#16865c;
-      --danger:#c9363e;--warning:#9a5300;--bg:#fff7ef;--card:#fff;--border:#e5e7eb;
-      --text:#1f2937;--muted:#6b7280;--radius:17px;--shadow:0 12px 32px rgba(80,45,15,.10)
+      /* Bộ quy chuẩn trình bày & nhận diện TBS Logistics 2026 (giống SafetyHub): cam #E45620, xám than #4D4D4F,
+         chữ #1A1A1A, Arial, nền trắng. Xanh lá / đỏ chỉ dùng cho trạng thái. */
+      --primary:#E45620;--primary2:#E45620;--primary-d:#C24714;--accent:#4D4D4F;--success:#16A34A;
+      --danger:#DC2626;--warning:#7A2E0B;--bg:#fff;--card:#fff;--border:#DADADC;--panel:#F2F2F3;--field:#8A8A8D;
+      --tint:#FFF6F1;--tint-bd:#F3C9B5;--text:#1A1A1A;--muted:#6B6B6E;--radius:14px;--shadow:none
     }
     *{box-sizing:border-box}
     html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
@@ -109,6 +111,90 @@
     .toast{position:fixed;z-index:2000;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));display:none;width:min(520px,calc(100% - 26px));padding:14px 16px;border-radius:12px;color:#fff;background:#9a5300;box-shadow:0 18px 45px #0004;transform:translateX(-50%);font-weight:800;line-height:1.45}.toast.on{display:block}.toast.error{background:var(--danger)}
     .loading{position:fixed;inset:0;z-index:3000;display:none;place-items:center;background:#ffffffc7;backdrop-filter:blur(2px)}.loading.on{display:grid}.spinner{width:50px;height:50px;border:5px solid #e5e7eb;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     .hidden{display:none!important}
+
+    /* ===== Giao diện theo nhận diện TBS Logistics — đồng bộ với SafetyHub ===== */
+    body{background:#fff;color:var(--text);font-size:16px;line-height:1.5}
+    .topbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:3px solid var(--primary)}
+    .topbar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:66px;padding:7px 0;width:min(1000px,calc(100% - 28px));margin:0 auto}
+    .topbar-logo{display:block;height:52px;width:auto}
+    .admin-btn{min-height:40px;padding:8px 14px;border:1.5px solid var(--accent);border-radius:10px;color:var(--accent);background:#fff;font-weight:700;font-size:14px}
+    .admin-btn:hover{background:var(--panel)}
+    .admin-btn:focus-visible,.btn:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--accent)}
+    .app{margin:0 auto 56px}
+    .intro{padding:22px 0 6px}
+    .eyebrow{margin:0 0 4px;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .intro h1{margin:0;font-size:25px;line-height:1.4;color:var(--accent);letter-spacing:.01em}
+    .intro-sub{margin:6px 0 0;color:var(--muted);font-size:15px}
+    .facts{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+    .fact{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:var(--panel);color:var(--accent);font-size:14px}
+    .privacy{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--accent);font-size:14px;line-height:1.5}
+    .status-banner.on{color:#14532D;background:#E8F6EE;border:1px solid #A9DFC7}
+    .status-banner.off{color:#7F1D1D;background:#FDECEC;border:1px solid #F5B5B5}
+    .progress-wrap{top:72px;border-color:var(--border);border-radius:12px;background:#fff;box-shadow:none;backdrop-filter:none}
+    .progress{height:8px;background:var(--panel)}.progress-bar{background:var(--primary)}
+    .progress-text{color:var(--accent);font-size:14px;font-weight:700}
+    .card{margin-top:12px;padding:20px;border:1px solid var(--border);border-radius:var(--radius);box-shadow:none}
+    .section-no{width:32px;height:32px;border-radius:50%;font-size:18px;font-weight:700}
+    .section-title{align-items:center}
+    .section-title h2{color:var(--accent);font-size:20px}
+    .section-title p{font-size:15px}
+    label.field-label{color:var(--accent);font-size:15px;font-weight:700}
+    input[type="text"],input[type="date"],input[type="email"],input[type="password"],input[type="file"],select,textarea{min-height:48px;padding:10px 14px;border:1.5px solid var(--field);border-radius:10px}
+    input::placeholder,textarea::placeholder{color:#8F8F92}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(228,86,32,.22)}
+    input[readonly]{background:var(--panel);color:var(--accent)}
+    #employeeId{font-size:22px;font-weight:700;letter-spacing:.04em;min-height:58px}
+    #employeeId::placeholder{font-size:17px;font-weight:400;letter-spacing:0}
+    .lookup-status{color:var(--accent);background:var(--panel);font-size:14px;font-weight:700}
+    .lookup-status.ok{color:#14532D;background:#E8F6EE}.lookup-status.error{color:#7F1D1D;background:#FDECEC}.lookup-status.warning{color:#7A2E0B;background:#FFF1E8}
+    .question{border-top-color:var(--border)}
+    .q-title{color:var(--text);font-size:17px;font-weight:700}
+    .help{font-size:14px}
+    .choice{min-height:56px;gap:12px;padding:12px 13px;border:2px solid var(--panel);background:var(--panel);font-size:16px}
+    .choice:hover{border-color:#E9E9EB;background:#E9E9EB}
+    .choice:has(input:checked){border-color:var(--primary);background:var(--tint);box-shadow:none}
+    .choice input{width:22px;height:22px}
+    .conditional{border:1px solid var(--tint-bd);border-left:4px solid var(--primary);background:var(--tint)}
+    .consent{background:var(--panel);border-color:var(--border)}
+    .btn{min-height:48px;padding:0 20px;border-radius:10px;font-weight:700;font-size:16px;transition:background .15s,transform .05s}
+    .btn:active{transform:translateY(1px)}
+    .btn:disabled{background:#B4B4B7;color:#fff;cursor:not-allowed}
+    .btn-primary:hover:not(:disabled){background:var(--primary-d)}
+    .submit-btn{background:var(--primary)}
+    .submit-btn:hover:not(:disabled){background:var(--primary-d)}
+    .btn-light{color:var(--accent);background:#fff;border:2px solid var(--accent)}
+    .btn-light:hover:not(:disabled){background:var(--panel)}
+    .btn-outline{color:var(--accent);border:1.5px solid var(--border)}
+    .success-icon{background:var(--success)}
+    .success-view h2{color:var(--accent)}
+    .response-code{background:var(--panel);color:var(--accent)}
+    .modal{background:rgba(26,26,26,.55)}
+    .modal-card{box-shadow:0 18px 50px rgba(0,0,0,.25)}
+    .modal-head h3{color:var(--accent)}
+    .close-btn{color:var(--accent);background:var(--panel)}
+    .admin-note,.schema-warning{color:#7A2E0B;background:#FFF1E8;border:1px solid var(--tint-bd)}
+    .admin-tabs{background:var(--panel);border-color:var(--border)}
+    .admin-tab{color:var(--accent);font-weight:700}
+    .admin-tab.on{color:#fff;background:var(--accent)}
+    .data-table th,.preview-table th{background:var(--accent)}
+    .response-name{color:var(--accent)}
+    .import-box,.builder-toolbar{border-color:var(--tint-bd);background:var(--tint)}
+    .import-summary{background:var(--panel);color:var(--accent)}
+    .builder-section{border-color:var(--border)}
+    .builder-section-head{background:var(--panel)}
+    .builder-section-number{border-radius:50%;min-width:34px;height:34px}
+    .builder-question-label{color:var(--accent)}
+    .builder-followup{border-left-color:var(--primary);background:var(--tint)}
+    .toast{background:var(--accent)}
+    .card,.question,.dynamic-question,input,select,textarea{scroll-margin-top:150px}
+    .loading{background:rgba(255,255,255,.75);backdrop-filter:none}
+    .spinner{border-color:var(--panel);border-top-color:var(--primary)}
+    @media(max-width:760px){
+      .topbar-in{width:100%;padding:6px 14px}
+      .topbar-logo{height:44px}
+      .intro h1{font-size:22px}
+      .progress-wrap{top:62px}
+    }
     @media(max-width:760px){
       .app{width:calc(100% - 16px);margin:8px auto 32px}.header{padding:17px 15px;border-radius:14px}.brand-logo{width:58px;height:58px}
       .header h1{font-size:20px}.header p{font-size:13px}.doc-meta{flex-direction:column;gap:4px}.admin-btn{min-width:46px;padding:10px;font-size:0}.admin-btn:after{content:"⚙";font-size:22px}
@@ -125,22 +211,21 @@
   <div class="loading" id="loading"><div class="spinner"></div></div>
   <div class="toast" id="toast"></div>
 
+  <header class="topbar">
+    <div class="topbar-in">
+      <img class="topbar-logo" src="https://lehuynhdatthinh-max.github.io/core-value-survey/images/logo.png" alt="TBS Logistics" width="89" height="52">
+      <button class="admin-btn" type="button" onclick="openAdmin()">Quản trị</button>
+    </div>
+  </header>
+
   <main class="app">
-    <header class="header">
-      <div class="header-row">
-        <div class="brand-wrap">
-          <img class="brand-logo" src="https://lehuynhdatthinh-max.github.io/core-value-survey/images/logo.png" alt="TBS Logistics">
-          <div>
-            <div class="eyebrow">Khảo sát nhân sự</div>
-            <h1>BẢNG CÂU HỎI PHỎNG VẤN KHI NGHỈ VIỆC</h1>
-            <p>Ghi nhận ý kiến chân thành để cải thiện môi trường làm việc và giữ chân nhân sự tốt hơn.</p>
-          </div>
-        </div>
-        <button class="admin-btn" type="button" onclick="openAdmin()">Quản trị</button>
-      </div>
-      <div class="doc-meta"><span>MKH: TBSL-NS-QT03-BM05</span><span>Lần ban hành: 02</span></div>
-      <div class="privacy"><span>🔒</span><span>Nội dung phản hồi được sử dụng cho mục đích cải tiến nội bộ. Vui lòng trả lời trung thực và đầy đủ.</span></div>
-    </header>
+    <div class="intro">
+      <p class="eyebrow">TBS Logistics · Khảo sát nhân sự</p>
+      <h1>BẢNG CÂU HỎI PHỎNG VẤN KHI NGHỈ VIỆC</h1>
+      <p class="intro-sub">Ghi nhận ý kiến chân thành để cải thiện môi trường làm việc và giữ chân nhân sự tốt hơn.</p>
+      <ul class="facts"><li class="fact">MKH: TBSL-NS-QT03-BM05</li><li class="fact">Lần ban hành: 02</li></ul>
+      <div class="privacy"><span aria-hidden="true">🔒</span><span>Nội dung phản hồi được sử dụng cho mục đích cải tiến nội bộ. Vui lòng trả lời trung thực và đầy đủ.</span></div>
+    </div>
 
     <div id="formStatus" class="status-banner"></div>
 
