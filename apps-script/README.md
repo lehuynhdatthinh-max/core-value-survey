@@ -5,8 +5,8 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. |
-| `SurveyRetake.gs` | Mỗi MSNV một dòng trong **Responses** (luôn là lần nộp mới nhất), điểm lần trước cho trang khảo sát, gộp dòng trùng cũ. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). |
+| `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
 
 ## Cài bản "xem điểm + làm lại ghi đè điểm cũ" (khoảng 5 phút)
@@ -30,6 +30,16 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.11.0: gộp MSNV theo TỪNG THÁNG
+
+Khảo sát làm hằng tháng, nên chỉ gộp các lần làm của cùng một MSNV **trong cùng tháng**:
+- Làm 3 lần trong tháng 8 → 1 dòng tháng 8 (lần mới nhất, Số lần làm = 3). Sang tháng 10 làm → **thêm dòng tháng 10**, dòng tháng 8 giữ nguyên. Làm lại trong tháng 10 → ghi đè dòng tháng 10.
+- Tháng = tháng của cột **Timestamp** theo giờ Việt Nam. Từ 4.11.0 Timestamp lấy theo **giờ máy chủ lúc nhận bài** (không theo đồng hồ điện thoại; giờ điện thoại vẫn lưu trong payload là `clientTimestamp`).
+- Trang khảo sát chỉ hiện điểm của **tháng hiện tại** ("Đã làm khảo sát tháng 10/2026"); tháng mới chưa làm thì hiện **Bắt đầu khảo sát**.
+- `mergeDuplicateResponsesByMsnv` cũng gộp theo MSNV + tháng.
+
+Cài: dán đè `Code.gs` 4.11.0 và `SurveyRetake.gs` mới › **Lưu** › nếu đã lỡ gộp các tháng với nhau bằng bản trước, khôi phục từ tab sao lưu "Responses (sao lưu trước gộp …)" rồi chạy lại `mergeDuplicateResponsesByMsnv` › **Triển khai › Quản lý triển khai › Phiên bản mới**.
 
 ## Cập nhật 4.10.0: processQueue nhanh hơn + lưu trữ Queue cũ
 

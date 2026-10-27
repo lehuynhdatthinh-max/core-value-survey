@@ -2165,6 +2165,7 @@
         const response = await apiGet('getMyResult',{ msnv:msnv });
         if (sequence !== state.lookupSequence) return;
         state.previousResult = response && response.result ? response.result : null;
+        if (state.previousResult && response.month) state.previousResult.month = response.month;
       }catch(error){
         if (sequence !== state.lookupSequence) return;
         console.warn('Không lấy được điểm lần trước:', error);
@@ -2172,6 +2173,12 @@
       }
       state.previousResultLoading = false;
       renderEmployeeCard();
+    }
+
+    // "2026-10" -> "10/2026"
+    function formatSurveyMonth(month){
+      const match = /^(\d{4})-(\d{2})$/.exec(String(month || ''));
+      return match ? `${Number(match[2])}/${match[1]}` : String(month || '');
     }
 
     function employeeInitials(name){
@@ -2231,7 +2238,7 @@
         if (previous.totalKnow) parts.push(`Phần biết: <b>${formatNumber(previous.knowScore)}/${formatNumber(previous.totalKnow)}</b>`);
         if (previous.totalUnderstand) parts.push(`Phần hiểu: <b>${formatNumber(previous.understandScore)}/${formatNumber(previous.totalUnderstand)}</b>`);
         body = `
-          <span class="chip ok">✓ Đã làm khảo sát</span>
+          <span class="chip ok">✓ Đã làm khảo sát${previous.month ? ' tháng ' + escapeHtml(formatSurveyMonth(previous.month)) : ''}</span>
           <div class="prev-result">
             <div class="prev-score"><span class="big">${formatNumber(r.score)}/${formatNumber(r.total)}</span><span class="pct">${formatNumber(r.percent)}%</span></div>
             <div class="prev-meta">${when ? `Nộp lúc ${escapeHtml(when)}` : 'Điểm lần làm gần nhất'}${parts.length ? ' · ' + parts.join(' · ') : ''}${previous.attempts > 1 ? ` · Đã làm ${formatNumber(previous.attempts)} lần` : ''}</div>
@@ -2241,7 +2248,7 @@
             <button class="btn btn-primary" type="button" onclick="startSurvey(true)">Làm lại khảo sát</button>
             <button class="btn btn-light" type="button" onclick="changeMsnv()">Nhập MSNV khác</button>
           </div>
-          <p class="card-note">Làm lại: điểm lần mới sẽ thay điểm cũ trên hệ thống.</p>`;
+          <p class="card-note">Làm lại trong tháng này: điểm lần mới sẽ thay điểm cũ trên hệ thống.</p>`;
       }else{
         body = `
           <span class="chip ok">✓ Đã xác nhận MSNV</span>
