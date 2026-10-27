@@ -579,6 +579,42 @@
     /* Thẻ nhân viên sau khi tra MSNV */
     .employee-card-slot:empty{display:none}
     .is-confirmed .auto-field{display:none !important}
+    [hidden]{display:none !important}
+    .btn-block{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:12px;font-size:18px}
+    .participant-fields .worker-box{margin-top:14px}
+    .worker-slot .worker-box{display:block;margin:14px 0 0}
+    .field-error{border-color:var(--danger) !important;box-shadow:0 0 0 4px rgba(220,38,38,.18) !important}
+    .skel{height:92px;margin-top:12px;border-radius:12px;background:linear-gradient(90deg,#EDEDEE 25%,#F7F7F8 50%,#EDEDEE 75%);background-size:200% 100%;animation:shimmer 1.1s linear infinite}
+    .skel-line{height:58px;margin-top:12px}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    .alert{display:flex;gap:12px;align-items:flex-start;margin-top:12px;padding:14px;border-radius:12px;background:#FDECEC;border:1px solid #F5B5B5;color:#7F1D1D;font-size:15px;line-height:1.5}
+    .alert b{font-size:16px}
+    .alert-detail{display:block;margin-top:4px;font-size:13px;opacity:.85}
+    .alert-icon{flex:none;width:22px;height:22px;margin-top:1px;border:2px solid #B91C1C;border-radius:50%;display:grid;place-items:center;color:#B91C1C;font-size:13px;font-weight:700;line-height:1}
+    .link{background:none;border:0;padding:6px 0;min-height:36px;color:var(--navy);font-weight:700;font-size:15px;text-decoration:underline;cursor:pointer}
+    .emp .chip{margin-top:12px}
+    .prev-result{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--panel)}
+    .prev-score,.result-score{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .prev-score .big,.result-score .big{color:var(--navy);font-size:30px;font-weight:700;line-height:1.1}
+    .prev-score .pct,.result-score .pct{color:var(--orange-d);font-size:20px;font-weight:700}
+    .prev-meta{margin-top:4px;color:var(--muted);font-size:14px;line-height:1.5}
+    .prev-meta b{color:var(--navy)}
+    .card-actions{display:grid;gap:10px;margin-top:14px}
+    .card-actions .btn{width:100%;min-height:50px;font-size:17px}
+    .card-note{margin:8px 0 0;color:var(--muted);font-size:13px;text-align:center}
+    .who{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:var(--panel)}
+    .who b{display:block;color:var(--navy);font-size:16px;line-height:1.3}
+    .who span{color:var(--muted);font-size:13px}
+    .who .link{flex:none;white-space:nowrap}
+    .retake-note{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:var(--tint);border:1px solid var(--tint-bd);color:var(--navy);font-size:15px}
+    .result-head{display:flex;align-items:center;gap:12px}
+    .result-icon{flex:none;width:44px;height:44px;border-radius:50%;background:var(--success);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center}
+    .result-head h3{margin:0}
+    .result-who{margin:2px 0 0;color:var(--muted);font-size:14px}
+    .result-score{margin-top:14px}
+    .result-parts{margin:4px 0 0;color:var(--muted);font-size:15px}
+    .result-parts b{color:var(--navy)}
+    #msnvStep.collapsed #checkMsnvButton{display:none}
     .employee-card-slot{margin-top:12px}
     .emp{border:1px solid var(--border);border-left:6px solid var(--orange);border-radius:12px;padding:14px;background:#fff}
     .emp-top{display:flex;gap:12px;align-items:center}
@@ -702,32 +738,19 @@
     </section>
 
     <section id="surveyArea" class="survey-area">
-      <section class="card">
-        <h2 class="h-step"><span class="step-num">1</span>Thông tin người tham gia</h2>
-        <p class="subtitle">
-          Nhập MSNV để hệ thống tự điền thông tin.
-        </p>
+      <section class="card" id="msnvStep">
+        <h2 class="h-step"><span class="step-num">1</span>Nhập mã số nhân viên</h2>
 
-        <div id="participantGrid" class="grid">
-          <div class="full">
-            <label class="field-label" for="employeeId">Mã số nhân viên (MSNV)</label>
-            <input id="employeeId" type="text" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 622412005">
-            <small class="note">Không bắt buộc. Có MSNV, hệ thống tự hiện họ tên, bộ phận để bạn xác nhận.</small>
-            <div id="lookupStatus" class="lookup-status"></div>
-            <div id="employeeCard" class="employee-card-slot" aria-live="polite"></div>
-          </div>
+        <label class="field-label" for="employeeId">Mã số nhân viên (MSNV)</label>
+        <input id="employeeId" type="text" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 622412005">
+        <button id="checkMsnvButton" class="btn btn-primary btn-block" type="button" onclick="checkMsnv()">Kiểm tra</button>
+        <div id="lookupStatus" class="lookup-status" aria-live="polite"></div>
+        <div id="employeeCard" class="employee-card-slot" aria-live="polite"></div>
 
-          <div class="auto-field">
-            <label class="field-label" for="fullName">
-              Họ và tên <span class="required">Bắt buộc</span>
-            </label>
-            <input id="fullName" type="text" placeholder="Nhập họ và tên">
-          </div>
-
-          <div id="manualDepartmentBox">
-            <label class="field-label" for="department">
-              Bộ phận <span class="required">Bắt buộc</span>
-            </label>
+        <!-- Thông tin lấy từ MSNV: giữ trong form để gửi kèm khảo sát, không hiện ra ngoài -->
+        <div id="participantGrid" class="participant-fields">
+          <input id="fullName" type="hidden">
+          <div id="manualDepartmentBox" style="display:none">
             <select id="department">
               <option value="">Chọn bộ phận</option>
               <option>HCNS</option>
@@ -753,13 +776,11 @@
               <option>BẢO VỆ KHO ST</option>
             </select>
           </div>
-
-          <div id="autoDepartmentBox" class="auto-field" style="display:none">
-            <label class="field-label" for="departmentAuto">Bộ phận</label>
-            <input id="departmentAuto" type="text" readonly>
+          <div id="autoDepartmentBox" style="display:none">
+            <input id="departmentAuto" type="hidden">
           </div>
-
-          <div id="workerDepartmentBox" style="display:none">
+          <input id="position" type="hidden">
+          <div id="workerDepartmentBox" class="worker-box" style="display:none">
             <label class="field-label" for="departmentWorker">
               Kho làm việc <span class="required">Bắt buộc</span>
             </label>
@@ -772,16 +793,13 @@
               <option>KHO ST</option>
             </select>
           </div>
-
-          <div class="auto-field">
-            <label class="field-label" for="position">Chức vụ</label>
-            <input id="position" type="text" readonly placeholder="Tự động điền nếu tìm thấy MSNV">
-          </div>
         </div>
       </section>
 
-      <form id="surveyForm" class="card" novalidate>
-        <h2 class="h-step"><span class="step-num">2</span>Bảng khảo sát</h2>
+      <form id="surveyForm" class="card" novalidate hidden>
+        <h2 class="h-step"><span class="step-num">2</span>Làm khảo sát</h2>
+        <div id="whoBar" class="who"></div>
+        <div id="retakeNote" class="retake-note" hidden>Bạn đang làm lại khảo sát. Điểm lần này sẽ <b>thay điểm cũ</b> sau khi nộp.</div>
         <p class="subtitle">Đáp án được xáo trộn khi tải trang. Điểm được tính ngay sau khi nộp.</p>
 
         <div id="questionLoadStatus" class="message info" style="display:block">
@@ -792,7 +810,7 @@
         <div id="formMessage" class="message"></div>
 
         <div class="actions">
-          <button class="btn btn-light" type="button" onclick="location.reload()">Làm lại</button>
+          <button class="btn btn-light" type="button" onclick="if(confirm('Xóa hết câu trả lời đã chọn?')) resetSurveyForRetake()">Xóa câu trả lời</button>
           <button id="submitButton" class="btn btn-primary" type="submit">Nộp khảo sát</button>
         </div>
 
@@ -1181,6 +1199,7 @@
       'https://script.google.com/macros/s/AKfycbzIpPzCPtqZJH9EhMyx-sPVzWXXBQ57OkKZuy7De8x45QSb2f57N13rpX-H1bpL9bCr/exec';
 
     const LOOKUP_DEBOUNCE_MS = 800;
+    const MSNV_AUTO_LOOKUP_LENGTH = 9; // MSNV TBS có 9 số: gõ đủ thì tự kiểm tra
     const SETTINGS_POLL_MS = 120000;
     const MIN_MEANINGFUL_WORDS = 5;
     const POST_TIMEOUT_MS = 60000;
@@ -1200,6 +1219,9 @@
       lastLookupMSNV: '',
       lookupSequence: 0,
       lookupTimer: null,
+      previousResult: null,
+      previousResultLoading: false,
+      surveySubmitted: false,
       admin: { email: '', passcode: '' },
       dashboard: null,
       adminQuestions: [],
@@ -1728,7 +1750,9 @@
           }
 
           if(!response.ok){
-            finish(new Error(response.error || 'Yêu cầu thất bại.'));
+            const serverError = new Error(response.error || 'Yêu cầu thất bại.');
+            serverError.fromServer = true; // Apps Script đã trả lời (không phải lỗi mạng / quá giờ)
+            finish(serverError);
             return;
           }
 
@@ -2006,27 +2030,31 @@
 
       input.addEventListener('input', () => {
         clearTimeout(state.lookupTimer);
-        state.lookupTimer = setTimeout(
-          lookupEmployeeFromInput,
-          LOOKUP_DEBOUNCE_MS
-        );
+        const msnv = normalizeMSNV(input.value);
+
+        // Đổi MSNV sau khi đã xác nhận -> quay về bước 1
+        if (state.employeeLookupOk && msnv !== state.lastLookupMSNV){
+          resetEmployeeToManual('');
+        }
+
+        // Tự kiểm tra khi đã gõ đủ MSNV (9 số); số ngắn hơn chờ bấm "Kiểm tra" / Enter
+        if (msnv.length >= MSNV_AUTO_LOOKUP_LENGTH){
+          state.lookupTimer = setTimeout(lookupEmployeeFromInput, LOOKUP_DEBOUNCE_MS);
+        }
       });
 
       input.addEventListener('keydown', event => {
         if (event.key === 'Enter'){
           event.preventDefault();
-          clearTimeout(state.lookupTimer);
-          lookupEmployeeFromInput();
+          checkMsnv();
         }
       });
+    }
 
-      input.addEventListener('blur', () => {
-        const msnv = normalizeMSNV(input.value);
-        if (msnv && msnv !== state.lastLookupMSNV) {
-          clearTimeout(state.lookupTimer);
-          lookupEmployeeFromInput();
-        }
-      });
+    function checkMsnv(){
+      clearTimeout(state.lookupTimer);
+      state.lastLookupMSNV = '';
+      lookupEmployeeFromInput();
     }
 
     async function lookupEmployeeFromInput(){
@@ -2034,6 +2062,7 @@
 
       if (!msnv){
         resetEmployeeToManual('');
+        renderLookupAlert('empty');
         return;
       }
 
@@ -2042,7 +2071,9 @@
       }
 
       const sequence = ++state.lookupSequence;
-      setLookupStatus('Đang kiểm tra MSNV…','loading');
+      setLookupStatus('','');
+      renderLookupSkeleton();
+      document.getElementById('checkMsnvButton').disabled = true;
 
       try{
         let employee;
@@ -2052,24 +2083,45 @@
         }else{
           const response = await apiGet('lookupEmployee',{ msnv:msnv });
           employee = response.employee;
-          state.employeeCache.set(msnv,employee);
+          if (employee) state.employeeCache.set(msnv,employee);
         }
 
         if (sequence !== state.lookupSequence) return;
 
         state.lastLookupMSNV = msnv;
+        if (!employee){
+          resetEmployeeToManual('');
+          renderLookupAlert('notFound');
+          return;
+        }
         applyEmployee(employee);
+        loadPreviousResult(msnv, sequence);
       }catch(error){
         if (sequence !== state.lookupSequence) return;
 
         state.lastLookupMSNV = msnv;
-        resetEmployeeToManual(error.message);
+        resetEmployeeToManual('');
+        // Máy chủ đã trả lời mà không có nhân viên -> coi là sai MSNV; chỉ lỗi mạng / quá giờ mới báo "chưa kiểm tra được"
+        if (isNotFoundError(error)) renderLookupAlert('notFound');
+        else if (error && error.fromServer) renderLookupAlert('notFound', error.message);
+        else renderLookupAlert('error', error && error.message);
+      }finally{
+        if (sequence === state.lookupSequence){
+          document.getElementById('checkMsnvButton').disabled = false;
+        }
       }
+    }
+
+    function isNotFoundError(error){
+      const message = String(error && error.message || '');
+      return /không\s*tìm\s*thấy|not\s*found|không\s*có\s*(trong|MSNV)|không\s*tồn\s*tại|chưa\s*có\s*trong\s*danh\s*sách/i.test(message);
     }
 
     function applyEmployee(employee){
       state.employee = employee;
       state.employeeLookupOk = true;
+      state.previousResult = null;
+      state.previousResultLoading = true;
 
       const nameInput = document.getElementById('fullName');
       const positionInput = document.getElementById('position');
@@ -2079,70 +2131,224 @@
       positionInput.value = employee.position || '';
 
       document.getElementById('manualDepartmentBox').style.display = 'none';
-
-      if (employee.isWorker){
-        document.getElementById('autoDepartmentBox').style.display = 'none';
-        document.getElementById('workerDepartmentBox').style.display = '';
-        document.getElementById('departmentWorker').value = '';
-      }else{
-        document.getElementById('workerDepartmentBox').style.display = 'none';
-        document.getElementById('autoDepartmentBox').style.display = '';
-        document.getElementById('departmentAuto').value = employee.department || '';
-      }
+      document.getElementById('autoDepartmentBox').style.display = 'none';
+      document.getElementById('departmentAuto').value = employee.isWorker ? '' : (employee.department || '');
+      document.getElementById('workerDepartmentBox').style.display = employee.isWorker ? '' : 'none';
+      document.getElementById('departmentWorker').value = '';
 
       setLookupStatus('','ok');
-      renderEmployeeCard(employee);
-      document.getElementById('participantGrid').classList.add('is-confirmed');
+      renderEmployeeCard();
     }
 
-    function renderEmployeeCard(employee){
-      const slot = document.getElementById('employeeCard');
-      if (!slot) return;
-      if (!employee){
-        slot.innerHTML = '';
-        return;
-      }
-      const name = String(employee.name || '').trim();
-      const words = name.split(/\s+/).filter(Boolean);
-      const initials = (words.length > 1
-        ? words[words.length - 2].charAt(0) + words[words.length - 1].charAt(0)
-        : name.charAt(0)).toUpperCase();
-      const parts = [];
-      [employee.department || (employee.isWorker ? 'Công nhân' : ''), employee.position].forEach(value => {
-        const text = String(value || '').trim();
-        if (text && !parts.some(p => p.toLowerCase() === text.toLowerCase())) parts.push(text);
-      });
-      const detail = parts.join(' · ');
-      slot.innerHTML = `
-        <div class="emp">
-          <div class="emp-top">
-            <div class="avatar" aria-hidden="true">${escapeHtml(initials || '?')}</div>
-            <div>
-              <h3>${escapeHtml(name || 'Nhân viên')}</h3>
-              ${detail ? `<p>${escapeHtml(detail)}</p>` : ''}
-            </div>
-          </div>
-          <span class="chip ok">✓ Đã xác nhận MSNV</span>
-        </div>`;
-    }
-
-    function resetEmployeeToManual(message){
+    function resetEmployeeToManual(){
       state.employee = null;
       state.employeeLookupOk = false;
+      state.previousResult = null;
+      state.previousResultLoading = false;
 
-      const nameInput = document.getElementById('fullName');
-      nameInput.readOnly = false;
-
+      document.getElementById('fullName').value = '';
       document.getElementById('position').value = '';
-      document.getElementById('manualDepartmentBox').style.display = '';
+      document.getElementById('manualDepartmentBox').style.display = 'none';
       document.getElementById('autoDepartmentBox').style.display = 'none';
       document.getElementById('workerDepartmentBox').style.display = 'none';
       document.getElementById('departmentAuto').value = '';
       document.getElementById('departmentWorker').value = '';
-      renderEmployeeCard(null);
-      document.getElementById('participantGrid').classList.remove('is-confirmed');
+      parkWorkerBox();
+      document.getElementById('employeeCard').innerHTML = '';
+      setLookupStatus('','');
+      hideSurveyForm();
+    }
 
-      setLookupStatus(message || 'Bạn có thể nhập thông tin thủ công.','error');
+    // Điểm lần làm trước (nếu Apps Script đã có hành động getMyResult). Lỗi / chưa có -> coi như chưa làm.
+    async function loadPreviousResult(msnv, sequence){
+      try{
+        const response = await apiGet('getMyResult',{ msnv:msnv });
+        if (sequence !== state.lookupSequence) return;
+        state.previousResult = response && response.result ? response.result : null;
+      }catch(error){
+        if (sequence !== state.lookupSequence) return;
+        console.warn('Không lấy được điểm lần trước:', error);
+        state.previousResult = null;
+      }
+      state.previousResultLoading = false;
+      renderEmployeeCard();
+    }
+
+    function employeeInitials(name){
+      const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+      if (!words.length) return '?';
+      return (words.length > 1
+        ? words[words.length - 2].charAt(0) + words[words.length - 1].charAt(0)
+        : words[0].charAt(0)).toUpperCase();
+    }
+
+    function employeeDetailLine(employee){
+      const parts = ['MSNV ' + normalizeMSNV(document.getElementById('employeeId').value)];
+      [employee.department || (employee.isWorker ? 'Công nhân' : ''), employee.position].forEach(value => {
+        const text = String(value || '').trim();
+        if (text && !parts.some(p => p.toLowerCase() === text.toLowerCase())) parts.push(text);
+      });
+      return parts.join(' · ');
+    }
+
+    function formatResultScore(result){
+      const score = Number(result.score) || 0;
+      const total = Number(result.total) || 0;
+      const percent = result.percent != null && result.percent !== ''
+        ? Number(result.percent)
+        : (total ? Math.round(score / total * 10000) / 100 : 0);
+      return { score, total, percent };
+    }
+
+    // Ô chọn Kho (công nhân) được đưa vào thẻ nhân viên; trả về chỗ cũ trước khi vẽ lại / xóa thẻ để không bị mất
+    function parkWorkerBox(){
+      const box = document.getElementById('workerDepartmentBox');
+      const home = document.getElementById('participantGrid');
+      if (box && home && box.parentNode !== home) home.appendChild(box);
+    }
+
+    function renderEmployeeCard(){
+      const slot = document.getElementById('employeeCard');
+      const employee = state.employee;
+      if (!slot) return;
+      parkWorkerBox();
+      if (!employee){
+        slot.innerHTML = '';
+        return;
+      }
+
+      const previous = state.previousResult;
+      let body;
+
+      if (state.previousResultLoading){
+        body = `
+          <span class="chip ok">✓ Đã xác nhận MSNV</span>
+          <div class="skel skel-line" aria-label="Đang kiểm tra kết quả lần trước"></div>`;
+      }else if (previous){
+        const r = formatResultScore(previous);
+        const when = previous.submittedAt || previous.timestamp || '';
+        const parts = [];
+        if (previous.totalKnow) parts.push(`Phần biết: <b>${formatNumber(previous.knowScore)}/${formatNumber(previous.totalKnow)}</b>`);
+        if (previous.totalUnderstand) parts.push(`Phần hiểu: <b>${formatNumber(previous.understandScore)}/${formatNumber(previous.totalUnderstand)}</b>`);
+        body = `
+          <span class="chip ok">✓ Đã làm khảo sát</span>
+          <div class="prev-result">
+            <div class="prev-score"><span class="big">${formatNumber(r.score)}/${formatNumber(r.total)}</span><span class="pct">${formatNumber(r.percent)}%</span></div>
+            <div class="prev-meta">${when ? `Nộp lúc ${escapeHtml(when)}` : 'Điểm lần làm gần nhất'}${parts.length ? ' · ' + parts.join(' · ') : ''}${previous.attempts > 1 ? ` · Đã làm ${formatNumber(previous.attempts)} lần` : ''}</div>
+          </div>
+          ${workerBoxHint()}
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" onclick="startSurvey(true)">Làm lại khảo sát</button>
+            <button class="btn btn-light" type="button" onclick="changeMsnv()">Nhập MSNV khác</button>
+          </div>
+          <p class="card-note">Làm lại: điểm lần mới sẽ thay điểm cũ trên hệ thống.</p>`;
+      }else{
+        body = `
+          <span class="chip ok">✓ Đã xác nhận MSNV</span>
+          ${workerBoxHint()}
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" onclick="startSurvey(false)">Bắt đầu khảo sát</button>
+            <button class="btn btn-light" type="button" onclick="changeMsnv()">Không phải tôi – nhập lại</button>
+          </div>`;
+      }
+
+      slot.innerHTML = `
+        <div class="emp">
+          <div class="emp-top">
+            <div class="avatar" aria-hidden="true">${escapeHtml(employeeInitials(employee.name))}</div>
+            <div>
+              <h3>${escapeHtml(employee.name || 'Nhân viên')}</h3>
+              <p>${escapeHtml(employeeDetailLine(employee))}</p>
+            </div>
+          </div>
+          ${body}
+        </div>`;
+
+      // Ô chọn Kho của công nhân nằm trong thẻ, ngay trên nút bắt đầu
+      const workerBox = document.getElementById('workerDepartmentBox');
+      const slotForWorker = slot.querySelector('.worker-slot');
+      if (slotForWorker && workerBox) slotForWorker.appendChild(workerBox);
+    }
+
+    function workerBoxHint(){
+      return state.employee && state.employee.isWorker ? '<div class="worker-slot"></div>' : '';
+    }
+
+    function renderLookupSkeleton(){
+      parkWorkerBox();
+      document.getElementById('employeeCard').innerHTML =
+        '<div class="skel" aria-label="Đang kiểm tra MSNV"></div>';
+    }
+
+    function renderLookupAlert(kind, detail){
+      parkWorkerBox();
+      const slot = document.getElementById('employeeCard');
+      if (kind === 'empty'){
+        slot.innerHTML = `<div class="alert"><span class="alert-icon" aria-hidden="true">!</span><div><b>Vui lòng nhập MSNV.</b><br>MSNV là mã số trên thẻ nhân viên của bạn.</div></div>`;
+        return;
+      }
+      if (kind === 'notFound'){
+        slot.innerHTML = `<div class="alert"><span class="alert-icon" aria-hidden="true">!</span><div><b>Không tìm thấy MSNV này.</b><br>Vui lòng kiểm tra lại số đã nhập. Nếu vẫn không được, liên hệ phòng HSSE.${detail ? `<span class="alert-detail">${escapeHtml(detail)}</span>` : ''}</div></div>`;
+        return;
+      }
+      slot.innerHTML = `<div class="alert"><span class="alert-icon" aria-hidden="true">!</span><div><b>Chưa kiểm tra được MSNV.</b><br>${escapeHtml(detail || 'Lỗi kết nối.')}<br><button class="link" type="button" onclick="checkMsnv()">Thử lại</button></div></div>`;
+    }
+
+    function startSurvey(isRetake){
+      if (!state.employeeLookupOk) return;
+      if (state.employee && state.employee.isWorker && !document.getElementById('departmentWorker').value){
+        const select = document.getElementById('departmentWorker');
+        select.focus();
+        select.classList.add('field-error');
+        return;
+      }
+      document.getElementById('departmentWorker').classList.remove('field-error');
+
+      const form = document.getElementById('surveyForm');
+      if (state.surveySubmitted) resetSurveyForRetake();
+      form.hidden = false;
+      document.getElementById('retakeNote').hidden = !isRetake;
+      document.getElementById('whoBar').innerHTML = `
+        <div><b>${escapeHtml(state.employee.name || '')}</b><span>${escapeHtml(employeeDetailLine(state.employee))}</span></div>
+        <button class="link" type="button" onclick="changeMsnv()">Đổi người</button>`;
+      document.getElementById('msnvStep').classList.add('collapsed');
+      form.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function hideSurveyForm(){
+      const form = document.getElementById('surveyForm');
+      if (form) form.hidden = true;
+      const step = document.getElementById('msnvStep');
+      if (step) step.classList.remove('collapsed');
+    }
+
+    function changeMsnv(){
+      const input = document.getElementById('employeeId');
+      if (state.surveySubmitted) resetSurveyForRetake();
+      input.disabled = false;
+      input.value = '';
+      state.lastLookupMSNV = '';
+      resetEmployeeToManual('');
+      document.getElementById('msnvStep').scrollIntoView({behavior:'smooth', block:'start'});
+      input.focus();
+    }
+
+    // Làm lại sau khi nộp: xóa câu trả lời, mở khóa, mã lần nộp mới, xáo lại đáp án
+    function resetSurveyForRetake(){
+      state.surveySubmitted = false;
+      state.currentSubmissionId = '';
+      document
+        .querySelectorAll('#surveyArea input,#surveyArea select,#surveyArea textarea,#submitButton,#checkMsnvButton')
+        .forEach(element => { element.disabled = false; });
+      const result = document.getElementById('resultBox');
+      result.classList.remove('active');
+      result.innerHTML = '';
+      clearFormMessage();
+      renderQuestions();
+    }
+
+    function retakeAfterSubmit(){
+      startSurvey(true);
     }
 
     function setLookupStatus(message,type){
@@ -2328,6 +2534,15 @@
 
         renderLocalResult(response.scores || scores,response.queueId);
         lockSurveyForm();
+        state.surveySubmitted = true;
+        const finalScores = response.scores || scores;
+        state.previousResult = {
+          ...finalScores,
+          percent: finalScores.total ? Math.round(finalScores.score / finalScores.total * 10000) / 100 : 0,
+          submittedAt: formatNowVi(),
+          attempts: (state.previousResult && state.previousResult.attempts ? state.previousResult.attempts : 0) + 1
+        };
+        state.previousResultLoading = false;
       }catch(error){
         const detail = error && error.message
           ? error.message
@@ -2345,11 +2560,13 @@
     }
 
     function validateSurvey(){
-      if (!document.getElementById('fullName').value.trim()) {
-        return {ok:false,message:'Vui lòng nhập họ và tên.'};
+      if (!state.employeeLookupOk || !document.getElementById('fullName').value.trim()) {
+        return {ok:false,message:'Vui lòng nhập MSNV và bấm Kiểm tra trước khi nộp khảo sát.'};
       }
       if (!getFinalDepartment()) {
-        return {ok:false,message:'Vui lòng chọn bộ phận hoặc kho làm việc.'};
+        return {ok:false,message: state.employee && state.employee.isWorker
+          ? 'Vui lòng chọn kho làm việc ở bước 1.'
+          : 'MSNV chưa có bộ phận trong danh sách nhân sự. Vui lòng liên hệ phòng HSSE.'};
       }
 
       for (const question of QUESTIONS){
@@ -2477,9 +2694,20 @@
       const recommendations=buildRecommendations();
       result.classList.add('active');
       result.innerHTML=`
-        <h3 style="margin-top:0">Đã hoàn thành khảo sát ✅</h3>
-        <p><strong>Tổng điểm:</strong> ${scores.score}/${scores.total}</p>
-        <p><strong>Phần biết:</strong> ${scores.knowScore}/${scores.totalKnow} · <strong>Phần hiểu:</strong> ${scores.understandScore}/${scores.totalUnderstand}</p>
+        <div class="result-head">
+          <div class="result-icon" aria-hidden="true">✓</div>
+          <div>
+            <h3>Đã hoàn thành khảo sát</h3>
+            <p class="result-who">${escapeHtml(document.getElementById('fullName').value)} · MSNV ${escapeHtml(normalizeMSNV(document.getElementById('employeeId').value))}</p>
+          </div>
+        </div>
+        <div class="result-score"><span class="big">${scores.score}/${scores.total}</span><span class="pct">${formatNumber(percent)}%</span></div>
+        <p class="result-parts">Phần biết: <b>${scores.knowScore}/${scores.totalKnow}</b> · Phần hiểu: <b>${scores.understandScore}/${scores.totalUnderstand}</b></p>
+        <div class="card-actions">
+          <button class="btn btn-primary" type="button" onclick="retakeAfterSubmit()">Làm lại khảo sát</button>
+          <button class="btn btn-light" type="button" onclick="changeMsnv()">Người khác làm khảo sát</button>
+        </div>
+        <p class="card-note">Làm lại: điểm lần mới sẽ thay điểm này trên hệ thống.</p>
         ${recommendations}
         <p class="answer-note">Mã hàng đợi: ${escapeHtml(queueId||'')} · Mã lần nộp: ${escapeHtml(state.currentSubmissionId||'')} · Kết quả sẽ được chuyển vào sheet Responses.</p>`;
       result.scrollIntoView({behavior:'smooth',block:'start'});
@@ -2501,6 +2729,12 @@
         });
       });
       return cards.length?`<div class="recommendation-wrap"><div class="recommendation-title">Dưới đây là đề xuất các giá trị cốt lõi phù hợp với tình huống này:</div>${cards.join('')}</div>`:'';
+    }
+
+    function formatNowVi(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function lockSurveyForm(){
