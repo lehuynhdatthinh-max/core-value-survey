@@ -5,7 +5,7 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). Bản 4.9.0 có thêm `getMyResult` và ghi đè điểm khi làm lại. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. |
 | `SurveyRetake.gs` | Mỗi MSNV một dòng trong **Responses** (luôn là lần nộp mới nhất), điểm lần trước cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
 
@@ -30,6 +30,16 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.10.0: processQueue nhanh hơn + lưu trữ Queue cũ
+
+Trước đây `processQueue` (chạy mỗi phút) đọc 6 cột của MỌI dòng Queue, kể cả nội dung bài làm (payloadJson), và Queue không bao giờ được dọn — sheet càng dài, mỗi lần chạy càng chậm và càng tốn hạn mức thời gian chạy trigger mỗi ngày.
+
+- Mỗi phút chỉ đọc **cột status**; chỉ đọc bài làm của đúng các dòng NEW được nhận (tối đa 80/lần); đánh dấu PROCESSING bằng một lần ghi.
+- Ghi DONE / ERROR theo **queueId** (không theo số dòng), nên vẫn đúng khi dòng Queue được dời đi.
+- **Mỗi giờ**, dòng **DONE đã xử lý quá 24 giờ** được chuyển sang tab mới **Queue Archive** (giữ nguyên cột). Dòng NEW / PROCESSING / ERROR giữ lại trong Queue.
+
+Cài: dán đè `Code.gs` bản 4.10.0 › **Lưu** › chạy **`archiveQueueNow`** một lần (dọn ngay Queue cũ, nhật ký báo số dòng đã chuyển) › **Triển khai › Quản lý triển khai › Phiên bản mới**. Không cần trigger mới.
 
 ## Các thay đổi trong Code.gs (4.8.0 → 4.9.0)
 
