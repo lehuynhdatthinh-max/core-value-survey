@@ -143,61 +143,89 @@ function getMyResult_(msnv) {
 
 /**
  * Chạy MỘT LẦN từ trình soạn thảo: gộp các dòng trùng MSNV đã có trong Responses.
- * Mỗi MSNV giữ VỊ TRÍ dòng đầu tiên, ghi đè bằng NỘI DUNG lần nộp mới nhất (dòng dưới cùng),
- * "Số lần làm" = tổng số lần, rồi xóa các dòng thừa. Dòng Stress Test và dòng không có MSNV giữ nguyên.
+ * Mỗi MSNV giữ VỊ TRÍ dòng đầu tiên, nội dung = lần nộp MỚI NHẤT (dòng dưới cùng), "Số lần làm" = tổng số lần.
+ * Dòng Stress Test và dòng không có MSNV giữ nguyên. Tự chép một tab sao lưu trước khi ghi.
+ * Đọc cả bảng một lần, ghi lại một lần, xóa phần thừa ở cuối một lần (không xóa từng dòng — dễ gặp lỗi
+ * "An unknown error has occurred" khi sheet nhiều dòng).
  */
 function mergeDuplicateResponsesByMsnv() {
-  const sheet = ensureResponsesSheet_();
-  if (sheet.getLastRow() < 3) return 'Không có dòng trùng.';
+  const ss = getSpreadsheet_();
+  const sheet = ss.getSheetByName(CFG.SHEETS.RESPONSES);
+  if (!sheet || sheet.getLastRow() < 3) return log_('Không có dòng trùng.');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
-    let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn())
-      .getDisplayValues()[0].map(header => String(header || '').trim());
-    if (headers.indexOf('MSNV') < 0) throw new Error('Sheet Responses không có cột MSNV.');
-    if (headers.indexOf(RETAKE_ATTEMPTS_HEADER) < 0) {
-      sheet.getRange(1, headers.length + 1).setValue(RETAKE_ATTEMPTS_HEADER);
-      headers = headers.concat(RETAKE_ATTEMPTS_HEADER);
-    }
-    const attemptsColumn = headers.indexOf(RETAKE_ATTEMPTS_HEADER);
-    const keys = readResponseKeys_(sheet, headers);
+    const lastRow = sheet.getLastRow();
+    let lastColumn = sheet.getLastColumn();
+    let headers = sheet.getRange(1, 1, 1, lastColumn).getDisplayValues()[0].map(header => String(header || '').trim());
+    const msnvIndex = headers.indexOf('MSNV');
+    if (msnvIndex < 0) throw new Error('Sheet Responses không có cột MSNV ở dòng 1.');
+    const stressIndex = headers.indexOf('Stress Test');
 
+    const data = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
+
+    // Gom dòng theo MSNV (bỏ qua Stress Test / không có MSNV)
     const groups = {};
-    keys.msnvs.forEach((value, i) => {
-      if (isStressValue_(keys.stress[i])) return;
-      const key = retakeMsnvKey_(value);
-      if (!key) return;
-      (groups[key] = groups[key] || []).push(i);
+    data.forEach((row, i) => {
+      if (stressIndex >= 0 && isStressValue_(row[stressIndex])) return;
+      const key = retakeMsnvKey_(row[msnvIndex]);
+      if (key) (groups[key] = groups[key] || []).push(i);
     });
+    const duplicateKeys = Object.keys(groups).filter(key => groups[key].length > 1);
+    const needsAttemptsColumn = headers.indexOf(RETAKE_ATTEMPTS_HEADER) < 0;
+    if (!duplicateKeys.length && !needsAttemptsColumn) return log_('Không có dòng trùng, không cần gộp.');
 
-    const toDelete = [];
-    let merged = 0;
-    const cache = CacheService.getScriptCache();
-    Object.keys(groups).forEach(key => {
-      const rows = groups[key];
-      const attempts = rows.reduce((sum, i) => sum + Math.max(number_(keys.attempts[i], 1), 1), 0);
-      const first = rows[0];
-      const latest = rows[rows.length - 1];
-      if (rows.length > 1) {
-        const values = sheet.getRange(latest + 2, 1, 1, headers.length).getValues()[0];
-        values[attemptsColumn] = attempts;
-        sheet.getRange(first + 2, 1, 1, headers.length).setValues([values]);
-        rows.slice(1).forEach(i => toDelete.push(i));
-        merged++;
-      } else if (keys.attempts[first] === '' || keys.attempts[first] == null) {
-        sheet.getRange(first + 2, attemptsColumn + 1).setValue(1);
+    // Sao lưu nguyên tab trước khi sửa
+    const backupName = 'Responses (sao lưu trước gộp ' +
+      Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'Asia/Ho_Chi_Minh', 'dd-MM-yyyy HH.mm') + ')';
+    sheet.copyTo(ss).setName(backupName);
+
+    // Cột "Số lần làm": thêm ở cuối nếu chưa có (mở rộng lưới trước để không vượt kích thước sheet)
+    if (needsAttemptsColumn) {
+      if (sheet.getMaxColumns() < lastColumn + 1) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
+      sheet.getRange(1, lastColumn + 1).setValue(RETAKE_ATTEMPTS_HEADER);
+      headers = headers.concat(RETAKE_ATTEMPTS_HEADER);
+      lastColumn += 1;
+      data.forEach(row => row.push(''));
+    }
+    const attemptsIndex = headers.indexOf(RETAKE_ATTEMPTS_HEADER);
+
+    // Dựng lại bảng: dòng đầu của mỗi MSNV mang nội dung lần mới nhất, các dòng trùng sau bị bỏ
+    const firstOf = {};
+    Object.keys(groups).forEach(key => { firstOf[groups[key][0]] = key; });
+    const output = [];
+    data.forEach((row, i) => {
+      const key = firstOf[i];
+      if (key === undefined) {
+        const isGrouped = !(stressIndex >= 0 && isStressValue_(row[stressIndex])) && retakeMsnvKey_(row[msnvIndex]);
+        if (!isGrouped) output.push(row); // Stress Test / không MSNV: giữ nguyên
+        return;                           // dòng trùng đứng sau: bỏ
       }
-      cache.remove(retakeResultCacheKey_(key));
+      const rows = groups[key];
+      const latest = data[rows[rows.length - 1]].slice();
+      latest[attemptsIndex] = rows.reduce((sum, r) => sum + Math.max(number_(data[r][attemptsIndex], 1), 1), 0);
+      output.push(latest);
     });
 
-    toDelete.sort((a, b) => b - a).forEach(i => sheet.deleteRow(i + 2));
-    const message = 'Đã gộp ' + merged + ' MSNV (giữ lần nộp mới nhất), xóa ' + toDelete.length + ' dòng trùng.';
-    console.log(message);
-    return message;
+    sheet.getRange(2, 1, output.length, lastColumn).setValues(output);
+    const leftover = data.length - output.length;
+    if (leftover > 0) sheet.deleteRows(2 + output.length, leftover);
+    SpreadsheetApp.flush();
+
+    const cache = CacheService.getScriptCache();
+    Object.keys(groups).forEach(key => cache.remove(retakeResultCacheKey_(key)));
+
+    return log_('Đã gộp ' + duplicateKeys.length + ' MSNV (giữ lần nộp mới nhất), xóa ' + leftover +
+      ' dòng trùng. Còn ' + output.length + ' dòng. Bản sao lưu: tab "' + backupName + '".');
   } finally {
     lock.releaseLock();
   }
+}
+
+function log_(message) {
+  console.log(message);
+  return message;
 }
 
 /** Thử nhanh từ trình soạn thảo: đổi MSNV rồi bấm Chạy, xem Nhật ký thực thi. */
