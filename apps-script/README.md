@@ -5,7 +5,8 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. |
+| `SurveyReport.gs` | Số liệu tab **Báo cáo VHDN**: BIẾT / HIỂU theo tháng, quý, bộ phận; số liệu nhập từ file báo cáo; điểm chuẩn HIỂU. |
 | `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
 
@@ -30,6 +31,19 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.13.0: tab "Báo cáo VHDN" (giống file báo cáo PowerPoint)
+
+Dashboard quản trị có thêm tab **Báo cáo VHDN**:
+- Chọn **tháng / quý / cả năm**. Ô tổng hợp: Tổng nhân sự khảo sát, Nhân sự đạt "BIẾT" (đúng **tất cả** câu BIẾT), Tỷ lệ đạt, Điểm chuẩn "HIỂU", Điểm TB "HIỂU" tất cả bộ phận (trung bình điểm TB các bộ phận, như báo cáo).
+- Biểu đồ theo bộ phận: BIẾT (tổng / đạt / tỷ lệ) và HIỂU (điểm TB so với đường điểm chuẩn); xu hướng theo tháng; bảng số liệu.
+- Bộ phận gộp theo nhóm của báo cáo (KHO 7-8 → KHO 7-8-DEPOT, XNK ICD / XNK TCY → XNK, BẢO VỆ ICD → BẢO VỆ ICD 30, BẢO VỆ ST → BẢO VỆ KHO ST, Giao nhận quốc tế → GNQT…); tên khác giữ nguyên.
+- **Điểm chuẩn HIỂU tự động** = điểm tối đa phần HIỂU của tháng (đổi theo số câu HIỂU); có thể **đặt tay** cho từng tháng. Quý = trung bình các tháng.
+- **Nhập Excel / PowerPoint**: đọc file báo cáo như "Báo cáo khảo sát VHDN - 2026.pptx" (biểu đồ "… của các bộ phận tháng M/YYYY") hoặc file Excel xuất từ tab này; xem trước rồi lưu vào tab **Báo cáo VHDN (nhập)** của sheet. Tháng có bài khảo sát trực tuyến luôn dùng số liệu trực tuyến.
+- **Xuất PowerPoint / Excel** cả năm: trang bìa, tổng hợp BIẾT / HIỂU (3 kỳ mỗi trang, có quý), biểu đồ theo bộ phận từng tháng và từng quý. File xuất nhập lại được.
+
+Cài: dán đè `Code.gs` 4.13.0 (gửi riêng) › thêm tệp `SurveyReport.gs` (**＋ › Tập lệnh**, dán `apps-script/SurveyReport.gs`) › **Lưu** › **Triển khai › Quản lý triển khai › Phiên bản mới**. Trang khảo sát (GitHub Pages) đã có sẵn tab mới.
+Thử: chọn hàm `testReportData` › **Chạy** — Nhật ký liệt kê từng tháng có số liệu.
 
 ## Cập nhật 4.12.0: chịu được 75–100 người cùng lúc
 

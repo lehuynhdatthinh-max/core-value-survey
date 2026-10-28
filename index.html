@@ -709,6 +709,67 @@
       .actions .btn{width:100%;min-height:54px;font-size:18px}
       #surveyForm .actions .btn-light{order:2}
     }
+  
+    /* ===== Tab Báo cáo VHDN ===== */
+    #reportPanel .hidden{display:none!important}
+    .report-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+    .report-toolbar>div:first-child{min-width:230px;flex:1;max-width:340px}
+    .report-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .report-empty{margin-top:14px;padding:18px;border:1px dashed var(--border,#DADADC);border-radius:12px;color:var(--muted,#6B6B6E);line-height:1.55}
+    .report-title{margin:18px 0 2px;color:var(--navy);font-size:20px}
+    .report-source{margin:0 0 12px;color:var(--muted,#6B6B6E);font-size:14px}
+    .report-tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+    .report-tile{padding:14px;border:1px solid var(--border,#DADADC);border-radius:12px;background:#fff}
+    .report-tile.strong{background:#FFF6F1;border-color:#F3C9B5}
+    .report-tile .metric-value{font-variant-numeric:tabular-nums}
+    .report-tile-sub{margin-top:2px;color:var(--muted,#6B6B6E);font-size:12px}
+    .report-bench{margin-top:12px;padding:12px 14px;border:1px solid var(--border,#DADADC);border-radius:12px;background:#F7F7F8}
+    .report-bench-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .report-bench-row input{max-width:140px}
+    .report-hint{margin:6px 0 0;color:var(--muted,#6B6B6E);font-size:13px;line-height:1.5}
+    .report-card{margin-top:14px;padding:16px;border:1px solid var(--border,#DADADC);border-radius:12px;background:#fff}
+    .report-card h4{margin:0 0 10px;color:var(--navy);font-size:16px}
+    .rc-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;color:var(--muted,#6B6B6E);font-size:13px}
+    .rc-legend span{display:inline-flex;align-items:center;gap:6px}
+    .rc-legend i{display:inline-block;width:14px;height:10px;border-radius:3px}
+    .rc-row{display:grid;grid-template-columns:minmax(92px,150px) minmax(0,1fr) 54px;gap:10px;align-items:center;padding:5px 0;border-top:1px solid #F0F0F1}
+    .rc-row:first-of-type{border-top:0}
+    .rc-row:hover{background:#FAFAFA}
+    .rc-label{font-size:13px;font-weight:700;color:#333;line-height:1.25;overflow-wrap:anywhere}
+    .rc-head{padding:0 0 2px;border-top:0}.rc-head .rc-rate{font-size:11px;font-weight:700;color:var(--muted,#6B6B6E);text-transform:uppercase;letter-spacing:.03em}
+    .rc-track{position:relative;display:flex;flex-direction:column;gap:3px;min-width:0}
+    .rc-line{display:flex;align-items:center;gap:6px;min-width:0}
+    .rc-bar{height:9px;border-radius:0 4px 4px 0;min-width:2px;flex:0 0 auto}
+    .rc-track.single .rc-bar{height:16px}
+    .rc-bar-in{display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+    .rc-bar-in span{color:#fff;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+    .rc-val{font-size:12px;color:#333;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .rc-rate{text-align:right;font-size:13px;font-weight:700;color:#333;font-variant-numeric:tabular-nums}
+    .rc-bench{position:absolute;top:-6px;bottom:-6px;width:0;border-left:2px dashed #4D4D4F}
+    .rc-empty{padding:16px;color:var(--muted,#6B6B6E)}
+    .rt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .rt-grid h4{margin:0 0 8px;color:var(--navy);font-size:15px}
+    .rt-chart{display:flex;align-items:stretch;gap:6px;height:170px;padding-top:4px;border-bottom:1px solid #DADADC}
+    .rt-col{flex:1;display:flex;flex-direction:column;min-width:0}
+    .rt-area{position:relative;flex:1}
+    .rt-bar{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:70%;max-width:34px;background:#E45620;border-radius:4px 4px 0 0;opacity:.75}
+    .rt-col.sel .rt-bar{opacity:1}
+    .rt-val{position:absolute;left:50%;transform:translateX(-50%);font-size:11px;color:#333;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .rt-bench{position:absolute;left:8%;right:8%;height:0;border-top:2px dashed #4D4D4F}
+    .rt-label{text-align:center;font-size:12px;color:var(--muted,#6B6B6E);padding-top:4px}
+    .rt-col.sel .rt-label{color:#1A1A1A;font-weight:700}
+    #reportRows tr.total td{background:#F7F7F8}
+    .report-preview{margin-top:12px;padding:14px;border:1px solid #F3C9B5;border-radius:12px;background:#FFF6F1;overflow:auto}
+    .report-preview h4{margin:0 0 8px}
+    .report-preview table{min-width:640px}
+    .report-imports{margin-top:16px}
+    .report-imports summary{cursor:pointer;font-weight:700;color:var(--navy)}
+    .report-imports ul{list-style:none;margin:10px 0 0;padding:0}
+    .report-imports li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 0;border-top:1px solid #F0F0F1}
+    .report-imports li.muted{color:var(--muted,#6B6B6E)}
+    .btn-xs{min-height:32px;padding:4px 10px;font-size:13px}
+    @media(max-width:900px){.report-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.rt-grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.report-actions{width:100%}.report-actions .btn{flex:1 1 45%}.report-toolbar>div:first-child{max-width:none}.rc-row{grid-template-columns:104px minmax(0,1fr) 46px;gap:6px}.rc-label{font-size:12px}.rt-val{font-size:10px}}
   </style>
 </head>
 
@@ -870,6 +931,11 @@
           Kết quả khảo sát
         </button>
         <button class="btn btn-light admin-tab"
+          data-panel="reportPanel" type="button"
+          onclick="switchAdminPanel('reportPanel', this); openVhdnReport()">
+          Báo cáo VHDN
+        </button>
+        <button class="btn btn-light admin-tab"
           data-panel="questionsPanel" type="button"
           onclick="switchAdminPanel('questionsPanel', this); loadAdminQuestions()">
           Câu hỏi & đáp án
@@ -1025,6 +1091,71 @@
             </button>
           </div>
         </div>
+      </section>
+
+      <section id="reportPanel" class="admin-panel">
+        <div class="report-toolbar">
+          <div>
+            <label class="field-label" for="reportPeriod">Kỳ báo cáo</label>
+            <select id="reportPeriod"><option value="">Đang tải…</option></select>
+          </div>
+          <div class="report-actions">
+            <button class="btn btn-light" type="button" id="reportImportButton">Nhập Excel / PowerPoint</button>
+            <button class="btn btn-light" type="button" id="reportExportExcel">Xuất Excel</button>
+            <button class="btn btn-primary" type="button" id="reportExportPptx">Xuất PowerPoint</button>
+            <button class="btn btn-light" type="button" id="reportReload">Tải lại</button>
+          </div>
+        </div>
+        <input type="file" id="reportFile" accept=".pptx,.xlsx,.xls,.csv" hidden>
+        <div id="reportNotice" class="message"></div>
+        <div id="reportPreview"></div>
+
+        <div id="reportEmpty" class="report-empty hidden">
+          Chưa có số liệu. Khi có bài khảo sát trực tuyến, số liệu tự hiện ở đây; số liệu các tháng trước có thể nhập từ file
+          PowerPoint báo cáo (ví dụ “Báo cáo khảo sát VHDN - 2026.pptx”) hoặc file Excel xuất từ tab này.
+        </div>
+
+        <div id="reportBody" class="hidden">
+          <h3 id="reportTitle" class="report-title"></h3>
+          <p id="reportSource" class="report-source"></p>
+
+          <div class="report-tiles">
+            <div class="report-tile"><div class="metric-label">Tổng nhân sự khảo sát</div><div id="rTotal" class="metric-value">–</div></div>
+            <div class="report-tile"><div class="metric-label">Nhân sự đạt “BIẾT”</div><div id="rPass" class="metric-value">–</div><div class="report-tile-sub">Đúng tất cả câu BIẾT</div></div>
+            <div class="report-tile strong"><div class="metric-label">Tỷ lệ đạt “BIẾT”</div><div id="rRate" class="metric-value">–</div></div>
+            <div class="report-tile"><div class="metric-label">Điểm chuẩn “HIỂU”</div><div id="rBench" class="metric-value">–</div><div id="rBenchSub" class="report-tile-sub"></div></div>
+            <div class="report-tile strong"><div class="metric-label">Điểm TB “HIỂU” tất cả bộ phận</div><div id="rUnd" class="metric-value">–</div></div>
+          </div>
+
+          <div id="reportBenchEditor" class="report-bench hidden">
+            <label class="field-label" for="reportBenchInput" id="reportBenchLabel">Điểm chuẩn HIỂU</label>
+            <div class="report-bench-row">
+              <input id="reportBenchInput" type="number" min="0.1" step="0.1" inputmode="decimal">
+              <button class="btn btn-navy" type="button" id="reportBenchSave">Lưu điểm chuẩn</button>
+              <button class="btn btn-light" type="button" id="reportBenchAuto">Dùng tự động</button>
+            </div>
+            <p class="report-hint">Để trống = tự động lấy điểm tối đa phần HIỂU của tháng (thay đổi theo số câu HIỂU).</p>
+          </div>
+
+          <div class="report-card"><h4>Kết quả truyền thông “BIẾT” của các bộ phận</h4><div id="chartKnow"></div></div>
+          <div class="report-card"><h4>Điểm trung bình phần “HIỂU” của các bộ phận</h4><div id="chartUnderstand"></div></div>
+          <div class="report-card"><div id="chartTrend"></div></div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Bộ phận</th><th>BIẾT: tổng</th><th>BIẾT: đạt</th><th>Tỷ lệ đạt</th><th>HIỂU: điểm TB</th><th>So với chuẩn</th></tr></thead>
+              <tbody id="reportRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <details class="report-imports">
+          <summary>Số liệu đã nhập từ file</summary>
+          <ul id="reportImports"></ul>
+          <p class="report-hint">Nhập PowerPoint: đọc các biểu đồ “Kết quả khảo sát việc truyền thông “BIẾT” của các bộ phận tháng M/YYYY” và
+            “Điểm trung bình phần “HIỂU” các bộ phận tháng M/YYYY”. Nhập Excel: sheet “Dữ liệu” (cột Tháng, Bộ phận, BIẾT - Tổng, BIẾT - Đạt,
+            HIỂU - Điểm TB, HIỂU - Điểm tối đa) — giống file Excel xuất từ tab này. Tháng đã có bài khảo sát trực tuyến luôn dùng số liệu trực tuyến.</p>
+        </details>
       </section>
 
       <section id="resultsPanel" class="admin-panel">
@@ -3922,6 +4053,22 @@
         'Đã yêu cầu dừng. Hệ thống sẽ không tạo thêm lượt mới; ' +
         'các lượt iframe đang chạy sẽ kết thúc hoặc timeout.'
       );
+    }
+
+    // Tab "Báo cáo VHDN": nạp vhdn-report.js khi mở tab lần đầu để trang khảo sát vẫn nhẹ.
+    let vhdnReportLoading = null;
+    function openVhdnReport(){
+      if (window.vhdnReport) return window.vhdnReport.open();
+      if (!vhdnReportLoading) {
+        vhdnReportLoading = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'vhdn-report.js?v=1';
+          script.onload = resolve;
+          script.onerror = () => { vhdnReportLoading = null; reject(new Error('Không tải được vhdn-report.js')); };
+          document.head.appendChild(script);
+        });
+      }
+      return vhdnReportLoading.then(() => window.vhdnReport.open()).catch(error => alert(error.message));
     }
 
     function switchAdminPanel(panelId, button){
