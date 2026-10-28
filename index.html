@@ -724,6 +724,17 @@
     .recommendation-card.rec-hit{border-color:#A9DFC7;background:#F3FBF6}
     .recommendation-card.rec-miss{border-color:#A9DFC7;background:#fff}
     .recommendation-card.rec-wrong{border-color:#F5B5B5;background:#FFF7F7}
+
+    /* Cảnh báo câu chưa trả lời */
+    .question.unanswered{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+    .question.unanswered.optional{border-color:#F3C9B5;box-shadow:none}
+    .issue-note{margin:-4px 0 10px;padding:7px 10px;border-radius:8px;color:#7F1D1D;background:#FDECEC;font-size:14px;font-weight:700}
+    .question.optional .issue-note{color:#7A2E0B;background:#FFF1E8}
+    .issue-link{margin:2px 2px 0 0;padding:2px 9px;border:1px solid #F5B5B5;border-radius:999px;background:#fff;color:#7F1D1D;font-weight:700;font-size:14px;cursor:pointer}
+    .issue-link:focus-visible{outline:2px solid #4D4D4F;outline-offset:2px}
+    .answer-progress{margin:14px 0 4px;color:var(--muted,#6B6B6E);font-size:14px;font-weight:700}
+    .answer-progress.done{color:#14532D}
+    .answer-progress.done:before{content:"✓ "}
     /* ===== Tab Báo cáo VHDN ===== */
     #reportPanel .hidden{display:none!important}
     .report-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
@@ -906,6 +917,7 @@
         </div>
         <div id="questionContainer"></div>
 
+        <div id="answerProgress" class="answer-progress" aria-live="polite"></div>
         <div id="formMessage" class="message"></div>
 
         <div class="actions">
@@ -2651,6 +2663,7 @@
 
       container.innerHTML = parts.join('') ||
         '<div class="message error" style="display:block">Chưa có câu hỏi đang sử dụng.</div>';
+      updateAnswerProgress();
     }
 
     function groupQuestionsBySituation(questions){
@@ -2755,6 +2768,23 @@
         return;
       }
 
+      // Báo trước các câu chưa trả lời / giải thích chưa đủ, thay vì chỉ báo lỗi chung.
+      const issues = findAnswerIssues();
+      markAnswerIssues(issues);
+      const blocking = issues.filter(issue => issue.blocking);
+      if (blocking.length){
+        showAnswerIssues(blocking);
+        return;
+      }
+      const optional = issues.filter(issue => !issue.blocking);
+      if (optional.length && !confirm(
+        'Còn ' + optional.length + ' câu không bắt buộc chưa trả lời (' +
+        optional.map(issue => 'Câu ' + issue.number).join(', ') + ').\nVẫn nộp khảo sát?'
+      )){
+        focusAnswerIssue(optional[0]);
+        return;
+      }
+
       const scores = calculateScores();
       const payload = buildPayload(scores);
 
@@ -2802,40 +2832,105 @@
           : 'MSNV chưa có bộ phận trong danh sách nhân sự. Vui lòng liên hệ phòng HSSE.'};
       }
 
-      for (const question of QUESTIONS){
-        if (isOpenTextQuestion(question)){
-          const text = getOpenTextAnswer(question.id);
-          if (question.required && !text) {
-            return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
-          }
-          continue;
-        }
-
-        const selected = getSelectedValues(question.id);
-        if (question.required && !selected.length) {
-          return {ok:false,message:'Vui lòng trả lời đầy đủ các câu hỏi.'};
-        }
-
-        if (question.requireExplanation){
-          for (const optionId of selected){
-            const textarea = document.querySelector(
-              `[data-explanation-key="${cssEscape(question.id+'::'+optionId)}"]`
-            );
-            const text = textarea ? textarea.value.trim() : '';
-            if (countMeaningfulWords(text) < MIN_MEANINGFUL_WORDS) {
-              return {
-                ok:false,
-                message:`Mỗi phần giải thích cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.`
-              };
-            }
-            if (isTooRepetitive(text)) {
-              return {ok:false,message:'Nội dung giải thích đang lặp lại quá nhiều.'};
-            }
-          }
-        }
-      }
       return {ok:true};
     }
+
+
+    /* ---------- Cảnh báo câu chưa trả lời trước khi nộp ---------- */
+    function questionNumberOf(section){
+      const match = /^\s*(\d+)\./.exec(section ? section.querySelector('h3').textContent : '');
+      return match ? match[1] : '?';
+    }
+
+    /** Mọi câu chưa trả lời (blocking nếu bắt buộc) và mọi phần giải thích chưa đạt (luôn blocking). */
+    function findAnswerIssues(){
+      const issues = [];
+      QUESTIONS.forEach(question => {
+        const section = document.querySelector(`.question[data-question="${cssEscape(question.id)}"]`);
+        if (!section) return;
+        const number = questionNumberOf(section);
+        if (isOpenTextQuestion(question)){
+          if (!getOpenTextAnswer(question.id)) issues.push({ question, section, number, blocking: Boolean(question.required), message: 'Câu này chưa trả lời.' });
+          return;
+        }
+        const selected = getSelectedValues(question.id);
+        if (!selected.length){
+          issues.push({ question, section, number, blocking: Boolean(question.required),
+            message: question.type === 'single' ? 'Câu này chưa chọn đáp án.' : 'Câu này chưa chọn đáp án nào.' });
+          return;
+        }
+        if (!question.requireExplanation) return;
+        for (const optionId of selected){
+          const textarea = document.querySelector(`[data-explanation-key="${cssEscape(question.id + '::' + optionId)}"]`);
+          const text = textarea ? textarea.value.trim() : '';
+          const label = ((question.options || []).find(option => String(option.id) === String(optionId)) || {}).label || '';
+          if (countMeaningfulWords(text) < MIN_MEANINGFUL_WORDS){
+            issues.push({ question, section, number, blocking: true, target: textarea,
+              message: `Phần giải thích cho “${label}” cần tối thiểu ${MIN_MEANINGFUL_WORDS} từ có ý nghĩa.` });
+            return;
+          }
+          if (isTooRepetitive(text)){
+            issues.push({ question, section, number, blocking: true, target: textarea,
+              message: `Phần giải thích cho “${label}” đang lặp lại quá nhiều.` });
+            return;
+          }
+        }
+      });
+      return issues;
+    }
+
+    function markAnswerIssues(issues){
+      document.querySelectorAll('.question.unanswered').forEach(section => section.classList.remove('unanswered', 'optional'));
+      document.querySelectorAll('.question .issue-note').forEach(note => note.remove());
+      issues.forEach(issue => {
+        issue.section.classList.add('unanswered');
+        if (!issue.blocking) issue.section.classList.add('optional');
+        const note = document.createElement('p');
+        note.className = 'issue-note';
+        note.setAttribute('role', 'alert');
+        note.textContent = '⚠ ' + issue.message + (issue.blocking ? '' : ' (không bắt buộc)');
+        issue.section.querySelector('h3').insertAdjacentElement('afterend', note);
+      });
+    }
+
+    function showAnswerIssues(issues){
+      const element = document.getElementById('formMessage');
+      element.className = 'message error';
+      element.innerHTML = 'Còn <b>' + issues.length + '</b> câu cần hoàn thành trước khi nộp: ' +
+        issues.map((issue, index) => `<button type="button" class="issue-link" data-issue="${index}">Câu ${escapeHtml(issue.number)}</button>`).join(' ');
+      element.querySelectorAll('.issue-link').forEach(button => {
+        button.onclick = () => focusAnswerIssue(issues[Number(button.dataset.issue)]);
+      });
+      focusAnswerIssue(issues[0]);
+    }
+
+    function focusAnswerIssue(issue){
+      if (!issue) return;
+      issue.section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const target = issue.target || issue.section.querySelector('input, textarea');
+      if (target) setTimeout(() => target.focus({ preventScroll: true }), 350);
+    }
+
+    /** Dòng "Đã trả lời x/y câu" phía trên nút Nộp; gỡ cảnh báo của câu vừa được trả lời. */
+    function updateAnswerProgress(event){
+      const progress = document.getElementById('answerProgress');
+      if (!progress) return;
+      const choice = QUESTIONS.filter(question => document.querySelector(`.question[data-question="${cssEscape(question.id)}"]`));
+      const answered = choice.filter(question => isOpenTextQuestion(question) ? getOpenTextAnswer(question.id) : getSelectedValues(question.id).length).length;
+      progress.textContent = choice.length ? `Đã trả lời ${answered}/${choice.length} câu` : '';
+      progress.classList.toggle('done', choice.length > 0 && answered === choice.length);
+      const section = event && event.target && event.target.closest ? event.target.closest('.question.unanswered') : null;
+      if (section){
+        const still = findAnswerIssues().some(issue => issue.section === section);
+        if (!still){
+          section.classList.remove('unanswered', 'optional');
+          const note = section.querySelector('.issue-note'); if (note) note.remove();
+          if (!document.querySelector('.question.unanswered')) clearFormMessage();
+        }
+      }
+    }
+    document.addEventListener('input', event => { if (event.target.closest && event.target.closest('#questionContainer')) updateAnswerProgress(event); });
+    document.addEventListener('change', event => { if (event.target.closest && event.target.closest('#questionContainer')) updateAnswerProgress(event); });
 
     function calculateScores(){
       let knowScore=0,totalKnow=0,understandScore=0,totalUnderstand=0;
