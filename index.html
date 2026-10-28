@@ -2960,7 +2960,8 @@
         if(!shown.length) return;
         const allRight=correct.length>0&&setsEqual(selected,correct);
         const countText=correct.length===1?'Tình huống này có <b>1 đáp án đúng</b>.':`Tình huống này có <b>${correct.length} đáp án đúng</b>.`;
-        const verdict=allRight?'<span class="rec-verdict ok">Bạn trả lời đúng</span>':'<span class="rec-verdict no">Bạn trả lời chưa đúng</span>';
+        const exactPoints=question.scoreMode==='perOption'?'':` (+${Number(question.points||1)} điểm)`;
+        const verdict=allRight?`<span class="rec-verdict ok">Bạn trả lời đúng${exactPoints}</span>`:'<span class="rec-verdict no">Bạn trả lời chưa đúng</span>';
         // Đáp án đúng trước, rồi lựa chọn sai đã chọn.
         shown.sort((a,b)=>Number(correct.includes(String(b.id)))-Number(correct.includes(String(a.id))));
         const cards=shown.map(option=>{
@@ -2969,7 +2970,9 @@
           const kind=isCorrect?(chosen?'hit':'miss'):'wrong';
           // Cách tính "từng đáp án đúng": chọn thừa không bị trừ điểm — nói rõ để người làm không hiểu nhầm dấu ❌.
           const noPenalty=question.scoreMode==='perOption'?' (Không trừ điểm)':'';
-          const label=isCorrect?(chosen?'✅ Đáp án đúng · Bạn đã chọn':'✔️ Đáp án đúng · Bạn chưa chọn'):'❌ Bạn đã chọn · Chưa phù hợp với tình huống'+noPenalty;
+          // Tính theo từng đáp án: mỗi đáp án đúng đã chọn được +1 điểm.
+          const gain=question.scoreMode==='perOption'?' (+1 điểm)':'';
+          const label=isCorrect?(chosen?'✅ Đáp án đúng · Bạn đã chọn'+gain:'✔️ Đáp án đúng · Bạn chưa chọn'):'❌ Bạn đã chọn · Chưa phù hợp với tình huống'+noPenalty;
           const explanationKey=question.id+'::'+option.id;
           const textarea=document.querySelector(`[data-explanation-key="${cssEscape(explanationKey)}"]`);
           const userExplanation=textarea&&textarea.value.trim()?escapeHtml(textarea.value.trim()):'';
