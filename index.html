@@ -710,6 +710,20 @@
       #surveyForm .actions .btn-light{order:2}
     }
   
+
+    /* Gợi ý số đáp án + kết quả sau khi nộp */
+    fieldset.choices{border:0;margin:0;padding:0;min-width:0}
+    .choice-hint{display:inline-block;margin:0 0 10px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+    .choice-hint.single{color:#4D4D4F;background:#F2F2F3}
+    .choice-hint.multi{color:#7A2E0B;background:#FFF1E8}
+    .recommendation-question+.recommendation-question{margin-top:18px}
+    .rec-summary{margin:4px 0 10px;font-size:15px}
+    .rec-verdict{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;font-size:13px;font-weight:700}
+    .rec-verdict.ok{color:#14532D;background:#E8F6EE}.rec-verdict.no{color:#7F1D1D;background:#FDECEC}
+    .rec-tag{display:inline-block;margin-left:6px;font-size:13px;font-weight:700}
+    .recommendation-card.rec-hit{border-color:#A9DFC7;background:#F3FBF6}
+    .recommendation-card.rec-miss{border-color:#A9DFC7;background:#fff}
+    .recommendation-card.rec-wrong{border-color:#F5B5B5;background:#FFF7F7}
     /* ===== Tab Báo cáo VHDN ===== */
     #reportPanel .hidden{display:none!important}
     .report-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
@@ -2683,7 +2697,8 @@
           <h3>${questionNumber}. ${escapeHtml(question.title)}
             ${question.required ? '<span class="required">Bắt buộc</span>' : ''}
           </h3>
-          <div class="choices">
+          <fieldset class="choices">
+            <legend class="choice-hint ${question.type === 'single' ? 'single' : 'multi'}">${question.type === 'single' ? 'Chọn 1 đáp án' : 'Có thể chọn nhiều đáp án — chọn tất cả đáp án đúng'}</legend>
             ${options.map(option => `
               <div>
                 <label class="choice">
@@ -2706,7 +2721,7 @@
                     <textarea data-explanation-key="${escapeAttribute(question.id)}::${escapeAttribute(option.id)}"></textarea>
                   </div>` : ''}
               </div>`).join('')}
-          </div>
+          </fieldset>
         </section>`;
     }
 
@@ -2931,22 +2946,39 @@
       result.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
+    /**
+     * Kết quả sau khi nộp: chỉ hiện ĐÁP ÁN ĐÚNG (đã chọn / chưa chọn) và các lựa chọn SAI mà người làm đã chọn.
+     * Lựa chọn sai mà người làm không chọn thì không hiện (trước đây hiện hết nên trông như câu có nhiều đáp án).
+     */
     function buildRecommendations(){
-      const cards=[];
+      const blocks=[];
       QUESTIONS.filter(q=>q.showRecommendation && !isOpenTextQuestion(q)).forEach(question=>{
-        const selected=getSelectedValues(question.id);
-        (question.options||[]).filter(option=>option.suggestion).forEach(option=>{
-          const chosen=selected.includes(option.id);
-          const correct=(question.correct||[]).includes(option.id);
-          const icon=chosen?(correct?'✅':'❌'):'❌';
-          const status=chosen?'Bạn đã chọn':'Bạn chưa chọn';
+        const selected=getSelectedValues(question.id).map(String);
+        const correct=(question.correct||[]).map(String);
+        const options=question.options||[];
+        const shown=options.filter(option=>correct.includes(String(option.id))||selected.includes(String(option.id)));
+        if(!shown.length) return;
+        const allRight=correct.length>0&&setsEqual(selected,correct);
+        const countText=correct.length===1?'Tình huống này có <b>1 đáp án đúng</b>.':`Tình huống này có <b>${correct.length} đáp án đúng</b>.`;
+        const verdict=allRight?'<span class="rec-verdict ok">Bạn trả lời đúng</span>':'<span class="rec-verdict no">Bạn trả lời chưa đúng</span>';
+        // Đáp án đúng trước, rồi lựa chọn sai đã chọn.
+        shown.sort((a,b)=>Number(correct.includes(String(b.id)))-Number(correct.includes(String(a.id))));
+        const cards=shown.map(option=>{
+          const id=String(option.id);
+          const isCorrect=correct.includes(id), chosen=selected.includes(id);
+          const kind=isCorrect?(chosen?'hit':'miss'):'wrong';
+          const label=isCorrect?(chosen?'✅ Đáp án đúng · Bạn đã chọn':'✔️ Đáp án đúng · Bạn chưa chọn'):'❌ Bạn đã chọn · Chưa phù hợp với tình huống';
           const explanationKey=question.id+'::'+option.id;
           const textarea=document.querySelector(`[data-explanation-key="${cssEscape(explanationKey)}"]`);
-          const userExplanation=textarea&&textarea.value.trim()?escapeHtml(textarea.value.trim()):'(Bạn không chọn mục này nên không có giải thích)';
-          cards.push(`<div class="recommendation-card"><div class="recommendation-head">${escapeHtml(option.label)} ${icon} (${status})</div><ul>${escapeHtml(option.suggestion).split(/\n|\.\s+/).map(x=>x.replace(/^[\s•·\-–]+/,'')).filter(Boolean).map(x=>`<li>${x}${/[.!?]$/.test(x)?'':'.'}</li>`).join('')}</ul><div class="answer-note">Giải thích của Anh/Chị:<br>${userExplanation}</div></div>`);
-        });
+          const userExplanation=textarea&&textarea.value.trim()?escapeHtml(textarea.value.trim()):'';
+          const lines=option.suggestion?escapeHtml(option.suggestion).split(/\n|\.\s+/).map(x=>x.replace(/^[\s•·\-–]+/,'')).filter(Boolean).map(x=>`<li>${x}${/[.!?]$/.test(x)?'':'.'}</li>`).join(''):'';
+          return `<div class="recommendation-card rec-${kind}"><div class="recommendation-head">${escapeHtml(option.label)} <span class="rec-tag">${label}</span></div>`+
+            (lines?`<ul>${lines}</ul>`:'')+
+            (chosen&&userExplanation?`<div class="answer-note">Giải thích của Anh/Chị:<br>${userExplanation}</div>`:'')+`</div>`;
+        }).join('');
+        blocks.push(`<div class="recommendation-question"><div class="recommendation-title">${escapeHtml(question.title)}</div><p class="rec-summary">${countText} ${verdict}</p>${cards}</div>`);
       });
-      return cards.length?`<div class="recommendation-wrap"><div class="recommendation-title">Dưới đây là đề xuất các giá trị cốt lõi phù hợp với tình huống này:</div>${cards.join('')}</div>`:'';
+      return blocks.length?`<div class="recommendation-wrap"><div class="recommendation-title">Đáp án và giải thích</div>${blocks.join('')}</div>`:'';
     }
 
     function formatNowVi(){
@@ -3546,6 +3578,21 @@
         options,
         correct
       };
+
+      if(!isOpen){
+        if(!correct.length){
+          showMessageElement('questionAdminMessage','Hãy đánh dấu ít nhất 1 đáp án “Đúng”.','error');
+          return;
+        }
+        if(type==='single'&&correct.length>1){
+          showMessageElement('questionAdminMessage',`Câu “Chọn 1 đáp án” chỉ được có 1 đáp án đúng (đang đánh dấu ${correct.length}). Bỏ bớt, hoặc đổi Loại câu hỏi sang “Chọn nhiều đáp án”.`,'error');
+          return;
+        }
+        if(type==='multi'&&correct.length===1&&confirm('Câu này chỉ có 1 đáp án đúng nhưng đang để “Chọn nhiều đáp án”, người làm sẽ chọn nhiều. Đổi sang “Chọn 1 đáp án”?')){
+          question.type='single';
+          document.getElementById('editQuestionType').value='single';
+        }
+      }
 
       if(section==='understand'&&!question.situationText){
         showMessageElement(
