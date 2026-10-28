@@ -342,6 +342,159 @@ function getMissingEmployees_(monthValue) {
   return { month: month, employees: employees, done: done, missing: employees - done, groups: list, generatedAt: new Date().toISOString() };
 }
 
+/* ---------- Màn hình kết quả: tỷ lệ đã làm + bảng xếp hạng của bộ phận ---------- */
+
+const BOARD_CACHE_SECONDS = 120;
+const BOARD_PASS_RATE = 0.5; // bộ phận ĐẠT khi ít nhất 50% nhân viên đã làm (giống tab Báo cáo VHDN)
+const BOARD_TOP = 10;
+
+function boardCacheKey_(month, suffix) { return 'vhdn_board_v1_' + month + '_' + suffix; }
+
+/** Số nhân viên theo nhóm bộ phận (Sheet1). */
+function readStaffGroupCounts_() {
+  const counts = {};
+  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.EMPLOYEES);
+  if (!sheet) return counts;
+  const header = findEmployeeHeaderInfo_(sheet);
+  const lastRow = sheet.getLastRow();
+  if (lastRow < header.dataStartRow) return counts;
+  const minCol = Math.min(header.msnvColumn, header.departmentColumn), maxCol = Math.max(header.msnvColumn, header.departmentColumn);
+  const rows = sheet.getRange(header.dataStartRow, minCol, lastRow - header.dataStartRow + 1, maxCol - minCol + 1).getDisplayValues();
+  const seen = {};
+  rows.forEach(row => {
+    const key = retakeMsnvKey_(row[header.msnvColumn - minCol]);
+    if (!key || seen[key]) return;
+    seen[key] = true;
+    const group = reportGroupOf_(row[header.departmentColumn - minCol]);
+    counts[group] = (counts[group] || 0) + 1;
+  });
+  return counts;
+}
+
+/** Xếp hạng: tỷ lệ điểm cao hơn trước; bằng điểm thì làm nhanh hơn trước; không có thời gian xếp sau. */
+function boardCompare_(a, b) {
+  const ra = a.t ? a.s / a.t : 0, rb = b.t ? b.s / b.t : 0;
+  if (rb !== ra) return rb - ra;
+  const da = a.d === '' || a.d == null ? Infinity : a.d, db = b.d === '' || b.d == null ? Infinity : b.d;
+  if (da !== db) return da - db;
+  return (a.at || 0) - (b.at || 0);
+}
+
+/** Dựng số liệu bảng xếp hạng của cả tháng (một lần đọc Responses + Sheet1), lưu bộ nhớ đệm 2 phút. */
+function buildBoardMonth_(month) {
+  const groups = {};
+  const members = {};
+  const resp = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
+  if (resp && resp.getLastRow() >= 2) {
+    const headers = resp.getRange(1, 1, 1, resp.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
+    const cols = readResponseColumns_(resp, headers, ['MSNV', 'Timestamp', 'Stress Test', 'Bộ phận', 'Họ và tên', 'Điểm - TỔNG', 'Tổng câu',
+      RETAKE_ATTEMPTS_HEADER, 'Thời gian làm (giây)'].concat(FIRST_ATTEMPT_HEADERS));
+    const latest = {};
+    cols.MSNV.forEach((value, i) => {
+      if (isStressValue_(cols['Stress Test'][i])) return;
+      const key = retakeMsnvKey_(value);
+      if (!key || retakeMonthOf_(cols.Timestamp[i]) !== month) return;
+      const time = (parseDate_(cols.Timestamp[i]) || new Date(0)).getTime();
+      if (!latest[key] || latest[key].time <= time) latest[key] = { i: i, time: time };
+    });
+    Object.keys(latest).forEach(key => {
+      const i = latest[key].i;
+      const group = reportGroupOf_(cols['Bộ phận'][i]);
+      const g = groups[group] || (groups[group] = { done: 0, ranking: [] });
+      g.done++;
+      members[key] = group;
+      const hasFirst = cols['Điểm lần đầu'][i] !== '' && cols['Điểm lần đầu'][i] != null;
+      const single = Math.max(number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), 1) === 1;
+      if (!hasFirst && !single) return; // làm lại từ trước khi có cột "lần đầu": không biết điểm lần đầu
+      const d = number_(hasFirst ? cols['Thời gian lần đầu (giây)'][i] : cols['Thời gian làm (giây)'][i], 0);
+      g.ranking.push({
+        k: key,
+        n: String(cols['Họ và tên'][i] || '').trim(),
+        s: number_(hasFirst ? cols['Điểm lần đầu'][i] : cols['Điểm - TỔNG'][i], 0),
+        t: number_(hasFirst ? cols['Tổng câu lần đầu'][i] : cols['Tổng câu'][i], 0),
+        d: d > 0 ? d : '',
+        at: latest[key].time
+      });
+    });
+  }
+  const staff = readStaffGroupCounts_();
+  Object.keys(staff).forEach(group => { if (!groups[group]) groups[group] = { done: 0, ranking: [] }; });
+  const names = Object.keys(groups);
+  const payload = {};
+  names.forEach((group, index) => {
+    const g = groups[group];
+    g.ranking.sort(boardCompare_);
+    payload[boardCacheKey_(month, 'g' + index)] = JSON.stringify({ group: group, staff: staff[group] || 0, done: g.done, ranking: g.ranking });
+  });
+  const memberIndex = {};
+  Object.keys(members).forEach(key => { memberIndex[key] = names.indexOf(members[key]); });
+  payload[boardCacheKey_(month, 'meta')] = JSON.stringify({ groups: names, members: memberIndex, builtAt: Date.now() });
+  try { CacheService.getScriptCache().putAll(payload, BOARD_CACHE_SECONDS); } catch (error) { console.warn('Board cache: ' + error); }
+  return payload;
+}
+
+function readBoardGroup_(month, cache, payload, index) {
+  const raw = payload ? payload[boardCacheKey_(month, 'g' + index)] : cache.get(boardCacheKey_(month, 'g' + index));
+  return raw ? JSON.parse(raw) : null;
+}
+
+/**
+ * GET getDepartmentBoard: bộ phận của người vừa làm — đã làm / tổng nhân viên / ĐẠT khi ≥ 50%,
+ * top 10 theo điểm lần làm đầu tiên trong tháng (bằng điểm thì nhanh hơn xếp trên), và hạng của chính người đó.
+ * Bài vừa nộp có thể còn trong hàng đợi (xử lý mỗi phút): khi đó trả về pending = true, trang tự xếp hạng tạm.
+ */
+function getDepartmentBoard_(msnv, departmentHint) {
+  const month = retakeCurrentMonth_();
+  const key = retakeMsnvKey_(msnv);
+  const cache = CacheService.getScriptCache();
+  let payload = null;
+  let metaRaw = cache.get(boardCacheKey_(month, 'meta'));
+  if (!metaRaw) {
+    const lock = LockService.getScriptLock();
+    const locked = lock.tryLock(8000);
+    try {
+      metaRaw = cache.get(boardCacheKey_(month, 'meta'));
+      if (!metaRaw) { payload = buildBoardMonth_(month); metaRaw = payload[boardCacheKey_(month, 'meta')]; }
+    } finally {
+      if (locked) lock.releaseLock();
+    }
+  }
+  const meta = JSON.parse(metaRaw);
+  let index = key && meta.members[key] != null ? meta.members[key] : -1;
+  const pending = index < 0;
+  if (index < 0) index = meta.groups.indexOf(reportGroupOf_(departmentHint));
+  if (index < 0) return { ok: true, month: month, group: reportGroupOf_(departmentHint), staff: 0, done: 0, rate: null, pass: false, top: [], me: null, all: [], pending: true };
+
+  let g = readBoardGroup_(month, cache, payload, index);
+  if (!g) { payload = buildBoardMonth_(month); g = readBoardGroup_(month, cache, payload, index); }
+  const rank = key ? g.ranking.findIndex(r => r.k === key) : -1;
+  const pack = (r, i) => ({ rank: i + 1, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d, me: r.k === key });
+  return {
+    ok: true,
+    month: month,
+    group: g.group,
+    staff: g.staff,
+    done: g.done,
+    rate: g.staff ? Math.round(g.done / g.staff * 1000) / 1000 : null,
+    pass: g.staff > 0 && g.done / g.staff >= BOARD_PASS_RATE,
+    passRate: BOARD_PASS_RATE,
+    top: g.ranking.slice(0, BOARD_TOP).map(pack),
+    me: rank >= 0 ? pack(g.ranking[rank], rank) : null,
+    ranked: g.ranking.length,
+    // Điểm / tổng / thời gian của mọi người (không tên) để trang tự xếp hạng tạm khi bài vừa nộp chưa vào sheet.
+    all: g.ranking.map(r => [r.s, r.t, r.d === '' ? null : r.d]),
+    pending: pending,
+    cachedAt: meta.builtAt
+  };
+}
+
+/** Thử từ trình soạn thảo: bảng xếp hạng bộ phận của một MSNV. */
+function testDepartmentBoard() {
+  const data = getDepartmentBoard_('622412005', '');
+  console.log(JSON.stringify(data, null, 2));
+  return data;
+}
+
 /** Thử từ trình soạn thảo: số người chưa làm khảo sát tháng này theo bộ phận. */
 function testMissingEmployees() {
   const data = getMissingEmployees_(retakeCurrentMonth_());

@@ -735,6 +735,29 @@
     .answer-progress{margin:14px 0 4px;color:var(--muted,#6B6B6E);font-size:14px;font-weight:700}
     .answer-progress.done{color:#14532D}
     .answer-progress.done:before{content:"✓ "}
+
+    /* Bộ phận của tôi + bảng xếp hạng (màn hình kết quả) */
+    .board{margin:16px 0;padding:16px;border:1px solid var(--border,#DADADC);border-radius:14px;background:#fff}
+    .board-loading{margin:0;color:var(--muted,#6B6B6E)}
+    .board-title{margin:0 0 10px;color:var(--navy,#4D4D4F);font-size:17px}
+    .board-bar{position:relative;height:12px;border-radius:999px;background:#F2F2F3;overflow:visible}
+    .board-bar i{display:block;height:100%;border-radius:999px;background:#E45620}
+    .board-bar b{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed #4D4D4F}
+    .board-part p{margin:8px 0 0;font-size:15px}
+    .board-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:13px;font-weight:700}
+    .board-pill.pass{color:#14532D;background:#E8F6EE}.board-pill.fail{color:#7F1D1D;background:#FDECEC}
+    .board-hint{margin:6px 0 0;color:var(--muted,#6B6B6E);font-size:13px;line-height:1.5}
+    .board-sub{margin:16px 0 6px;color:var(--navy,#4D4D4F);font-size:15px}
+    .board-list{list-style:none;margin:0;padding:0}
+    .board-row{display:grid;grid-template-columns:44px minmax(0,1fr) 52px 60px;gap:8px;align-items:center;padding:8px 6px;border-top:1px solid #F0F0F1;font-size:14px}
+    .board-row.head{border-top:0;color:var(--muted,#6B6B6E);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+    .board-row.me{background:#FFF6F1;border-radius:8px;font-weight:700}
+    .board-rank{text-align:center;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+    .board-name{overflow-wrap:anywhere}.board-name em{color:#C24714;font-style:normal;font-weight:700}
+    .board-score,.board-time{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .board-gap{padding:2px 0 2px 18px;color:var(--muted,#6B6B6E)}
+    .board-me{margin:10px 0 0;font-size:15px}
+    @media(max-width:420px){.board-row{grid-template-columns:32px minmax(0,1fr) 44px 46px;gap:6px;font-size:13px}.board-row.head{font-size:11px}}
     /* ===== Tab Báo cáo VHDN ===== */
     #reportPanel .hidden{display:none!important}
     .report-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
@@ -2550,6 +2573,8 @@
       const form = document.getElementById('surveyForm');
       if (state.surveySubmitted) resetSurveyForRetake();
       form.hidden = false;
+      // Thời gian làm bài (bảng xếp hạng bộ phận) tính từ lúc bấm bắt đầu khảo sát.
+      state.surveyStartedAt = Date.now();
       document.getElementById('retakeNote').hidden = !isRetake;
       document.getElementById('whoBar').innerHTML = `
         <div><b>${escapeHtml(state.employee.name || '')}</b><span>${escapeHtml(employeeDetailLine(state.employee))}</span></div>
@@ -2787,6 +2812,8 @@
 
       const scores = calculateScores();
       const payload = buildPayload(scores);
+      // Bảng xếp hạng dùng lần làm đầu tiên trong tháng: nhớ xem trước lần nộp này đã có bài tháng này chưa.
+      const firstAttemptThisMonth = !state.previousResult;
 
       document.getElementById('submitButton').disabled = true;
       setLoading(true);
@@ -2796,6 +2823,7 @@
         const response = await withRetry(() => apiPost('submitSurvey',payload), 3);
 
         renderLocalResult(response.scores || scores,response.queueId);
+        loadDepartmentBoard(payload, response.scores || scores, firstAttemptThisMonth);
         lockSurveyForm();
         state.surveySubmitted = true;
         const finalScores = response.scores || scores;
@@ -3010,6 +3038,7 @@
             ? 'NOT_FOUND_OR_MANUAL'
             : 'MANUAL',
         ...scores,
+        durationSeconds: state.surveyStartedAt ? Math.max(1, Math.round((Date.now() - state.surveyStartedAt) / 1000)) : '',
         answers,
         explanations,
         userAgent:navigator.userAgent
@@ -3036,6 +3065,7 @@
           <button class="btn btn-light" type="button" onclick="changeMsnv()">Người khác làm khảo sát</button>
         </div>
         <p class="card-note">Làm lại: điểm lần mới sẽ thay điểm này trên hệ thống.</p>
+        <div id="boardBox" class="board" aria-live="polite"><p class="board-loading">Đang tải kết quả của bộ phận…</p></div>
         ${recommendations}
         <p class="answer-note">Mã hàng đợi: ${escapeHtml(queueId||'')} · Mã lần nộp: ${escapeHtml(state.currentSubmissionId||'')} · Kết quả sẽ được chuyển vào sheet Responses.</p>`;
       result.scrollIntoView({behavior:'smooth',block:'start'});
@@ -3045,6 +3075,59 @@
      * Kết quả sau khi nộp: chỉ hiện ĐÁP ÁN ĐÚNG (đã chọn / chưa chọn) và các lựa chọn SAI mà người làm đã chọn.
      * Lựa chọn sai mà người làm không chọn thì không hiện (trước đây hiện hết nên trông như câu có nhiều đáp án).
      */
+
+    /* ---------- Bộ phận của tôi: tỷ lệ đã làm + bảng xếp hạng ---------- */
+    function formatDuration(seconds){
+      if (seconds == null || seconds === '' || !isFinite(seconds)) return '–';
+      const s = Math.round(seconds), m = Math.floor(s / 60), r = s % 60;
+      return m ? `${m} phút ${String(r).padStart(2, '0')} giây` : `${r} giây`;
+    }
+    function boardBetter(a, b){ // a xếp trên b?
+      const ra = a.total ? a.score / a.total : 0, rb = b.total ? b.score / b.total : 0;
+      if (ra !== rb) return ra > rb;
+      const da = a.seconds == null ? Infinity : a.seconds, db = b.seconds == null ? Infinity : b.seconds;
+      return da < db;
+    }
+
+    async function loadDepartmentBoard(payload, scores, firstAttempt){
+      const box = () => document.getElementById('boardBox');
+      try{
+        const data = await apiGetWithRetry('getDepartmentBoard', { msnv: payload.employeeId, department: payload.department });
+        if (!box()) return;
+        if (!data || data.ok === false) throw new Error((data && data.error) || 'Không có dữ liệu.');
+        // Bài vừa nộp còn trong hàng đợi: tự xếp hạng tạm bằng điểm và thời gian của lần này.
+        let me = data.me, top = (data.top || []).slice(), done = data.done || 0, estimated = false;
+        if (data.pending && firstAttempt){
+          const mine = { name: payload.fullName, score: scores.score, total: scores.total, seconds: payload.durationSeconds || null, me: true };
+          const above = (data.all || []).filter(row => boardBetter({ score: row[0], total: row[1], seconds: row[2] }, mine)).length;
+          me = Object.assign({ rank: above + 1 }, mine);
+          done += 1; estimated = true;
+          if (me.rank <= 10){ top.splice(me.rank - 1, 0, me); top = top.slice(0, 10).map((row, i) => Object.assign({}, row, { rank: i + 1 })); }
+        }
+        const rate = data.staff ? done / data.staff : null;
+        const pass = data.staff > 0 && rate >= (data.passRate || 0.5);
+        const pct = rate == null ? '–' : Math.round(rate * 100) + '%';
+        const medal = rank => rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+        const clock = sec => sec == null || !isFinite(sec) ? '–' : Math.floor(sec / 60) + ':' + String(Math.round(sec) % 60).padStart(2, '0');
+        const row = r => `<li class="board-row${r.me ? ' me' : ''}"><span class="board-rank">${medal(r.rank)}</span><span class="board-name">${escapeHtml(r.name || '')}${r.me ? ' <em>(bạn)</em>' : ''}</span><span class="board-score">${formatNumber(r.score)}/${formatNumber(r.total)}</span><span class="board-time" title="${formatDuration(r.seconds)}">${clock(r.seconds)}</span></li>`;
+        const meOutside = me && !top.some(r => r.me);
+        const monthText = (() => { const [y, m] = String(data.month || '').split('-'); return m ? `tháng ${Number(m)}/${y}` : ''; })();
+        box().innerHTML = `
+          <h4 class="board-title">Bộ phận ${escapeHtml(data.group || '')} · ${monthText}</h4>
+          <div class="board-part">
+            <div class="board-bar" role="img" aria-label="${pct} nhân viên đã làm, mốc đạt 50%"><i style="width:${rate == null ? 0 : Math.min(100, rate * 100)}%"></i><b style="left:${(data.passRate || 0.5) * 100}%"></b></div>
+            <p><strong>${pct}</strong> nhân viên đã làm${data.staff ? ` (${done}/${data.staff})` : ''} · <span class="board-pill ${pass ? 'pass' : 'fail'}">${pass ? 'Bộ phận đạt' : 'Bộ phận chưa đạt'}</span> <span class="board-hint">(cần ít nhất ${Math.round((data.passRate || 0.5) * 100)}%)</span></p>
+          </div>
+          <h5 class="board-sub">Bảng xếp hạng bộ phận</h5>
+          ${top.length ? `<ol class="board-list"><li class="board-row head"><span>Hạng</span><span>Họ và tên</span><span>Điểm</span><span>Thời gian</span></li>${top.map(row).join('')}${meOutside ? '<li class="board-gap">…</li>' + row(me) : ''}</ol>` : '<p class="board-hint">Chưa có ai trong bộ phận làm khảo sát tháng này.</p>'}
+          ${me ? `<p class="board-me">Bạn xếp hạng <b>${me.rank}</b>${data.ranked || estimated ? ` / ${(data.ranked || 0) + (estimated ? 1 : 0)}` : ''} trong bộ phận${me.seconds ? ` · ${formatNumber(me.score)}/${formatNumber(me.total)} điểm trong ${formatDuration(me.seconds)}` : ''}${estimated ? ' (tạm tính, cập nhật sau khoảng 1 phút)' : ''}.</p>` : ''}
+          ${!firstAttempt ? '<p class="board-hint">Bạn đang làm lại: bảng xếp hạng vẫn tính lần làm đầu tiên trong tháng.</p>' : ''}
+          <p class="board-hint">Xếp theo điểm lần làm đầu tiên trong tháng; bằng điểm thì ai làm nhanh hơn xếp trên. Thời gian (phút:giây) tính từ lúc bấm bắt đầu khảo sát đến lúc nộp.</p>`;
+      }catch(error){
+        if (box()) box().innerHTML = '<p class="board-hint">Chưa tải được kết quả của bộ phận. Mở lại trang sau ít phút để xem.</p>';
+      }
+    }
+
     function buildRecommendations(){
       const blocks=[];
       QUESTIONS.filter(q=>q.showRecommendation && !isOpenTextQuestion(q)).forEach(question=>{

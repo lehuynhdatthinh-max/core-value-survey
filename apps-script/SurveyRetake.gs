@@ -200,6 +200,9 @@ function isStressValue_(value) {
  * hoặc thêm dòng mới; "Số lần làm" cộng dồn trong tháng. Đọc các cột khóa một lần cho cả đợt, ghi phần thêm mới một lần.
  * Dòng Stress Test / không MSNV luôn thêm mới. Trả về số kết quả đã ghi.
  */
+/** Cột của lần làm đầu tiên trong tháng (Code.gs buildResponseObject_ ghi; làm lại giữ nguyên). */
+const FIRST_ATTEMPT_HEADERS = ['Điểm lần đầu', 'Tổng câu lần đầu', 'Thời gian lần đầu (giây)'];
+
 function appendResponsesBatch_(rowObjects) {
   if (!rowObjects.length) return 0;
   const sheet = ensureResponsesSheet_();
@@ -226,15 +229,24 @@ function appendResponsesBatch_(rowObjects) {
     const valuesFor = obj => headers.map(h => Object.prototype.hasOwnProperty.call(obj, h) ? obj[h] : '');
     const attemptsIndex = headers.indexOf(RETAKE_ATTEMPTS_HEADER);
 
-    const cols = readResponseColumns_(sheet, headers, ['MSNV', 'Timestamp', 'Stress Test', RETAKE_ATTEMPTS_HEADER]);
+    const cols = readResponseColumns_(sheet, headers, ['MSNV', 'Timestamp', 'Stress Test', RETAKE_ATTEMPTS_HEADER, 'Điểm - TỔNG', 'Tổng câu'].concat(FIRST_ATTEMPT_HEADERS));
     const target = {};   // nhóm -> { row: số dòng trên sheet } hoặc { append: vị trí trong appendRows }
     const attempts = {}; // nhóm -> số lần đã làm trong tháng
+    const first = {};    // nhóm -> giá trị các cột "lần đầu" đã có (làm lại không ghi đè)
     cols.MSNV.forEach((value, i) => {
       if (isStressValue_(cols['Stress Test'][i])) return;
       const group = retakeGroupKey_(value, cols.Timestamp[i]);
       if (!group) return;
       if (!target[group]) target[group] = { row: i + 2 };
       attempts[group] = (attempts[group] || 0) + Math.max(number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), 1);
+      if (!first[group]) {
+        const known = cols['Điểm lần đầu'][i] !== '' && cols['Điểm lần đầu'][i] != null;
+        if (known) first[group] = FIRST_ATTEMPT_HEADERS.reduce((o, h) => { o[h] = cols[h][i]; return o; }, {});
+        // Dòng cũ (trước khi có các cột này) mới làm 1 lần: điểm hiện tại chính là lần đầu (không có thời gian).
+        else if (Math.max(number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), 1) === 1)
+          first[group] = { 'Điểm lần đầu': cols['Điểm - TỔNG'][i], 'Tổng câu lần đầu': cols['Tổng câu'][i], 'Thời gian lần đầu (giây)': '' };
+        else first[group] = 'none';
+      }
     });
 
     const overwrites = {}; // số dòng -> giá trị
@@ -246,6 +258,14 @@ function appendResponsesBatch_(rowObjects) {
       const row = Object.assign({}, obj);
       row[RETAKE_ATTEMPTS_HEADER] = (attempts[group] || 0) + 1;
       attempts[group] = row[RETAKE_ATTEMPTS_HEADER];
+      if (first[group] === 'none') {
+        // Đã có bài trước khi có cột "lần đầu": không biết điểm lần đầu → để trống, không lấy bài làm lại.
+        FIRST_ATTEMPT_HEADERS.forEach(h => { row[h] = ''; });
+      } else if (first[group]) {
+        FIRST_ATTEMPT_HEADERS.forEach(h => { row[h] = first[group][h]; });
+      } else {
+        first[group] = FIRST_ATTEMPT_HEADERS.reduce((o, h) => { o[h] = row[h] === undefined ? '' : row[h]; return o; }, {});
+      }
       const values = valuesFor(row);
       if (target[group] && target[group].row) overwrites[target[group].row] = values;
       else if (target[group]) appendRows[target[group].append] = values;

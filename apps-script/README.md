@@ -5,7 +5,7 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. 4.14.0: bảng xếp hạng bộ phận. |
 | `SurveyReport.gs` | Số liệu tab **Báo cáo VHDN**: BIẾT / HIỂU theo tháng, quý, bộ phận; số liệu nhập từ file báo cáo; điểm chuẩn HIỂU. |
 | `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
@@ -31,6 +31,19 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.14.0: bộ phận của tôi + bảng xếp hạng trên màn hình kết quả
+
+Sau khi nộp, người làm thấy **bộ phận của mình** (chỉ bộ phận đó):
+- Tỷ lệ nhân viên đã làm tháng này (đã làm / tổng nhân viên trong Sheet1) và **Bộ phận đạt / chưa đạt** (đạt khi ≥ 50%).
+- **Bảng xếp hạng bộ phận**: top 10 + hạng của chính mình. Xếp theo **điểm lần làm đầu tiên trong tháng**; bằng điểm thì ai làm **nhanh hơn** xếp trên. Thời gian tính từ lúc bấm bắt đầu khảo sát đến lúc nộp.
+- Làm lại vẫn thay điểm trên sheet như cũ, nhưng **không** đổi thứ hạng (có đáp án rồi làm lại thì không công bằng).
+- Bài vừa nộp còn trong hàng đợi (xử lý mỗi phút): trang tự xếp hạng tạm và ghi "tạm tính".
+
+Cột mới trong Responses: `Thời gian làm (giây)`, `Điểm lần đầu`, `Tổng câu lần đầu`, `Thời gian lần đầu (giây)` (tự thêm, không cần tạo tay). Bài nộp trước bản này không có thời gian: vẫn được xếp hạng theo điểm (đứng sau người cùng điểm có thời gian).
+Bảng xếp hạng được nhớ đệm 2 phút để 75–100 người cùng nộp không đọc sheet nhiều lần.
+
+Cài: dán đè `Code.gs` 4.14.0 (gửi riêng), `SurveyRetake.gs` và `SurveyReport.gs` mới › **Lưu** › **Triển khai › Phiên bản mới**. Thử: chạy `testDepartmentBoard` (đổi MSNV trong hàm).
 
 ## Cập nhật 4.13.0: tab "Báo cáo VHDN" (giống file báo cáo PowerPoint)
 
