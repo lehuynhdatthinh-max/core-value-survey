@@ -782,6 +782,9 @@
     .mg .mg-name{flex:1;font-weight:700;color:#333}
     .mg .mg-count{color:#6B6B6E;font-variant-numeric:tabular-nums;white-space:nowrap}
     .mg .mg-count strong{color:#E45620}
+    .mg-badge{flex:0 0 auto;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+    .mg-badge.pass{color:#14532D;background:#E8F6EE}.mg-badge.fail{color:#7F1D1D;background:#FDECEC}
+    @media(max-width:560px){.mg summary{flex-wrap:wrap}.mg .mg-name{flex:1 1 100%}}
     .mg.done summary{cursor:default}.mg.done summary:before{content:"✓";color:#16A34A}
     .mg table{width:100%;min-width:0;margin:0 0 10px;border-collapse:collapse}
     .mg th{background:#4D4D4F;color:#fff;font-size:13px;padding:7px 10px;text-align:left}
@@ -4096,7 +4099,7 @@
       if (!vhdnReportLoading) {
         vhdnReportLoading = new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'vhdn-report.js?v=2';
+          script.src = 'vhdn-report.js?v=3';
           script.onload = resolve;
           script.onerror = () => { vhdnReportLoading = null; reject(new Error('Không tải được vhdn-report.js')); };
           document.head.appendChild(script);

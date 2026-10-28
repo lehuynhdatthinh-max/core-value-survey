@@ -14,6 +14,9 @@
     exceljs: 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'
   };
   const COLOR = { total: '#3F78B5', pass: '#E45620', bench: '#4D4D4F' };
+  const PASS_RATE = 0.5; // bộ phận ĐẠT khi ít nhất 50% nhân viên đã làm khảo sát trong tháng
+  const deptRate = g => g.total ? g.done / g.total : 0;
+  const deptPass = g => g.total > 0 && deptRate(g) >= PASS_RATE;
   const BAR_SPAN = 84; // thanh dài nhất chiếm 84% bề ngang, chừa chỗ cho số
   const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '' };
   const $ = id => document.getElementById(id);
@@ -580,12 +583,15 @@
     const offline = !info || info.source !== 'live';
     summary.innerHTML = '<strong>' + num(data.missing, 0) + '</strong> / ' + num(data.employees, 0) + ' nhân viên chưa làm (' + pct(data.employees ? data.missing / data.employees : null) +
       '), ' + num(data.done, 0) + ' người đã làm. So theo danh sách nhân sự hiện tại (Sheet1, đồng bộ từ SafetyHub).' +
+      '<br><strong>' + data.groups.filter(deptPass).length + ' / ' + data.groups.length + '</strong> bộ phận đạt (ít nhất ' + Math.round(PASS_RATE * 100) + '% nhân viên đã làm)' +
+      (data.groups.some(g => !deptPass(g)) ? ' · Chưa đạt: ' + data.groups.filter(g => !deptPass(g)).map(g => esc(g.group)).join(', ') : '') + '.' +
       (offline ? ' <span class="missing-warn">Tháng này chưa có bài khảo sát trực tuyến nên mọi người đều tính là chưa làm.</span>' : '');
     const q = fold($('missingSearch').value);
     const groups = data.groups.map(g => Object.assign({}, g, { shown: q ? g.missing.filter(p => fold(p.msnv + ' ' + p.name).includes(q)) : g.missing }))
       .filter(g => !q || g.shown.length);
     box.innerHTML = groups.length ? groups.map(g => {
-      const head = '<summary><span class="mg-name">' + esc(g.group) + '</span><span class="mg-count">' +
+      const badge = '<span class="mg-badge ' + (deptPass(g) ? 'pass' : 'fail') + '">' + (deptPass(g) ? 'Đạt' : 'Chưa đạt') + ' · đã làm ' + pct(deptRate(g)) + '</span>';
+      const head = '<summary><span class="mg-name">' + esc(g.group) + '</span>' + badge + '<span class="mg-count">' +
         (g.missing.length ? '<strong>' + g.missing.length + '</strong> / ' + g.total + ' chưa làm' : 'Đã làm đủ ' + g.total + ' người') + '</span></summary>';
       if (!g.missing.length) return '<details class="mg done">' + head + '</details>';
       return '<details class="mg"' + (q ? ' open' : '') + '>' + head + '<table><thead><tr><th class="mg-stt">STT</th><th class="mg-msnv">MSNV</th><th>Họ và tên</th></tr></thead><tbody>' +
@@ -657,15 +663,29 @@
       };
 
       const sum = book.addWorksheet(sheetName('Tổng hợp', used), { properties: { tabColor: { argb: ORANGE } } });
-      layout(sum, 5, 'Cập nhật ' + stamp + ' · ' + data.missing + '/' + data.employees + ' nhân viên chưa làm', ['STT', 'Bộ phận', 'Tổng nhân sự', 'Đã làm', 'Chưa làm'], [7, 30, 16, 12, 12]);
-      data.groups.forEach((g, i) => bodyRow(sum, 5 + i, [i + 1, g.group, g.total, g.done, g.missing.length], [0, 2, 3, 4]));
+      const passed = data.groups.filter(deptPass).length;
+      layout(sum, 7, 'Cập nhật ' + stamp + ' · ' + data.missing + '/' + data.employees + ' nhân viên chưa làm · ' + passed + '/' + data.groups.length +
+        ' bộ phận đạt (≥ ' + Math.round(PASS_RATE * 100) + '% nhân viên đã làm)', ['STT', 'Bộ phận', 'Tổng nhân sự', 'Đã làm', 'Chưa làm', 'Tỷ lệ đã làm', 'Kết quả'], [7, 30, 15, 11, 11, 14, 13]);
+      const result = (cell, ok) => {
+        cell.value = ok ? 'Đạt' : 'Chưa đạt';
+        cell.font = font({ bold: true, color: { argb: ok ? 'FF14532D' : 'FF7F1D1D' } });
+        cell.fill = fill(ok ? 'FFE8F6EE' : 'FFFDECEC');
+      };
+      data.groups.forEach((g, i) => {
+        bodyRow(sum, 5 + i, [i + 1, g.group, g.total, g.done, g.missing.length, deptRate(g), ''], [0, 2, 3, 4, 5, 6]);
+        sum.getCell(5 + i, 6).numFmt = '0%';
+        result(sum.getCell(5 + i, 7), deptPass(g));
+      });
       const totalRow = 5 + data.groups.length;
-      bodyRow(sum, totalRow, ['', 'Tổng cộng', data.employees, data.done, data.missing], [2, 3, 4]);
+      bodyRow(sum, totalRow, ['', 'Tổng cộng', data.employees, data.done, data.missing, data.employees ? data.done / data.employees : 0, passed + '/' + data.groups.length + ' đạt'], [2, 3, 4, 5, 6]);
+      sum.getCell(totalRow, 6).numFmt = '0%';
       sum.getRow(totalRow).eachCell(c => { c.font = font({ bold: true }); c.fill = fill(TINT); });
 
       data.groups.filter(g => g.missing.length).forEach(g => {
         const ws = book.addWorksheet(sheetName(g.group, used));
-        layout(ws, 3, 'Bộ phận: ' + g.group + ' · ' + g.missing.length + '/' + g.total + ' người chưa làm · cập nhật ' + stamp, ['STT', 'MSNV', 'Họ và tên'], [8, 16, 48]);
+        layout(ws, 3, 'Bộ phận: ' + g.group + ' · ' + g.missing.length + '/' + g.total + ' người chưa làm · đã làm ' + Math.round(deptRate(g) * 100) + '% → ' +
+          (deptPass(g) ? 'ĐẠT' : 'CHƯA ĐẠT') + ' (cần ≥ ' + Math.round(PASS_RATE * 100) + '%) · cập nhật ' + stamp, ['STT', 'MSNV', 'Họ và tên'], [8, 16, 48]);
+        if (!deptPass(g)) ws.properties.tabColor = { argb: 'FFDC2626' };
         g.missing.forEach((person, i) => {
           bodyRow(ws, 5 + i, [i + 1, String(person.msnv), person.name], [0, 1]);
           ws.getCell(5 + i, 2).numFmt = '@'; // MSNV giữ dạng chữ
