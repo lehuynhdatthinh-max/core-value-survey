@@ -10,11 +10,12 @@
   const LIBS = {
     pptx: 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js',
     xlsx: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-    jszip: 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+    jszip: 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+    exceljs: 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'
   };
   const COLOR = { total: '#3F78B5', pass: '#E45620', bench: '#4D4D4F' };
   const BAR_SPAN = 84; // thanh dài nhất chiếm 84% bề ngang, chừa chỗ cho số
-  const report = { data: null, period: '', pending: null };
+  const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '' };
   const $ = id => document.getElementById(id);
   const esc = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : String(v == null ? '' : v));
   const fold = v => String(v || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/Đ/g, 'D').replace(/\s+/g, ' ').trim();
@@ -66,8 +67,10 @@
     };
   }
   function periodData(id) { const months = monthsOf(id); return months.length ? aggregate(months) : null; }
+  function currentMonth() { const d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
   function periodIds() {
-    const months = ((report.data && report.data.months) || []).map(m => m.month).sort().reverse();
+    // Tháng hiện tại luôn có trong danh sách (để xem ai chưa làm, kể cả khi chưa có bài nào).
+    const months = Array.from(new Set(((report.data && report.data.months) || []).map(m => m.month).concat([currentMonth()]))).sort().reverse();
     const out = [];
     const years = Array.from(new Set(months.map(k => k.slice(0, 4))));
     years.forEach(y => {
@@ -75,7 +78,7 @@
       [4, 3, 2, 1].forEach(q => { if (months.some(k => k.startsWith(y) && Math.ceil(monthParts(k).m / 3) === q)) out.push({ id: 'Q' + y + '-' + q, label: 'Quý ' + q + '/' + y }); });
       months.filter(k => k.startsWith(y)).forEach(k => {
         const m = report.data.months.find(x => x.month === k);
-        out.push({ id: k, label: 'Tháng ' + monthParts(k).m + '/' + monthParts(k).y + (m.source === 'import' ? ' (nhập từ file)' : '') });
+        out.push({ id: k, label: 'Tháng ' + monthParts(k).m + '/' + monthParts(k).y + (!m ? ' (chưa có bài)' : m.source === 'import' ? ' (nhập từ file)' : '') });
       });
     });
     return out;
@@ -96,10 +99,7 @@
   function setData(data) {
     report.data = data;
     const ids = periodIds().map(p => p.id);
-    if (!ids.includes(report.period)) {
-      const months = (data.months || []).map(m => m.month).sort();
-      report.period = months.length ? months[months.length - 1] : '';
-    }
+    if (!ids.includes(report.period)) report.period = currentMonth();
     render();
   }
   function notice(text, kind) { const el = $('reportNotice'); el.textContent = text || ''; el.className = 'message' + (kind ? ' ' + kind : ''); }
@@ -114,7 +114,7 @@
     $('reportBody').classList.toggle('hidden', !d);
     $('reportEmpty').classList.toggle('hidden', Boolean(d));
     renderImports();
-    if (!d) return;
+    if (!d) { renderMissing(); return; }
     const label = periodLabel(report.period);
     $('reportTitle').textContent = 'Kết quả khảo sát VHDN ' + label;
 
@@ -144,6 +144,7 @@
     renderUnderstandChart(d);
     renderTrend();
     renderTable(d);
+    renderMissing();
   }
 
   function legend(items) {
@@ -543,10 +544,149 @@
     } catch (error) { notice(error.message || String(error), 'error'); } finally { setLoading(false); }
   }
 
+
+  /* ---------- Nhân viên chưa làm khảo sát trong tháng ---------- */
+  function selectedMonth() { return /^\d{4}-\d{2}$/.test(report.period) ? report.period : ''; }
+
+  async function loadMissing(month, force) {
+    if (!force && (report.missing[month] || report.missingLoading === month)) return;
+    report.missingLoading = month;
+    renderMissing();
+    try {
+      const response = await apiPost('adminReportMissing', Object.assign({}, state.admin, { month }));
+      report.missing[month] = response.missing;
+    } catch (error) {
+      report.missing[month] = { error: error.message || String(error) };
+    } finally {
+      if (report.missingLoading === month) report.missingLoading = '';
+      if (selectedMonth() === month) renderMissing();
+    }
+  }
+
+  function renderMissing() {
+    const month = selectedMonth();
+    const box = $('missingList'), summary = $('missingSummary');
+    $('missingExport').disabled = true;
+    if (!month) {
+      $('missingTitle').textContent = 'Nhân viên chưa làm khảo sát';
+      summary.textContent = 'Chọn một tháng ở “Kỳ báo cáo” để xem danh sách nhân viên chưa làm khảo sát.';
+      box.innerHTML = ''; return;
+    }
+    $('missingTitle').textContent = 'Nhân viên chưa làm VHDN ' + monthLabel(month);
+    const data = report.missing[month];
+    if (!data) { summary.textContent = 'Đang tải danh sách…'; box.innerHTML = ''; loadMissing(month); return; }
+    if (data.error) { summary.textContent = 'Không tải được danh sách: ' + data.error; box.innerHTML = ''; return; }
+    const info = ((report.data && report.data.months) || []).find(m => m.month === month);
+    const offline = !info || info.source !== 'live';
+    summary.innerHTML = '<strong>' + num(data.missing, 0) + '</strong> / ' + num(data.employees, 0) + ' nhân viên chưa làm (' + pct(data.employees ? data.missing / data.employees : null) +
+      '), ' + num(data.done, 0) + ' người đã làm. So theo danh sách nhân sự hiện tại (Sheet1, đồng bộ từ SafetyHub).' +
+      (offline ? ' <span class="missing-warn">Tháng này chưa có bài khảo sát trực tuyến nên mọi người đều tính là chưa làm.</span>' : '');
+    const q = fold($('missingSearch').value);
+    const groups = data.groups.map(g => Object.assign({}, g, { shown: q ? g.missing.filter(p => fold(p.msnv + ' ' + p.name).includes(q)) : g.missing }))
+      .filter(g => !q || g.shown.length);
+    box.innerHTML = groups.length ? groups.map(g => {
+      const head = '<summary><span class="mg-name">' + esc(g.group) + '</span><span class="mg-count">' +
+        (g.missing.length ? '<strong>' + g.missing.length + '</strong> / ' + g.total + ' chưa làm' : 'Đã làm đủ ' + g.total + ' người') + '</span></summary>';
+      if (!g.missing.length) return '<details class="mg done">' + head + '</details>';
+      return '<details class="mg"' + (q ? ' open' : '') + '>' + head + '<table><thead><tr><th class="mg-stt">STT</th><th class="mg-msnv">MSNV</th><th>Họ và tên</th></tr></thead><tbody>' +
+        g.shown.map((p, i) => '<tr><td class="mg-stt">' + (i + 1) + '</td><td class="mg-msnv">' + esc(p.msnv) + '</td><td>' + esc(p.name) + '</td></tr>').join('') + '</tbody></table></details>';
+    }).join('') : '<div class="rc-empty">Không tìm thấy nhân viên phù hợp.</div>';
+    $('missingExport').disabled = !data.missing;
+  }
+
+  /** Tên sheet Excel: tối đa 31 ký tự, không có : \ / ? * [ ], không trùng. */
+  function sheetName(name, used) {
+    let base = String(name || 'Bộ phận').replace(/[:\\\/?*\[\]]/g, '-').slice(0, 31).trim() || 'Bộ phận';
+    let out = base, n = 2;
+    while (used.has(out.toLowerCase())) { const tail = ' (' + n++ + ')'; out = base.slice(0, 31 - tail.length) + tail; }
+    used.add(out.toLowerCase());
+    return out;
+  }
+
+  async function exportMissing() {
+    const month = selectedMonth(), data = report.missing[month];
+    if (!month || !data || data.error || !data.missing) return;
+    setLoading(true);
+    try {
+      const ExcelJS = await loadLib('exceljs', 'ExcelJS');
+      const p = monthParts(month), label = ('0' + p.m).slice(-2) + '/' + p.y;
+      const title = 'DANH SÁCH NHÂN VIÊN CHƯA LÀM VHDN THÁNG ' + label;
+      const ORANGE = 'FFE45620', CHAR = 'FF4D4D4F', TINT = 'FFFFF6F1', LINE = 'FFDADADC', WHITE = 'FFFFFFFF', INK = 'FF1A1A1A';
+      const font = (o) => Object.assign({ name: 'Arial', size: 11, color: { argb: INK } }, o || {});
+      const fill = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+      const border = { top: { style: 'thin', color: { argb: LINE } }, left: { style: 'thin', color: { argb: LINE } }, bottom: { style: 'thin', color: { argb: LINE } }, right: { style: 'thin', color: { argb: LINE } } };
+      const stamp = new Date().toLocaleString('vi-VN');
+
+      const book = new ExcelJS.Workbook();
+      book.creator = 'TBS Logistics · HSSE'; book.created = new Date();
+      const used = new Set();
+
+      // Một sheet tổng hợp số người chưa làm theo bộ phận, rồi mỗi bộ phận một sheet.
+      const layout = (ws, lastCol, subtitle, headers, widths) => {
+        ws.columns = widths.map(w => ({ width: w }));
+        ws.mergeCells(1, 1, 1, lastCol);
+        const t = ws.getCell(1, 1);
+        t.value = title; t.font = font({ size: 14, bold: true, color: { argb: WHITE } }); t.fill = fill(ORANGE);
+        t.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        ws.getRow(1).height = 32;
+        ws.mergeCells(2, 1, 2, lastCol);
+        const sub = ws.getCell(2, 1);
+        sub.value = subtitle; sub.font = font({ size: 10, italic: true, color: { argb: CHAR } }); sub.alignment = { horizontal: 'center' };
+        ws.getRow(2).height = 18;
+        const head = ws.getRow(4);
+        headers.forEach((h, i) => {
+          const c = head.getCell(i + 1);
+          c.value = h; c.font = font({ bold: true, color: { argb: WHITE } }); c.fill = fill(CHAR); c.border = border;
+          c.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+        head.height = 22;
+        ws.views = [{ state: 'frozen', ySplit: 4 }];
+        ws.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '4:4',
+          margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 } };
+        ws.headerFooter = { oddFooter: '&L&8TBS Logistics · ' + title + '&R&8Trang &P/&N' };
+      };
+      const bodyRow = (ws, r, values, centerCols) => {
+        const row = ws.getRow(r);
+        values.forEach((v, i) => {
+          const c = row.getCell(i + 1);
+          c.value = v; c.font = font(); c.border = border;
+          if (r % 2 === 1) c.fill = fill(TINT);
+          c.alignment = { vertical: 'middle', horizontal: centerCols.includes(i) ? 'center' : 'left' };
+        });
+        row.height = 18;
+      };
+
+      const sum = book.addWorksheet(sheetName('Tổng hợp', used), { properties: { tabColor: { argb: ORANGE } } });
+      layout(sum, 5, 'Cập nhật ' + stamp + ' · ' + data.missing + '/' + data.employees + ' nhân viên chưa làm', ['STT', 'Bộ phận', 'Tổng nhân sự', 'Đã làm', 'Chưa làm'], [7, 30, 16, 12, 12]);
+      data.groups.forEach((g, i) => bodyRow(sum, 5 + i, [i + 1, g.group, g.total, g.done, g.missing.length], [0, 2, 3, 4]));
+      const totalRow = 5 + data.groups.length;
+      bodyRow(sum, totalRow, ['', 'Tổng cộng', data.employees, data.done, data.missing], [2, 3, 4]);
+      sum.getRow(totalRow).eachCell(c => { c.font = font({ bold: true }); c.fill = fill(TINT); });
+
+      data.groups.filter(g => g.missing.length).forEach(g => {
+        const ws = book.addWorksheet(sheetName(g.group, used));
+        layout(ws, 3, 'Bộ phận: ' + g.group + ' · ' + g.missing.length + '/' + g.total + ' người chưa làm · cập nhật ' + stamp, ['STT', 'MSNV', 'Họ và tên'], [8, 16, 48]);
+        g.missing.forEach((person, i) => {
+          bodyRow(ws, 5 + i, [i + 1, String(person.msnv), person.name], [0, 1]);
+          ws.getCell(5 + i, 2).numFmt = '@'; // MSNV giữ dạng chữ
+        });
+      });
+
+      const buffer = await book.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Danh-sach-chua-lam-VHDN-thang-' + p.m + '-' + p.y + '.xlsx';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      notice('Đã xuất Excel: ' + data.groups.filter(g => g.missing.length).length + ' bộ phận, ' + data.missing + ' nhân viên chưa làm.', 'success');
+    } catch (error) { notice(error.message || String(error), 'error'); } finally { setLoading(false); }
+  }
+
   /* ---------- Gắn sự kiện ---------- */
   function bind() {
     $('reportPeriod').onchange = e => { report.period = e.target.value; render(); };
-    $('reportReload').onclick = () => load();
+    $('reportReload').onclick = () => { report.missing = {}; load(); };
     $('reportImportButton').onclick = () => $('reportFile').click();
     $('reportFile').onchange = onFile;
     $('reportExportExcel').onclick = exportExcel;
@@ -554,6 +694,9 @@
     $('reportBenchSave').onclick = () => saveBenchmark(false);
     $('reportBenchAuto').onclick = () => saveBenchmark(true);
     $('reportImports').onclick = e => { const b = e.target.closest('[data-del]'); if (b) deleteImport(b.dataset.del); };
+    $('missingSearch').oninput = () => { clearTimeout(renderMissing.t); renderMissing.t = setTimeout(renderMissing, 150); };
+    $('missingExport').onclick = exportMissing;
+    $('missingReload').onclick = () => { const m = selectedMonth(); if (m) loadMissing(m, true); };
   }
 
   window.vhdnReport = { open() { if (!report.bound) { bind(); report.bound = true; } return load(); }, _state: report, _parsePptx: parsePptx, _parseExcel: parseExcel };

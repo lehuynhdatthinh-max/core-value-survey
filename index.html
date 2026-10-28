@@ -768,8 +768,29 @@
     .report-imports li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 0;border-top:1px solid #F0F0F1}
     .report-imports li.muted{color:var(--muted,#6B6B6E)}
     .btn-xs{min-height:32px;padding:4px 10px;font-size:13px}
+    .missing-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+    .missing-head h4{margin:0}
+    .missing-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .missing-actions input{min-width:200px;max-width:260px}
+    .missing-warn{color:#7A2E0B;font-weight:700}
+    #missingSummary{margin:8px 0 10px;font-size:14px}
+    .mg{border-top:1px solid #F0F0F1}
+    .mg summary{display:flex;justify-content:space-between;gap:10px;padding:9px 4px;cursor:pointer;list-style:none}
+    .mg summary::-webkit-details-marker{display:none}
+    .mg summary:before{content:"›";display:inline-block;width:14px;color:#E45620;font-weight:900;transition:transform .15s}
+    .mg[open] summary:before{transform:rotate(90deg)}
+    .mg .mg-name{flex:1;font-weight:700;color:#333}
+    .mg .mg-count{color:#6B6B6E;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .mg .mg-count strong{color:#E45620}
+    .mg.done summary{cursor:default}.mg.done summary:before{content:"✓";color:#16A34A}
+    .mg table{width:100%;min-width:0;margin:0 0 10px;border-collapse:collapse}
+    .mg th{background:#4D4D4F;color:#fff;font-size:13px;padding:7px 10px;text-align:left}
+    .mg td{padding:6px 10px;border-bottom:1px solid #F0F0F1;font-size:14px}
+    .mg tbody tr:nth-child(odd) td{background:#FFF6F1}
+    .mg .mg-stt{width:56px;text-align:center}.mg .mg-msnv{width:130px;font-variant-numeric:tabular-nums}
+    .missing-actions input{min-height:44px}
     @media(max-width:900px){.report-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.rt-grid{grid-template-columns:1fr}}
-    @media(max-width:560px){.report-actions{width:100%}.report-actions .btn{flex:1 1 45%}.report-toolbar>div:first-child{max-width:none}.rc-row{grid-template-columns:104px minmax(0,1fr) 46px;gap:6px}.rc-label{font-size:12px}.rt-val{font-size:10px}}
+    @media(max-width:560px){.missing-actions{width:100%}.missing-actions input{max-width:none;flex:1 1 100%}.missing-actions .btn{flex:1 1 100%}.mg .mg-stt{width:38px}.mg .mg-msnv{width:92px}.mg th,.mg td{padding:6px}.report-actions{width:100%}.report-actions .btn{flex:1 1 45%}.report-toolbar>div:first-child{max-width:none}.rc-row{grid-template-columns:104px minmax(0,1fr) 46px;gap:6px}.rc-label{font-size:12px}.rt-val{font-size:10px}}
   </style>
 </head>
 
@@ -1147,6 +1168,19 @@
               <tbody id="reportRows"></tbody>
             </table>
           </div>
+        </div>
+
+        <div class="report-card missing-card">
+          <div class="missing-head">
+            <h4 id="missingTitle">Nhân viên chưa làm khảo sát</h4>
+            <div class="missing-actions">
+              <input id="missingSearch" type="search" placeholder="Tìm MSNV, họ tên" aria-label="Tìm nhân viên chưa làm">
+              <button class="btn btn-light" type="button" id="missingReload">Tải lại</button>
+              <button class="btn btn-primary" type="button" id="missingExport" disabled>Xuất Excel danh sách chưa làm</button>
+            </div>
+          </div>
+          <p id="missingSummary" class="report-hint"></p>
+          <div id="missingList"></div>
         </div>
 
         <details class="report-imports">
@@ -4062,7 +4096,7 @@
       if (!vhdnReportLoading) {
         vhdnReportLoading = new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'vhdn-report.js?v=1';
+          script.src = 'vhdn-report.js?v=2';
           script.onload = resolve;
           script.onerror = () => { vhdnReportLoading = null; reject(new Error('Không tải được vhdn-report.js')); };
           document.head.appendChild(script);

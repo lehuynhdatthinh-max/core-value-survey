@@ -40,10 +40,11 @@ Dashboard quản trị có thêm tab **Báo cáo VHDN**:
 - Bộ phận gộp theo nhóm của báo cáo (KHO 7-8 → KHO 7-8-DEPOT, XNK ICD / XNK TCY → XNK, BẢO VỆ ICD → BẢO VỆ ICD 30, BẢO VỆ ST → BẢO VỆ KHO ST, Giao nhận quốc tế → GNQT…); tên khác giữ nguyên.
 - **Điểm chuẩn HIỂU tự động** = điểm tối đa phần HIỂU của tháng (đổi theo số câu HIỂU); có thể **đặt tay** cho từng tháng. Quý = trung bình các tháng.
 - **Nhập Excel / PowerPoint**: đọc file báo cáo như "Báo cáo khảo sát VHDN - 2026.pptx" (biểu đồ "… của các bộ phận tháng M/YYYY") hoặc file Excel xuất từ tab này; xem trước rồi lưu vào tab **Báo cáo VHDN (nhập)** của sheet. Tháng có bài khảo sát trực tuyến luôn dùng số liệu trực tuyến.
+- **Nhân viên chưa làm khảo sát** (chọn một tháng): ai có trong danh sách nhân sự (Sheet1, đồng bộ từ SafetyHub) mà chưa có bài khảo sát trực tuyến tháng đó, theo từng bộ phận (STT, MSNV, Họ và tên), có ô tìm. **Xuất Excel danh sách chưa làm**: sheet "Tổng hợp" + mỗi bộ phận một sheet, tiêu đề "DANH SÁCH NHÂN VIÊN CHƯA LÀM VHDN THÁNG mm/yyyy", màu TBS (cam #E45620, xám than #4D4D4F), font Arial, sẵn in A4. Tháng hiện tại luôn có trong danh sách kỳ báo cáo, kể cả khi chưa ai làm.
 - **Xuất PowerPoint / Excel** cả năm: trang bìa, tổng hợp BIẾT / HIỂU (3 kỳ mỗi trang, có quý), biểu đồ theo bộ phận từng tháng và từng quý. File xuất nhập lại được.
 
 Cài: dán đè `Code.gs` 4.13.0 (gửi riêng) › thêm tệp `SurveyReport.gs` (**＋ › Tập lệnh**, dán `apps-script/SurveyReport.gs`) › **Lưu** › **Triển khai › Quản lý triển khai › Phiên bản mới**. Trang khảo sát (GitHub Pages) đã có sẵn tab mới.
-Thử: chọn hàm `testReportData` › **Chạy** — Nhật ký liệt kê từng tháng có số liệu.
+Thử: chọn hàm `testReportData` › **Chạy** — Nhật ký liệt kê từng tháng có số liệu; `testMissingEmployees` — số người chưa làm tháng này theo bộ phận.
 
 ## Cập nhật 4.12.0: chịu được 75–100 người cùng lúc
 

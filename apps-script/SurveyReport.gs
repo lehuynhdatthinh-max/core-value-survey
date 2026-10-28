@@ -287,6 +287,69 @@ function getReportData_() {
   return { months: months, groupOrder: REPORT_GROUP_ORDER.slice(), generatedAt: new Date().toISOString() };
 }
 
+/* ---------- Nhân viên chưa làm khảo sát trong tháng ---------- */
+
+/**
+ * Người có trong danh sách nhân sự (Sheet1 — đồng bộ từ SafetyHub) nhưng chưa có bài khảo sát trực tuyến nào trong tháng.
+ * Bộ phận lấy theo cột "Bộ phận" của Sheet1, gộp nhóm như báo cáo. Danh sách nhân sự là danh sách HIỆN TẠI.
+ * { month, employees, done, missing, groups: [{ group, total, done, missing: [{ msnv, name, position }] }] }
+ */
+function getMissingEmployees_(monthValue) {
+  const month = reportMonthKey_(monthValue);
+  if (!month) throw new Error('Tháng không hợp lệ.');
+
+  const doneSet = {};
+  const resp = getSpreadsheet_().getSheetByName(CFG.SHEETS.RESPONSES);
+  if (resp && resp.getLastRow() >= 2) {
+    const headers = resp.getRange(1, 1, 1, resp.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
+    const cols = readResponseColumns_(resp, headers, ['MSNV', 'Timestamp', 'Stress Test']);
+    cols.MSNV.forEach((value, i) => {
+      if (isStressValue_(cols['Stress Test'][i])) return;
+      const key = retakeMsnvKey_(value);
+      if (key && retakeMonthOf_(cols.Timestamp[i]) === month) doneSet[key] = true;
+    });
+  }
+
+  const sheet = getSpreadsheet_().getSheetByName(CFG.SHEETS.EMPLOYEES);
+  if (!sheet) throw new Error('Không tìm thấy sheet nhân sự: ' + CFG.SHEETS.EMPLOYEES);
+  const header = findEmployeeHeaderInfo_(sheet);
+  const lastRow = sheet.getLastRow();
+  const groups = {};
+  let employees = 0, done = 0;
+  if (lastRow >= header.dataStartRow) {
+    const cols = [header.msnvColumn, header.nameColumn, header.departmentColumn, header.positionColumn];
+    const minCol = Math.min.apply(null, cols), maxCol = Math.max.apply(null, cols);
+    const rows = sheet.getRange(header.dataStartRow, minCol, lastRow - header.dataStartRow + 1, maxCol - minCol + 1).getDisplayValues();
+    const seen = {};
+    rows.forEach(row => {
+      const msnv = normalizeMSNV_(row[header.msnvColumn - minCol]);
+      const key = retakeMsnvKey_(msnv);
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      const group = reportGroupOf_(row[header.departmentColumn - minCol]);
+      const g = groups[group] || (groups[group] = { group: group, total: 0, done: 0, missing: [] });
+      g.total++; employees++;
+      if (doneSet[key]) { g.done++; done++; return; }
+      g.missing.push({
+        msnv: msnv,
+        name: String(row[header.nameColumn - minCol] || '').trim(),
+        position: String(row[header.positionColumn - minCol] || '').trim()
+      });
+    });
+  }
+  const list = Object.keys(groups).map(k => groups[k]).sort((a, b) => reportGroupSort_(a.group, b.group));
+  list.forEach(g => g.missing.sort((a, b) => String(a.msnv).localeCompare(String(b.msnv), 'vi', { numeric: true })));
+  return { month: month, employees: employees, done: done, missing: employees - done, groups: list, generatedAt: new Date().toISOString() };
+}
+
+/** Thử từ trình soạn thảo: số người chưa làm khảo sát tháng này theo bộ phận. */
+function testMissingEmployees() {
+  const data = getMissingEmployees_(retakeCurrentMonth_());
+  console.log(data.month + ': ' + data.missing + '/' + data.employees + ' chưa làm. ' +
+    data.groups.map(g => g.group + ' ' + g.missing.length + '/' + g.total).join(' · '));
+  return data;
+}
+
 /** Thử từ trình soạn thảo: xem tóm tắt số liệu báo cáo trong Nhật ký thực thi. */
 function testReportData() {
   const data = getReportData_();
