@@ -2639,7 +2639,8 @@
 
     function changeMsnv(){
       const input = document.getElementById('employeeId');
-      if (state.surveySubmitted) resetSurveyForRetake();
+      // Người khác làm trên cùng máy: luôn xóa câu trả lời đang có (kể cả chưa nộp), để không dùng lại bài của người trước.
+      resetSurveyForRetake();
       input.disabled = false;
       input.value = '';
       state.lastLookupMSNV = '';

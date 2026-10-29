@@ -542,3 +542,68 @@ function testReportData() {
     rate: m.totals.rate, hieu: m.totals.understandAvg, chuan: m.benchmark, groups: m.groups.length }))));
   return data;
 }
+
+/**
+ * Chạy từ trình soạn thảo: liệt kê các bài làm tháng này nhanh hơn `maxSeconds` giây (mặc định 60) vào tab
+ * "Kiểm tra làm nhanh yyyy-MM" để xem vì sao: lựa chọn, câu tự luận, thiết bị (UserAgent), các bài cùng thiết bị
+ * nộp liền nhau, các câu tự luận giống hệt nhau. Chỉ đọc Responses, không sửa điểm.
+ */
+function auditFastSubmissions(maxSeconds) {
+  const limit = Number(maxSeconds) > 0 ? Number(maxSeconds) : 60;
+  const month = retakeCurrentMonth_();
+  const ss = getSpreadsheet_();
+  const resp = ss.getSheetByName(CFG.SHEETS.RESPONSES);
+  if (!resp || resp.getLastRow() < 2) return log_('Chưa có bài làm.');
+  const headers = resp.getRange(1, 1, 1, resp.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
+  const cols = readResponseColumns_(resp, headers, ['MSNV', 'Timestamp', 'Stress Test', 'Bộ phận', 'Họ và tên', 'Điểm - TỔNG', 'Tổng câu',
+    'Answers JSON', 'UserAgent', RETAKE_ATTEMPTS_HEADER, 'Thời gian làm (giây)'].concat(FIRST_ATTEMPT_HEADERS));
+  // Câu tự luận = câu không có đáp án để chọn (theo danh sách câu hỏi).
+  const textIds = {};
+  try { getQuestionConfig_(true).forEach(q => { textIds[q.id] = !(q.options && q.options.length); }); } catch (err) {}
+  const all = [];
+  cols.MSNV.forEach((value, i) => {
+    if (isStressValue_(cols['Stress Test'][i]) || !retakeMsnvKey_(value) || retakeMonthOf_(cols.Timestamp[i]) !== month) return;
+    const hasFirst = cols['Điểm lần đầu'][i] !== '' && cols['Điểm lần đầu'][i] != null;
+    const seconds = number_(hasFirst ? cols['Thời gian lần đầu (giây)'][i] : cols['Thời gian làm (giây)'][i], 0);
+    let answers = {};
+    try { answers = JSON.parse(cols['Answers JSON'][i] || '{}'); } catch (err) {}
+    const isText = k => textIds[k] || (!(k in textIds) && typeof answers[k] === 'string' && (answers[k].length > 3 || /\s/.test(answers[k])));
+    const text = Object.keys(answers).filter(isText).map(k => String(answers[k] || '').trim()).join(' | ');
+    const picks = Object.keys(answers).filter(k => !isText(k)).map(k => k + '=' + [].concat(answers[k]).join(',')).join('; ');
+    const time = parseDate_(cols.Timestamp[i]);
+    all.push({ msnv: retakeMsnvKey_(value), name: String(cols['Họ và tên'][i] || ''), group: reportGroupOf_(cols['Bộ phận'][i]),
+      time: time, seconds: seconds, score: (hasFirst ? cols['Điểm lần đầu'][i] : cols['Điểm - TỔNG'][i]) + '/' + (hasFirst ? cols['Tổng câu lần đầu'][i] : cols['Tổng câu'][i]),
+      attempts: number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), ua: String(cols.UserAgent[i] || ''), text: text, picks: picks });
+  });
+  const fast = all.filter(r => r.seconds > 0 && r.seconds < limit);
+  const count = (list, key) => list.reduce((m, r) => { m[r[key]] = (m[r[key]] || 0) + 1; return m; }, {});
+  const sameDevice = count(fast, 'ua');
+  const normText = r => r.text.toLowerCase().replace(/\s+/g, ' ').trim();
+  fast.forEach(r => { r.textKey = normText(r); });
+  const sameText = count(fast, 'textKey');
+  // Bài nộp ngay trước đó trên cùng thiết bị (theo thời gian nộp): vài phút một bài = một máy chuyền tay / một người làm hộ.
+  const byDevice = {};
+  all.slice().sort((a, b) => (a.time || 0) - (b.time || 0)).forEach(r => {
+    const prev = byDevice[r.ua];
+    r.gap = prev && r.time && prev.time ? Math.round((r.time - prev.time) / 6000) / 10 : '';
+    r.prevName = prev ? prev.name + ' (' + prev.msnv + ')' : '';
+    byDevice[r.ua] = r;
+  });
+  fast.sort((a, b) => reportGroupSort_(a.group, b.group) || (a.time || 0) - (b.time || 0));
+  const name = 'Kiểm tra làm nhanh ' + month;
+  const old = ss.getSheetByName(name); if (old) ss.deleteSheet(old);
+  const sheet = ss.insertSheet(name);
+  const head = ['Bộ phận', 'MSNV', 'Họ và tên', 'Nộp lúc', 'Giây (lần đầu)', 'Điểm lần đầu', 'Số lần làm', 'Câu tự luận', 'Số ký tự tự luận',
+    'Số bài nhanh cùng nội dung tự luận', 'Lựa chọn (lần nộp mới nhất)', 'Số bài nhanh cùng thiết bị', 'Bài trước trên cùng thiết bị', 'Cách bài trước (phút)', 'Thiết bị (UserAgent)'];
+  const rows = fast.map(r => [r.group, r.msnv, r.name, r.time ? Utilities.formatDate(r.time, retakeTimeZone_(), 'dd/MM/yyyy HH:mm:ss') : '', r.seconds, r.score, r.attempts,
+    r.text, r.text.length, sameText[r.textKey], r.picks, sameDevice[r.ua], r.prevName, r.gap, r.ua]);
+  sheet.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
+  if (rows.length) sheet.getRange(2, 1, rows.length, head.length).setValues(rows);
+  sheet.getRange(2, 2, Math.max(rows.length, 1), 1).setNumberFormat('@');
+  sheet.setFrozenRows(1);
+  const devices = Object.keys(sameDevice).filter(k => sameDevice[k] > 1).length;
+  const texts = Object.keys(sameText).filter(k => sameText[k] > 1);
+  return log_(month + ': ' + fast.length + '/' + all.length + ' bài làm dưới ' + limit + ' giây. ' +
+    Object.entries(count(fast, 'group')).map(e => e[0] + ' ' + e[1]).join(' · ') + '. ' +
+    devices + ' thiết bị có từ 2 bài nhanh trở lên; ' + texts.length + ' câu tự luận lặp lại (' + texts.slice(0, 5).map(t => '“' + t.slice(0, 40) + '” ×' + sameText[t]).join(', ') + '). Xem tab "' + name + '".');
+}

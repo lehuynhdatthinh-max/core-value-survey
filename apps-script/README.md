@@ -32,6 +32,12 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
 
+## Kiểm tra bài làm quá nhanh
+
+Trong `SurveyReport.gs`, chạy **`auditFastSubmissions`** (mặc định dưới 60 giây). Hàm tạo tab **"Kiểm tra làm nhanh yyyy-MM"** gồm: thời gian, điểm, câu tự luận, lựa chọn, thiết bị (UserAgent), số bài nhanh cùng thiết bị hoặc cùng nội dung tự luận, và bài nộp ngay trước đó trên cùng thiết bị. Hàm chỉ đọc, không sửa điểm.
+
+Trang khảo sát: bấm **"Đổi người"** giờ luôn xóa các câu đã chọn và câu tự luận, kể cả khi chưa nộp, nên người sau không dùng lại được bài của người trước trên cùng máy.
+
 ## Cập nhật 4.15.0: bảng xếp hạng tất cả bộ phận (Quản trị)
 
 - **Quản trị › Báo cáo VHDN › Bảng xếp hạng các bộ phận** (chọn một tháng ở “Kỳ báo cáo”): mỗi bộ phận một dòng gồm số đã làm / tổng nhân sự, Đạt (≥ 50%) hay Chưa đạt, và **người hạng 1** (họ tên, MSNV, điểm, thời gian).
