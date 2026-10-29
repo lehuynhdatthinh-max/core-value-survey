@@ -5,7 +5,7 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. 4.14.0: bảng xếp hạng bộ phận. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. 4.14.0: bảng xếp hạng bộ phận. 4.15.0: bảng xếp hạng tất cả bộ phận trong Quản trị. |
 | `SurveyReport.gs` | Số liệu tab **Báo cáo VHDN**: BIẾT / HIỂU theo tháng, quý, bộ phận; số liệu nhập từ file báo cáo; điểm chuẩn HIỂU. |
 | `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
@@ -31,6 +31,17 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.15.0: bảng xếp hạng tất cả bộ phận (Quản trị)
+
+- **Quản trị › Báo cáo VHDN › Bảng xếp hạng các bộ phận** (chọn một tháng ở “Kỳ báo cáo”): mỗi bộ phận một dòng gồm số đã làm / tổng nhân sự, Đạt (≥ 50%) hay Chưa đạt, và **người hạng 1** (họ tên, MSNV, điểm, thời gian).
+- **Xem cả bộ phận** mở toàn bộ thứ hạng của bộ phận đó. Ô tìm kiếm lọc theo MSNV hoặc họ tên (không cần gõ dấu).
+- Bên dưới là **Toàn công ty · top 20**.
+- **Xuất Excel bảng xếp hạng**: sheet Tổng hợp, sheet Toàn công ty và mỗi bộ phận một sheet, theo màu TBS.
+- Cách xếp hạng giống màn hình kết quả: điểm lần làm đầu tiên trong tháng, bằng điểm thì ai nhanh hơn xếp trên. Số liệu được làm mới sau tối đa 2 phút; bấm **Tải lại** để lấy lại.
+- Action mới: `adminLeaderboard` (POST, cần email + mã quản trị).
+
+Cài: dán đè `Code.gs` 4.15.0 (gửi riêng) và `SurveyReport.gs` mới › **Lưu** › **Triển khai › Quản lý bản triển khai › Phiên bản mới**.
 
 ## Cập nhật 4.14.0: bộ phận của tôi + bảng xếp hạng trên màn hình kết quả
 

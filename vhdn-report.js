@@ -18,7 +18,7 @@
   const deptRate = g => g.total ? g.done / g.total : 0;
   const deptPass = g => g.total > 0 && deptRate(g) >= PASS_RATE;
   const BAR_SPAN = 84; // thanh dài nhất chiếm 84% bề ngang, chừa chỗ cho số
-  const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '' };
+  const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '', board: {}, boardLoading: '' };
   const $ = id => document.getElementById(id);
   const esc = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : String(v == null ? '' : v));
   const fold = v => String(v || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/Đ/g, 'D').replace(/\s+/g, ' ').trim();
@@ -117,7 +117,7 @@
     $('reportBody').classList.toggle('hidden', !d);
     $('reportEmpty').classList.toggle('hidden', Boolean(d));
     renderImports();
-    if (!d) { renderMissing(); return; }
+    if (!d) { renderMissing(); renderLeaderboard(); return; }
     const label = periodLabel(report.period);
     $('reportTitle').textContent = 'Kết quả khảo sát VHDN ' + label;
 
@@ -148,6 +148,7 @@
     renderTrend();
     renderTable(d);
     renderMissing();
+    renderLeaderboard();
   }
 
   function legend(items) {
@@ -703,10 +704,118 @@
     } catch (error) { notice(error.message || String(error), 'error'); } finally { setLoading(false); }
   }
 
+
+  /* ---------- Bảng xếp hạng toàn bộ phận (quản trị) ---------- */
+  function clock(sec) { return sec == null || !isFinite(sec) ? '–' : Math.floor(sec / 60) + ':' + String(Math.round(sec) % 60).padStart(2, '0'); }
+  function medal(rank) { return rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : String(rank); }
+
+  async function loadLeaderboard(month, force) {
+    if (!force && (report.board[month] || report.boardLoading === month)) return;
+    report.boardLoading = month;
+    renderLeaderboard();
+    try {
+      const response = await apiPost('adminLeaderboard', Object.assign({}, state.admin, { month }));
+      report.board[month] = response.leaderboard;
+    } catch (error) {
+      report.board[month] = { error: error.message || String(error) };
+    } finally {
+      if (report.boardLoading === month) report.boardLoading = '';
+      if (selectedMonth() === month) renderLeaderboard();
+    }
+  }
+
+  function renderLeaderboard() {
+    const month = selectedMonth();
+    const box = $('lbList'), summary = $('lbSummary');
+    $('lbExport').disabled = true;
+    if (!month) {
+      $('lbTitle').textContent = 'Bảng xếp hạng các bộ phận';
+      summary.textContent = 'Chọn một tháng ở “Kỳ báo cáo” để xem bảng xếp hạng.'; box.innerHTML = ''; $('lbCompany').innerHTML = ''; return;
+    }
+    $('lbTitle').textContent = 'Bảng xếp hạng các bộ phận ' + monthLabel(month);
+    const data = report.board[month];
+    if (!data) { summary.textContent = 'Đang tải bảng xếp hạng…'; box.innerHTML = ''; $('lbCompany').innerHTML = ''; loadLeaderboard(month); return; }
+    if (data.error) { summary.textContent = 'Không tải được: ' + data.error; box.innerHTML = ''; $('lbCompany').innerHTML = ''; return; }
+    const q = fold($('lbSearch').value);
+    summary.innerHTML = '<strong>' + num(data.ranked, 0) + '</strong> người được xếp hạng · ' + data.groups.filter(g => g.pass).length + '/' + data.groups.length +
+      ' bộ phận đạt (≥ ' + Math.round(data.passRate * 100) + '% đã làm). Xếp theo điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên.';
+    const person = r => '<tr class="' + (q && fold(r.msnv + ' ' + r.name).includes(q) ? 'lb-hit' : '') + '"><td class="lb-rank">' + medal(r.rank) + '</td><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + '<div class="lb-mob lb-sub">' + esc(r.msnv) + '</div>' +
+      '</td><td class="num">' + num(r.score, 0) + '/' + num(r.total, 0) + '</td><td class="num">' + clock(r.seconds) + '</td></tr>';
+    const table = rows => '<table class="lb-table"><thead><tr><th class="lb-rank">Hạng</th><th class="lb-msnv">MSNV</th><th>Họ và tên</th><th class="num">Điểm</th><th class="num">Thời gian</th></tr></thead><tbody>' + rows.map(person).join('') + '</tbody></table>';
+    $('lbCompany').innerHTML = data.company.length ? '<details class="lb-company" open><summary>Toàn công ty · top ' + data.company.length + '</summary><table class="lb-table"><thead><tr><th class="lb-rank">Hạng</th><th class="lb-grp">Bộ phận</th><th class="lb-msnv">MSNV</th><th>Họ và tên</th><th class="num">Điểm</th><th class="num">Thời gian</th></tr></thead><tbody>' +
+      data.company.map(r => '<tr><td class="lb-rank">' + medal(r.rank) + '</td><td class="lb-grp">' + esc(r.group) + '</td><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + '<div class="lb-mob lb-sub">' + esc(r.group) + ' · ' + esc(r.msnv) + '</div></td><td class="num">' + num(r.score, 0) + '/' + num(r.total, 0) + '</td><td class="num">' + clock(r.seconds) + '</td></tr>').join('') + '</tbody></table></details>' : '';
+    const groups = q ? data.groups.filter(g => g.ranking.some(r => fold(r.msnv + ' ' + r.name).includes(q))) : data.groups;
+    box.innerHTML = groups.length ? '<div class="table-wrap"><table class="lb-overview"><thead><tr><th>Bộ phận</th><th class="num">Đã làm</th><th>Kết quả</th><th>Hạng 1</th><th class="num">Điểm</th><th class="num">Thời gian</th><th></th></tr></thead><tbody>' +
+      groups.map((g, i) => {
+        const first = g.ranking[0];
+        return '<tr class="lb-group" data-lb="' + i + '"><td class="lb-dept"><strong>' + esc(g.group) + '</strong></td><td class="num lb-done">' + g.done + '/' + g.staff + ' (' + pct(g.rate) + ')</td>' +
+          '<td class="lb-res"><span class="mg-badge ' + (g.pass ? 'pass' : 'fail') + '">' + (g.pass ? 'Đạt' : 'Chưa đạt') + '</span></td>' +
+          '<td class="lb-first">' + (first ? '🥇 ' + esc(first.name) + ' <span class="lb-sub">' + esc(first.msnv) + '</span>' : '<span class="lb-sub">Chưa có</span>') + '</td>' +
+          '<td class="num lb-score">' + (first ? num(first.score, 0) + '/' + num(first.total, 0) : '') + '</td><td class="num lb-time">' + (first ? clock(first.seconds) : '') + '</td>' +
+          '<td class="lb-act"><button class="btn btn-light btn-xs" type="button" data-lb-open="' + i + '">' + (q ? 'Ẩn' : 'Xem cả bộ phận') + '</button></td></tr>' +
+          '<tr class="lb-detail' + (q ? '' : ' hidden') + '" data-lb-detail="' + i + '"><td colspan="7">' + (g.ranking.length ? table(g.ranking) : '<p class="report-hint">Chưa ai trong bộ phận làm khảo sát tháng này.</p>') +
+          (g.unranked ? '<p class="report-hint">' + g.unranked + ' người đã làm nhưng không có điểm lần đầu (làm lại trước khi có bảng xếp hạng) nên không xếp hạng.</p>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<div class="rc-empty">Không tìm thấy nhân viên phù hợp.</div>';
+    box.querySelectorAll('[data-lb-open]').forEach(b => b.onclick = () => {
+      const row = box.querySelector('[data-lb-detail="' + b.dataset.lbOpen + '"]');
+      row.classList.toggle('hidden'); b.textContent = row.classList.contains('hidden') ? 'Xem cả bộ phận' : 'Ẩn';
+    });
+    $('lbExport').disabled = !data.ranked;
+  }
+
+  async function exportLeaderboard() {
+    const month = selectedMonth(), data = report.board[month];
+    if (!month || !data || data.error) return;
+    setLoading(true);
+    try {
+      const ExcelJS = await loadLib('exceljs', 'ExcelJS');
+      const p = monthParts(month), label = ('0' + p.m).slice(-2) + '/' + p.y;
+      const title = 'BẢNG XẾP HẠNG KHẢO SÁT VHDN THÁNG ' + label;
+      const ORANGE = 'FFE45620', CHAR = 'FF4D4D4F', TINT = 'FFFFF6F1', LINE = 'FFDADADC', WHITE = 'FFFFFFFF', INK = 'FF1A1A1A';
+      const font = o => Object.assign({ name: 'Arial', size: 11, color: { argb: INK } }, o || {});
+      const fill = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+      const border = ['top', 'left', 'bottom', 'right'].reduce((o, k) => { o[k] = { style: 'thin', color: { argb: LINE } }; return o; }, {});
+      const book = new ExcelJS.Workbook(); book.creator = 'TBS Logistics · HSSE';
+      const used = new Set();
+      const sheet = (name, subtitle, headers, widths, rows, center) => {
+        const ws = book.addWorksheet(sheetName(name, used));
+        ws.columns = widths.map(w => ({ width: w }));
+        ws.mergeCells(1, 1, 1, headers.length);
+        Object.assign(ws.getCell(1, 1), { value: title }); const t = ws.getCell(1, 1);
+        t.font = font({ size: 14, bold: true, color: { argb: WHITE } }); t.fill = fill(ORANGE); t.alignment = { vertical: 'middle', horizontal: 'center' }; ws.getRow(1).height = 30;
+        ws.mergeCells(2, 1, 2, headers.length); const st = ws.getCell(2, 1);
+        st.value = subtitle; st.font = font({ size: 10, italic: true, color: { argb: CHAR } }); st.alignment = { horizontal: 'center' };
+        headers.forEach((h, i) => { const c = ws.getRow(4).getCell(i + 1); c.value = h; c.font = font({ bold: true, color: { argb: WHITE } }); c.fill = fill(CHAR); c.border = border; c.alignment = { horizontal: 'center', vertical: 'middle' }; });
+        ws.getRow(4).height = 22;
+        rows.forEach((values, r) => values.forEach((v, i) => {
+          const c = ws.getRow(5 + r).getCell(i + 1); c.value = v; c.font = font(); c.border = border;
+          if (r % 2 === 0) c.fill = fill(TINT);
+          c.alignment = { vertical: 'middle', horizontal: center.includes(i) ? 'center' : 'left' };
+        }));
+        ws.views = [{ state: 'frozen', ySplit: 4 }];
+        ws.pageSetup = { paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '4:4' };
+        return ws;
+      };
+      const stamp = new Date().toLocaleString('vi-VN');
+      const rule = 'Xếp theo điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên · cập nhật ' + stamp;
+      sheet('Tổng hợp', rule, ['STT', 'Bộ phận', 'Đã làm', 'Tổng nhân viên', 'Tỷ lệ', 'Kết quả', 'Hạng 1', 'MSNV', 'Điểm', 'Thời gian'], [6, 22, 10, 15, 9, 11, 28, 13, 9, 11],
+        data.groups.map((g, i) => { const f = g.ranking[0] || {}; return [i + 1, g.group, g.done, g.staff, g.rate == null ? '' : Math.round(g.rate * 100) + '%', g.pass ? 'Đạt' : 'Chưa đạt', f.name || '', f.msnv || '', f.name ? f.score + '/' + f.total : '', f.name ? clock(f.seconds) : '']; }),
+        [0, 2, 3, 4, 5, 7, 8, 9]);
+      sheet('Toàn công ty', 'Top ' + data.company.length + ' toàn công ty · ' + rule, ['Hạng', 'Bộ phận', 'MSNV', 'Họ và tên', 'Điểm', 'Thời gian'], [7, 22, 13, 32, 9, 11],
+        data.company.map(r => [r.rank, r.group, r.msnv, r.name, r.score + '/' + r.total, clock(r.seconds)]), [0, 2, 4, 5]);
+      data.groups.filter(g => g.ranking.length).forEach(g => sheet(g.group, 'Bộ phận: ' + g.group + ' · ' + g.done + '/' + g.staff + ' đã làm · ' + (g.pass ? 'ĐẠT' : 'CHƯA ĐẠT') + ' · ' + rule,
+        ['Hạng', 'MSNV', 'Họ và tên', 'Điểm', 'Thời gian'], [7, 14, 34, 9, 11], g.ranking.map(r => [r.rank, r.msnv, r.name, r.score + '/' + r.total, clock(r.seconds)]), [0, 1, 3, 4]));
+      const blob = new Blob([await book.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Bang-xep-hang-VHDN-thang-' + p.m + '-' + p.y + '.xlsx';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      notice('Đã xuất Excel bảng xếp hạng tháng ' + p.m + '/' + p.y + '.', 'success');
+    } catch (error) { notice(error.message || String(error), 'error'); } finally { setLoading(false); }
+  }
+
   /* ---------- Gắn sự kiện ---------- */
   function bind() {
     $('reportPeriod').onchange = e => { report.period = e.target.value; render(); };
-    $('reportReload').onclick = () => { report.missing = {}; load(); };
+    $('reportReload').onclick = () => { report.missing = {}; report.board = {}; load(); };
     $('reportImportButton').onclick = () => $('reportFile').click();
     $('reportFile').onchange = onFile;
     $('reportExportExcel').onclick = exportExcel;
@@ -716,6 +825,9 @@
     $('reportImports').onclick = e => { const b = e.target.closest('[data-del]'); if (b) deleteImport(b.dataset.del); };
     $('missingSearch').oninput = () => { clearTimeout(renderMissing.t); renderMissing.t = setTimeout(renderMissing, 150); };
     $('missingExport').onclick = exportMissing;
+    $('lbSearch').oninput = () => { clearTimeout(renderLeaderboard.t); renderLeaderboard.t = setTimeout(renderLeaderboard, 150); };
+    $('lbExport').onclick = exportLeaderboard;
+    $('lbReload').onclick = () => { const m = selectedMonth(); if (m) loadLeaderboard(m, true); };
     $('missingReload').onclick = () => { const m = selectedMonth(); if (m) loadMissing(m, true); };
   }
 

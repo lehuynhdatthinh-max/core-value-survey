@@ -838,6 +838,39 @@
     .mg th{background:#4D4D4F;color:#fff;font-size:13px;padding:7px 10px;text-align:left}
     .mg td{padding:6px 10px;border-bottom:1px solid #F0F0F1;font-size:14px}
     .mg tbody tr:nth-child(odd) td{background:#FFF6F1}
+    .lb-card .table-wrap{margin-top:10px}
+    .lb-overview{width:100%;min-width:760px;border-collapse:collapse}
+    .lb-overview th,.lb-table th{background:#4D4D4F;color:#fff;font-size:13px;padding:8px 10px;text-align:left;white-space:nowrap}
+    .lb-overview td{padding:8px 10px;border-bottom:1px solid #F0F0F1;font-size:14px;vertical-align:middle}
+    .lb-overview .num,.lb-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .lb-overview tr.lb-detail>td{background:#FAFAFA;padding:6px 10px 12px}
+    .lb-table{width:100%;min-width:0;border-collapse:collapse;margin-top:4px}
+    .lb-table td{padding:6px 10px;border-bottom:1px solid #F0F0F1;font-size:14px}
+    .lb-table tbody tr:nth-child(odd) td{background:#FFF6F1}
+    .lb-table tr.lb-hit td{background:#FFE3D3!important;font-weight:700}
+    .lb-rank{width:52px;text-align:center}.lb-msnv{width:110px;font-variant-numeric:tabular-nums}
+    .lb-sub{color:#6B6B6E;font-size:12px}
+    .lb-mob{display:none}
+    .lb-company{margin:10px 0}.lb-company summary{cursor:pointer;font-weight:700;color:#4D4D4F;padding:6px 0}
+    .lb-company .lb-table{min-width:560px}.lb-company{overflow-x:auto}
+    @media (max-width:640px){
+      .lb-overview{min-width:0}
+      .lb-overview thead{display:none}
+      .lb-overview tr.lb-group{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px;border-top:1px solid #E5E5E6}
+      .lb-overview tr.lb-group td{border:0;padding:0}
+      .lb-overview tr.lb-group .lb-dept{grid-column:1}.lb-overview tr.lb-group .lb-res{grid-column:2;grid-row:1;text-align:right}
+      .lb-overview tr.lb-group .lb-done{grid-column:1/-1;text-align:left;color:#6B6B6E;font-size:13px}
+      .lb-overview tr.lb-group .lb-first{grid-column:1/-1}
+      .lb-overview tr.lb-group .lb-score{grid-column:1;text-align:left}.lb-overview tr.lb-group .lb-time{grid-column:2;text-align:right}
+      .lb-overview tr.lb-group .lb-score::before{content:'Điểm '}.lb-overview tr.lb-group .lb-time::before{content:'Thời gian '}
+      .lb-overview tr.lb-group .lb-score::before,.lb-overview tr.lb-group .lb-time::before{color:#6B6B6E;font-size:13px}
+      .lb-overview tr.lb-group .lb-act{grid-column:1/-1}.lb-overview tr.lb-group .lb-act .btn{width:100%}
+      .lb-overview tr.lb-detail,.lb-overview tr.lb-detail>td{display:block;padding:0 0 10px}
+      .lb-overview tr.lb-detail.hidden{display:none}
+      .lb-table td,.lb-table th{padding:6px}
+      .lb-table .lb-msnv,.lb-table .lb-grp{display:none}.lb-mob{display:block}
+      .lb-company .lb-table{min-width:0}
+    }
     .mg .mg-stt{width:56px;text-align:center}.mg .mg-msnv{width:130px;font-variant-numeric:tabular-nums}
     .missing-actions input{min-height:44px}
     @media(max-width:900px){.report-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.rt-grid{grid-template-columns:1fr}}
@@ -1233,6 +1266,20 @@
           </div>
           <p id="missingSummary" class="report-hint"></p>
           <div id="missingList"></div>
+        </div>
+
+        <div class="report-card lb-card">
+          <div class="missing-head">
+            <h4 id="lbTitle">Bảng xếp hạng các bộ phận</h4>
+            <div class="missing-actions">
+              <input id="lbSearch" type="search" placeholder="Tìm MSNV, họ tên" aria-label="Tìm trong bảng xếp hạng">
+              <button class="btn btn-light" type="button" id="lbReload">Tải lại</button>
+              <button class="btn btn-primary" type="button" id="lbExport" disabled>Xuất Excel bảng xếp hạng</button>
+            </div>
+          </div>
+          <p id="lbSummary" class="report-hint"></p>
+          <div id="lbList"></div>
+          <div id="lbCompany"></div>
         </div>
 
         <details class="report-imports">
@@ -4329,7 +4376,7 @@
       if (!vhdnReportLoading) {
         vhdnReportLoading = new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'vhdn-report.js?v=3';
+          script.src = 'vhdn-report.js?v=4';
           script.onload = resolve;
           script.onerror = () => { vhdnReportLoading = null; reject(new Error('Không tải được vhdn-report.js')); };
           document.head.appendChild(script);

@@ -488,6 +488,38 @@ function getDepartmentBoard_(msnv, departmentHint) {
   };
 }
 
+/**
+ * Quản trị: bảng xếp hạng ĐẦY ĐỦ của mọi bộ phận trong một tháng (có MSNV), và top toàn công ty.
+ * Cùng cách xếp như màn hình kết quả: điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên.
+ */
+function getAdminLeaderboard_(monthValue) {
+  const month = reportMonthKey_(monthValue) || retakeCurrentMonth_();
+  const payload = buildBoardMonth_(month);
+  const meta = JSON.parse(payload[boardCacheKey_(month, 'meta')]);
+  const all = [];
+  const groups = meta.groups.map((name, index) => {
+    const g = JSON.parse(payload[boardCacheKey_(month, 'g' + index)]);
+    const ranking = g.ranking.map((r, i) => ({ rank: i + 1, msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d }));
+    g.ranking.forEach(r => all.push(Object.assign({ group: g.group }, r)));
+    return {
+      group: g.group, staff: g.staff, done: g.done,
+      rate: g.staff ? Math.round(g.done / g.staff * 1000) / 1000 : null,
+      pass: g.staff > 0 && g.done / g.staff >= BOARD_PASS_RATE,
+      unranked: g.done - ranking.length,
+      ranking: ranking
+    };
+  }).sort((a, b) => reportGroupSort_(a.group, b.group));
+  all.sort(boardCompare_);
+  return {
+    month: month,
+    passRate: BOARD_PASS_RATE,
+    groups: groups,
+    company: all.slice(0, 20).map((r, i) => ({ rank: i + 1, group: r.group, msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d })),
+    ranked: all.length,
+    generatedAt: new Date().toISOString()
+  };
+}
+
 /** Thử từ trình soạn thảo: bảng xếp hạng bộ phận của một MSNV. */
 function testDepartmentBoard() {
   const data = getDepartmentBoard_('622412005', '');
