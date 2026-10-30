@@ -5,7 +5,7 @@ sửa xong phải dán vào trình soạn thảo Apps Script. Repo này công kh
 
 | File | Việc |
 |---|---|
-| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. 4.14.0: bảng xếp hạng bộ phận. 4.15.0: bảng xếp hạng tất cả bộ phận trong Quản trị. |
+| `Code.gs` (gửi riêng, không để trong repo công khai) | Toàn bộ backend (tra MSNV, câu hỏi, hàng đợi nộp bài, dashboard…). 4.9.0: `getMyResult` + ghi đè điểm khi làm lại. 4.10.0: `processQueue` nhanh hơn + tự lưu trữ Queue cũ. 4.11.0: giờ nộp theo máy chủ (để gộp theo tháng). 4.12.0: chịu tải 75–100 người cùng lúc. 4.13.0: tab Báo cáo VHDN. 4.14.0: bảng xếp hạng bộ phận. 4.15.0: bảng xếp hạng tất cả bộ phận trong Quản trị. 4.16.0: gắn "Cần xem lại" cho bài làm quá nhanh / một máy làm cho nhiều người. |
 | `SurveyReport.gs` | Số liệu tab **Báo cáo VHDN**: BIẾT / HIỂU theo tháng, quý, bộ phận; số liệu nhập từ file báo cáo; điểm chuẩn HIỂU. |
 | `SurveyRetake.gs` | Mỗi MSNV **một dòng mỗi tháng** trong **Responses** (luôn là lần nộp mới nhất của tháng), điểm tháng này cho trang khảo sát, gộp dòng trùng cũ. |
 | `SafetyHubEmployeeRefresh.gs` | Làm mới tra cứu MSNV sau khi SafetyHub đồng bộ Sheet1 (đã có sẵn trong dự án; bản lưu ở repo SafetyHub, `survey-appscript/`). |
@@ -31,6 +31,25 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
 - Dòng **Stress Test = YES** không ghi đè và không bị ghi đè, nên dọn stress test vẫn chạy như cũ.
 - Sau khi bấm **Kiểm tra**, trang gọi `getMyResult` → hiện điểm gần nhất, giờ nộp, số lần làm. Kết quả được nhớ 10 phút và xóa ngay khi có lần nộp mới.
 - Dashboard quản trị giờ đếm mỗi người một lần (dòng mới nhất).
+
+## Cập nhật 4.16.0: "Cần xem lại" trên bảng xếp hạng
+
+- Một bài **không được xếp hạng** (nhưng vẫn tính là đã làm cho mốc 50%) khi:
+  - lần làm đầu dưới **60 giây**, hoặc
+  - **cùng một máy** (UserAgent) nộp liên tiếp cho **từ 3 người**, mỗi bài cách bài trước trên máy đó **không quá 10 phút**.
+  
+  Các ngưỡng nằm ở đầu phần bảng xếp hạng trong `SurveyReport.gs` (`BOARD_MIN_SECONDS`, `BOARD_SHARED_DEVICE_PEOPLE`, `BOARD_SHARED_GAP_MINUTES`).
+- Quản trị › Báo cáo VHDN › Bảng xếp hạng:
+  - mỗi bộ phận hiện "⚠ N cần xem lại";
+  - "Xem cả bộ phận" có bảng **Cần xem lại** (giờ nộp, điểm, thời gian, lý do) với nút **Duyệt**;
+  - bài đã duyệt được xếp hạng lại và có nhãn "đã duyệt" cùng nút **Bỏ duyệt**.
+  
+  Danh sách đã duyệt lưu trong Script Properties (`VHDN_BOARD_APPROVED_yyyy-MM`).
+- Excel có thêm sheet **Cần xem lại**; sheet Tổng hợp có cột Cần xem lại.
+- Màn hình kết quả của người làm: "Bài làm của bạn đang được xem lại nên chưa được xếp hạng…".
+- Action mới: `adminBoardReview` (POST, cần email + mã quản trị).
+
+Cài: dán đè `Code.gs` 4.16.0 (gửi riêng) và `SurveyReport.gs` mới › **Lưu** › **Triển khai › Quản lý bản triển khai › Phiên bản mới**.
 
 ## Kiểm tra bài làm quá nhanh
 

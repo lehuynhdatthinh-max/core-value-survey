@@ -347,8 +347,50 @@ function getMissingEmployees_(monthValue) {
 const BOARD_CACHE_SECONDS = 120;
 const BOARD_PASS_RATE = 0.5; // bộ phận ĐẠT khi ít nhất 50% nhân viên đã làm (giống tab Báo cáo VHDN)
 const BOARD_TOP = 10;
+// "Cần xem lại": không xếp hạng (vẫn tính là đã làm) khi làm quá nhanh, hoặc một máy nộp liên tiếp cho nhiều người.
+const BOARD_MIN_SECONDS = 60;          // lần làm đầu dưới 60 giây
+const BOARD_SHARED_DEVICE_PEOPLE = 3;  // cùng một máy (UserAgent) nộp cho từ 3 người trở lên…
+const BOARD_SHARED_GAP_MINUTES = 10;   // …mỗi bài cách bài trước trên máy đó không quá 10 phút
 
-function boardCacheKey_(month, suffix) { return 'vhdn_board_v1_' + month + '_' + suffix; }
+function boardCacheKey_(month, suffix) { return 'vhdn_board_v2_' + month + '_' + suffix; }
+
+function boardApprovedKey_(month) { return 'VHDN_BOARD_APPROVED_' + month; }
+
+/** MSNV quản trị đã duyệt (vẫn xếp hạng dù bị gắn "Cần xem lại"), lưu trong Script Properties theo tháng. */
+function readBoardApproved_(month) {
+  try { return JSON.parse(PropertiesService.getScriptProperties().getProperty(boardApprovedKey_(month)) || '{}') || {}; } catch (error) { return {}; }
+}
+
+/** Quản trị: duyệt / bỏ duyệt một bài "Cần xem lại", rồi dựng lại bảng xếp hạng. */
+function saveBoardReview_(monthValue, msnv, approve) {
+  const month = reportMonthKey_(monthValue);
+  const key = retakeMsnvKey_(msnv);
+  if (!month || !key) throw new Error('Thiếu tháng hoặc MSNV.');
+  const approved = readBoardApproved_(month);
+  if (approve) approved[key] = new Date().toISOString(); else delete approved[key];
+  PropertiesService.getScriptProperties().setProperty(boardApprovedKey_(month), JSON.stringify(approved));
+  try { CacheService.getScriptCache().remove(boardCacheKey_(month, 'meta')); } catch (error) {}
+  return getAdminLeaderboard_(month);
+}
+
+/** Lý do "Cần xem lại" của từng MSNV: f = làm quá nhanh, m = số người nộp liên tiếp trên cùng máy. */
+function boardReviewFlags_(entries) {
+  const flags = {};
+  entries.forEach(e => { if (e.d !== '' && e.d < BOARD_MIN_SECONDS) (flags[e.k] = flags[e.k] || {}).f = true; });
+  const byDevice = {};
+  entries.forEach(e => { if (e.ua) (byDevice[e.ua] = byDevice[e.ua] || []).push(e); });
+  Object.keys(byDevice).forEach(ua => {
+    const list = byDevice[ua].sort((a, b) => a.at - b.at);
+    let run = [];
+    const close = () => { if (run.length >= BOARD_SHARED_DEVICE_PEOPLE) run.forEach(e => { (flags[e.k] = flags[e.k] || {}).m = run.length; }); };
+    list.forEach(e => {
+      if (run.length && e.at - run[run.length - 1].at > BOARD_SHARED_GAP_MINUTES * 60000) { close(); run = []; }
+      run.push(e);
+    });
+    close();
+  });
+  return flags;
+}
 
 /** Số nhân viên theo nhóm bộ phận (Sheet1). */
 function readStaffGroupCounts_() {
@@ -388,7 +430,7 @@ function buildBoardMonth_(month) {
   if (resp && resp.getLastRow() >= 2) {
     const headers = resp.getRange(1, 1, 1, resp.getLastColumn()).getDisplayValues()[0].map(h => String(h || '').trim());
     const cols = readResponseColumns_(resp, headers, ['MSNV', 'Timestamp', 'Stress Test', 'Bộ phận', 'Họ và tên', 'Điểm - TỔNG', 'Tổng câu',
-      RETAKE_ATTEMPTS_HEADER, 'Thời gian làm (giây)'].concat(FIRST_ATTEMPT_HEADERS));
+      RETAKE_ATTEMPTS_HEADER, 'Thời gian làm (giây)', 'UserAgent'].concat(FIRST_ATTEMPT_HEADERS));
     const latest = {};
     cols.MSNV.forEach((value, i) => {
       if (isStressValue_(cols['Stress Test'][i])) return;
@@ -397,17 +439,20 @@ function buildBoardMonth_(month) {
       const time = (parseDate_(cols.Timestamp[i]) || new Date(0)).getTime();
       if (!latest[key] || latest[key].time <= time) latest[key] = { i: i, time: time };
     });
+    const entries = [];
     Object.keys(latest).forEach(key => {
       const i = latest[key].i;
       const group = reportGroupOf_(cols['Bộ phận'][i]);
-      const g = groups[group] || (groups[group] = { done: 0, ranking: [] });
+      const g = groups[group] || (groups[group] = { done: 0, ranking: [], review: [] });
       g.done++;
       members[key] = group;
       const hasFirst = cols['Điểm lần đầu'][i] !== '' && cols['Điểm lần đầu'][i] != null;
       const single = Math.max(number_(cols[RETAKE_ATTEMPTS_HEADER][i], 1), 1) === 1;
       if (!hasFirst && !single) return; // làm lại từ trước khi có cột "lần đầu": không biết điểm lần đầu
       const d = number_(hasFirst ? cols['Thời gian lần đầu (giây)'][i] : cols['Thời gian làm (giây)'][i], 0);
-      g.ranking.push({
+      entries.push({
+        g: group,
+        ua: String(cols.UserAgent[i] || '').trim(),
         k: key,
         n: String(cols['Họ và tên'][i] || '').trim(),
         s: number_(hasFirst ? cols['Điểm lần đầu'][i] : cols['Điểm - TỔNG'][i], 0),
@@ -416,15 +461,26 @@ function buildBoardMonth_(month) {
         at: latest[key].time
       });
     });
+    const flags = boardReviewFlags_(entries);
+    const approved = readBoardApproved_(month);
+    entries.forEach(e => {
+      const g = groups[e.g];
+      const r = { k: e.k, n: e.n, s: e.s, t: e.t, d: e.d, at: e.at };
+      const f = flags[e.k];
+      if (f) r.x = (f.f ? 'f' : '') + (f.m ? 'm' + f.m : '');
+      if (f && approved[e.k]) r.ok = 1;
+      (f && !approved[e.k] ? g.review : g.ranking).push(r);
+    });
   }
   const staff = readStaffGroupCounts_();
-  Object.keys(staff).forEach(group => { if (!groups[group]) groups[group] = { done: 0, ranking: [] }; });
+  Object.keys(staff).forEach(group => { if (!groups[group]) groups[group] = { done: 0, ranking: [], review: [] }; });
   const names = Object.keys(groups);
   const payload = {};
   names.forEach((group, index) => {
     const g = groups[group];
     g.ranking.sort(boardCompare_);
-    payload[boardCacheKey_(month, 'g' + index)] = JSON.stringify({ group: group, staff: staff[group] || 0, done: g.done, ranking: g.ranking });
+    g.review.sort((a, b) => a.at - b.at);
+    payload[boardCacheKey_(month, 'g' + index)] = JSON.stringify({ group: group, staff: staff[group] || 0, done: g.done, ranking: g.ranking, review: g.review });
   });
   const memberIndex = {};
   Object.keys(members).forEach(key => { memberIndex[key] = names.indexOf(members[key]); });
@@ -468,6 +524,7 @@ function getDepartmentBoard_(msnv, departmentHint) {
   let g = readBoardGroup_(month, cache, payload, index);
   if (!g) { payload = buildBoardMonth_(month); g = readBoardGroup_(month, cache, payload, index); }
   const rank = key ? g.ranking.findIndex(r => r.k === key) : -1;
+  const review = !!(key && (g.review || []).some(r => r.k === key));
   const pack = (r, i) => ({ rank: i + 1, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d, me: r.k === key });
   return {
     ok: true,
@@ -484,6 +541,8 @@ function getDepartmentBoard_(msnv, departmentHint) {
     // Điểm / tổng / thời gian của mọi người (không tên) để trang tự xếp hạng tạm khi bài vừa nộp chưa vào sheet.
     all: g.ranking.map(r => [r.s, r.t, r.d === '' ? null : r.d]),
     pending: pending,
+    review: review, // bài của người này đang "Cần xem lại" nên chưa xếp hạng
+    minSeconds: BOARD_MIN_SECONDS,
     cachedAt: meta.builtAt
   };
 }
@@ -499,14 +558,17 @@ function getAdminLeaderboard_(monthValue) {
   const all = [];
   const groups = meta.groups.map((name, index) => {
     const g = JSON.parse(payload[boardCacheKey_(month, 'g' + index)]);
-    const ranking = g.ranking.map((r, i) => ({ rank: i + 1, msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d }));
+    const ranking = g.ranking.map((r, i) => ({ rank: i + 1, msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d, flags: boardFlagText_(r.x), approved: !!r.ok }));
+    const review = (g.review || []).map(r => ({ msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d, flags: boardFlagText_(r.x),
+      submittedAt: Utilities.formatDate(new Date(r.at), retakeTimeZone_(), 'dd/MM/yyyy HH:mm') }));
     g.ranking.forEach(r => all.push(Object.assign({ group: g.group }, r)));
     return {
       group: g.group, staff: g.staff, done: g.done,
       rate: g.staff ? Math.round(g.done / g.staff * 1000) / 1000 : null,
       pass: g.staff > 0 && g.done / g.staff >= BOARD_PASS_RATE,
-      unranked: g.done - ranking.length,
-      ranking: ranking
+      unranked: g.done - ranking.length - review.length,
+      ranking: ranking,
+      review: review
     };
   }).sort((a, b) => reportGroupSort_(a.group, b.group));
   all.sort(boardCompare_);
@@ -516,8 +578,19 @@ function getAdminLeaderboard_(monthValue) {
     groups: groups,
     company: all.slice(0, 20).map((r, i) => ({ rank: i + 1, group: r.group, msnv: r.k, name: r.n, score: r.s, total: r.t, seconds: r.d === '' ? null : r.d })),
     ranked: all.length,
+    reviewCount: groups.reduce((n, g) => n + g.review.length, 0),
+    rules: { minSeconds: BOARD_MIN_SECONDS, devicePeople: BOARD_SHARED_DEVICE_PEOPLE, deviceGapMinutes: BOARD_SHARED_GAP_MINUTES },
     generatedAt: new Date().toISOString()
   };
+}
+
+function boardFlagText_(code) {
+  if (!code) return [];
+  const out = [];
+  if (code.indexOf('f') >= 0) out.push('Làm quá nhanh (dưới ' + BOARD_MIN_SECONDS + ' giây)');
+  const m = /m(\d+)/.exec(code);
+  if (m) out.push('Một máy nộp liên tiếp cho ' + m[1] + ' người');
+  return out;
 }
 
 /** Thử từ trình soạn thảo: bảng xếp hạng bộ phận của một MSNV. */

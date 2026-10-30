@@ -18,7 +18,7 @@
   const deptRate = g => g.total ? g.done / g.total : 0;
   const deptPass = g => g.total > 0 && deptRate(g) >= PASS_RATE;
   const BAR_SPAN = 84; // thanh dài nhất chiếm 84% bề ngang, chừa chỗ cho số
-  const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '', board: {}, boardLoading: '' };
+  const report = { data: null, period: '', pending: null, missing: {}, missingLoading: '', board: {}, boardLoading: '', lbOpen: new Set() };
   const $ = id => document.getElementById(id);
   const esc = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : String(v == null ? '' : v));
   const fold = v => String(v || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/Đ/g, 'D').replace(/\s+/g, ' ').trim();
@@ -737,30 +737,54 @@
     if (!data) { summary.textContent = 'Đang tải bảng xếp hạng…'; box.innerHTML = ''; $('lbCompany').innerHTML = ''; loadLeaderboard(month); return; }
     if (data.error) { summary.textContent = 'Không tải được: ' + data.error; box.innerHTML = ''; $('lbCompany').innerHTML = ''; return; }
     const q = fold($('lbSearch').value);
+    const rules = data.rules || { minSeconds: 60, devicePeople: 3, deviceGapMinutes: 10 };
     summary.innerHTML = '<strong>' + num(data.ranked, 0) + '</strong> người được xếp hạng · ' + data.groups.filter(g => g.pass).length + '/' + data.groups.length +
-      ' bộ phận đạt (≥ ' + Math.round(data.passRate * 100) + '% đã làm). Xếp theo điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên.';
-    const person = r => '<tr class="' + (q && fold(r.msnv + ' ' + r.name).includes(q) ? 'lb-hit' : '') + '"><td class="lb-rank">' + medal(r.rank) + '</td><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + '<div class="lb-mob lb-sub">' + esc(r.msnv) + '</div>' +
+      ' bộ phận đạt (≥ ' + Math.round(data.passRate * 100) + '% đã làm). Xếp theo điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên.' +
+      (data.reviewCount ? '<br><span class="lb-flag">⚠ <strong>' + num(data.reviewCount, 0) + '</strong> bài cần xem lại, không xếp hạng</span> (vẫn tính là đã làm): làm dưới ' + rules.minSeconds +
+        ' giây, hoặc một máy nộp liên tiếp cho từ ' + rules.devicePeople + ' người (mỗi bài cách nhau ≤ ' + rules.deviceGapMinutes + ' phút). Bấm <b>Duyệt</b> nếu bài hợp lệ để xếp hạng lại.' : '');
+    const hit = r => q && fold(r.msnv + ' ' + r.name).includes(q);
+    const isOpen = g => q ? true : report.lbOpen.has(g.group);
+    const approvedTag = r => r.approved ? ' <span class="lb-ok" title="' + esc((r.flags || []).join('; ')) + '">đã duyệt</span> <button class="link lb-unapprove" type="button" data-lb-approve="' + esc(r.msnv) + '" data-v="0">Bỏ duyệt</button>' : '';
+    const person = r => '<tr class="' + (hit(r) ? 'lb-hit' : '') + '"><td class="lb-rank">' + medal(r.rank) + '</td><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + approvedTag(r) + '<div class="lb-mob lb-sub">' + esc(r.msnv) + '</div>' +
       '</td><td class="num">' + num(r.score, 0) + '/' + num(r.total, 0) + '</td><td class="num">' + clock(r.seconds) + '</td></tr>';
     const table = rows => '<table class="lb-table"><thead><tr><th class="lb-rank">Hạng</th><th class="lb-msnv">MSNV</th><th>Họ và tên</th><th class="num">Điểm</th><th class="num">Thời gian</th></tr></thead><tbody>' + rows.map(person).join('') + '</tbody></table>';
     $('lbCompany').innerHTML = data.company.length ? '<details class="lb-company" open><summary>Toàn công ty · top ' + data.company.length + '</summary><table class="lb-table"><thead><tr><th class="lb-rank">Hạng</th><th class="lb-grp">Bộ phận</th><th class="lb-msnv">MSNV</th><th>Họ và tên</th><th class="num">Điểm</th><th class="num">Thời gian</th></tr></thead><tbody>' +
       data.company.map(r => '<tr><td class="lb-rank">' + medal(r.rank) + '</td><td class="lb-grp">' + esc(r.group) + '</td><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + '<div class="lb-mob lb-sub">' + esc(r.group) + ' · ' + esc(r.msnv) + '</div></td><td class="num">' + num(r.score, 0) + '/' + num(r.total, 0) + '</td><td class="num">' + clock(r.seconds) + '</td></tr>').join('') + '</tbody></table></details>' : '';
-    const groups = q ? data.groups.filter(g => g.ranking.some(r => fold(r.msnv + ' ' + r.name).includes(q))) : data.groups;
+    const reviewTable = rows => '<div class="lb-review"><h5>⚠ Cần xem lại · không xếp hạng (' + rows.length + ')</h5><table class="lb-table"><thead><tr><th class="lb-msnv">MSNV</th><th>Họ và tên</th><th class="num">Điểm</th><th class="num">Thời gian</th><th>Lý do</th><th></th></tr></thead><tbody>' +
+      rows.map(r => '<tr class="' + (hit(r) ? 'lb-hit' : '') + '"><td class="lb-msnv">' + esc(r.msnv) + '</td><td>' + esc(r.name) + '<div class="lb-sub">Nộp ' + esc(r.submittedAt || '') + '</div><div class="lb-mob lb-sub">' + esc(r.msnv) + '</div></td><td class="num">' + num(r.score, 0) + '/' + num(r.total, 0) +
+        '</td><td class="num">' + clock(r.seconds) + '</td><td class="lb-why">' + (r.flags || []).map(esc).join('<br>') + '</td><td><button class="btn btn-light btn-xs" type="button" data-lb-approve="' + esc(r.msnv) + '" data-v="1">Duyệt</button></td></tr>').join('') + '</tbody></table></div>';
+    const groups = q ? data.groups.filter(g => g.ranking.concat(g.review || []).some(hit)) : data.groups;
     box.innerHTML = groups.length ? '<div class="table-wrap"><table class="lb-overview"><thead><tr><th>Bộ phận</th><th class="num">Đã làm</th><th>Kết quả</th><th>Hạng 1</th><th class="num">Điểm</th><th class="num">Thời gian</th><th></th></tr></thead><tbody>' +
       groups.map((g, i) => {
         const first = g.ranking[0];
-        return '<tr class="lb-group" data-lb="' + i + '"><td class="lb-dept"><strong>' + esc(g.group) + '</strong></td><td class="num lb-done">' + g.done + '/' + g.staff + ' (' + pct(g.rate) + ')</td>' +
+        const review = g.review || [];
+        return '<tr class="lb-group" data-lb="' + i + '"><td class="lb-dept"><strong>' + esc(g.group) + '</strong>' + (review.length ? '<div class="lb-flag">⚠ ' + review.length + ' cần xem lại</div>' : '') + '</td><td class="num lb-done">' + g.done + '/' + g.staff + ' (' + pct(g.rate) + ')</td>' +
           '<td class="lb-res"><span class="mg-badge ' + (g.pass ? 'pass' : 'fail') + '">' + (g.pass ? 'Đạt' : 'Chưa đạt') + '</span></td>' +
           '<td class="lb-first">' + (first ? '🥇 ' + esc(first.name) + ' <span class="lb-sub">' + esc(first.msnv) + '</span>' : '<span class="lb-sub">Chưa có</span>') + '</td>' +
           '<td class="num lb-score">' + (first ? num(first.score, 0) + '/' + num(first.total, 0) : '') + '</td><td class="num lb-time">' + (first ? clock(first.seconds) : '') + '</td>' +
-          '<td class="lb-act"><button class="btn btn-light btn-xs" type="button" data-lb-open="' + i + '">' + (q ? 'Ẩn' : 'Xem cả bộ phận') + '</button></td></tr>' +
-          '<tr class="lb-detail' + (q ? '' : ' hidden') + '" data-lb-detail="' + i + '"><td colspan="7">' + (g.ranking.length ? table(g.ranking) : '<p class="report-hint">Chưa ai trong bộ phận làm khảo sát tháng này.</p>') +
+          '<td class="lb-act"><button class="btn btn-light btn-xs" type="button" data-lb-open="' + i + '" data-group="' + esc(g.group) + '">' + (isOpen(g) ? 'Ẩn' : 'Xem cả bộ phận') + '</button></td></tr>' +
+          '<tr class="lb-detail' + (isOpen(g) ? '' : ' hidden') + '" data-lb-detail="' + i + '"><td colspan="7">' + (g.ranking.length ? table(g.ranking) : '<p class="report-hint">' + (review.length ? 'Chưa ai được xếp hạng.' : 'Chưa ai trong bộ phận làm khảo sát tháng này.') + '</p>') +
+          (review.length ? reviewTable(review) : '') +
           (g.unranked ? '<p class="report-hint">' + g.unranked + ' người đã làm nhưng không có điểm lần đầu (làm lại trước khi có bảng xếp hạng) nên không xếp hạng.</p>' : '') + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="rc-empty">Không tìm thấy nhân viên phù hợp.</div>';
     box.querySelectorAll('[data-lb-open]').forEach(b => b.onclick = () => {
       const row = box.querySelector('[data-lb-detail="' + b.dataset.lbOpen + '"]');
       row.classList.toggle('hidden'); b.textContent = row.classList.contains('hidden') ? 'Xem cả bộ phận' : 'Ẩn';
+      if (row.classList.contains('hidden')) report.lbOpen.delete(b.dataset.group); else report.lbOpen.add(b.dataset.group);
     });
-    $('lbExport').disabled = !data.ranked;
+    box.querySelectorAll('[data-lb-approve]').forEach(b => b.onclick = () => reviewEntry(month, b.dataset.lbApprove, b.dataset.v === '1', b));
+    $('lbExport').disabled = !data.ranked && !data.reviewCount;
+  }
+
+  async function reviewEntry(month, msnv, approve, button) {
+    if (!approve && !confirm('Bỏ duyệt MSNV ' + msnv + '? Bài này sẽ trở lại danh sách cần xem lại và không được xếp hạng.')) return;
+    button.disabled = true;
+    try {
+      const response = await apiPost('adminBoardReview', Object.assign({}, state.admin, { month, msnv, approve }));
+      report.board[month] = response.leaderboard;
+      notice(approve ? 'Đã duyệt MSNV ' + msnv + ': bài được xếp hạng.' : 'Đã bỏ duyệt MSNV ' + msnv + '.', 'success');
+    } catch (error) { notice(error.message || String(error), 'error'); button.disabled = false; return; }
+    if (selectedMonth() === month) renderLeaderboard();
   }
 
   async function exportLeaderboard() {
@@ -798,11 +822,15 @@
       };
       const stamp = new Date().toLocaleString('vi-VN');
       const rule = 'Xếp theo điểm lần làm đầu tiên trong tháng, bằng điểm thì nhanh hơn xếp trên · cập nhật ' + stamp;
-      sheet('Tổng hợp', rule, ['STT', 'Bộ phận', 'Đã làm', 'Tổng nhân viên', 'Tỷ lệ', 'Kết quả', 'Hạng 1', 'MSNV', 'Điểm', 'Thời gian'], [6, 22, 10, 15, 9, 11, 28, 13, 9, 11],
-        data.groups.map((g, i) => { const f = g.ranking[0] || {}; return [i + 1, g.group, g.done, g.staff, g.rate == null ? '' : Math.round(g.rate * 100) + '%', g.pass ? 'Đạt' : 'Chưa đạt', f.name || '', f.msnv || '', f.name ? f.score + '/' + f.total : '', f.name ? clock(f.seconds) : '']; }),
-        [0, 2, 3, 4, 5, 7, 8, 9]);
+      sheet('Tổng hợp', rule, ['STT', 'Bộ phận', 'Đã làm', 'Tổng nhân viên', 'Tỷ lệ', 'Kết quả', 'Hạng 1', 'MSNV', 'Điểm', 'Thời gian', 'Cần xem lại'], [6, 22, 10, 15, 9, 11, 28, 13, 9, 11, 13],
+        data.groups.map((g, i) => { const f = g.ranking[0] || {}; return [i + 1, g.group, g.done, g.staff, g.rate == null ? '' : Math.round(g.rate * 100) + '%', g.pass ? 'Đạt' : 'Chưa đạt', f.name || '', f.msnv || '', f.name ? f.score + '/' + f.total : '', f.name ? clock(f.seconds) : '', (g.review || []).length || '']; }),
+        [0, 2, 3, 4, 5, 7, 8, 9, 10]);
       sheet('Toàn công ty', 'Top ' + data.company.length + ' toàn công ty · ' + rule, ['Hạng', 'Bộ phận', 'MSNV', 'Họ và tên', 'Điểm', 'Thời gian'], [7, 22, 13, 32, 9, 11],
         data.company.map(r => [r.rank, r.group, r.msnv, r.name, r.score + '/' + r.total, clock(r.seconds)]), [0, 2, 4, 5]);
+      const review = [];
+      data.groups.forEach(g => (g.review || []).forEach(r => review.push([g.group, r.msnv, r.name, r.submittedAt || '', r.score + '/' + r.total, clock(r.seconds), (r.flags || []).join('; ')])));
+      if (review.length) sheet('Cần xem lại', 'Không xếp hạng (vẫn tính là đã làm) · ' + review.length + ' bài · cập nhật ' + stamp, ['Bộ phận', 'MSNV', 'Họ và tên', 'Nộp lúc', 'Điểm', 'Thời gian', 'Lý do'],
+        [20, 13, 30, 17, 9, 11, 44], review, [1, 3, 4, 5]);
       data.groups.filter(g => g.ranking.length).forEach(g => sheet(g.group, 'Bộ phận: ' + g.group + ' · ' + g.done + '/' + g.staff + ' đã làm · ' + (g.pass ? 'ĐẠT' : 'CHƯA ĐẠT') + ' · ' + rule,
         ['Hạng', 'MSNV', 'Họ và tên', 'Điểm', 'Thời gian'], [7, 14, 34, 9, 11], g.ranking.map(r => [r.rank, r.msnv, r.name, r.score + '/' + r.total, clock(r.seconds)]), [0, 1, 3, 4]));
       const blob = new Blob([await book.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
