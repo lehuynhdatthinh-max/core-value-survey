@@ -46,7 +46,7 @@ Không cần tạo trigger mới. Trigger `processQueue` (mỗi phút) và trigg
   
   Danh sách đã duyệt lưu trong Script Properties (`VHDN_BOARD_APPROVED_yyyy-MM`).
 - Excel có thêm sheet **Cần xem lại**; sheet Tổng hợp có cột Cần xem lại.
-- Màn hình kết quả của người làm: "Bài làm của bạn đang được xem lại nên chưa được xếp hạng…".
+- Màn hình kết quả của người bị gắn "Cần xem lại": vẫn thấy bảng xếp hạng bộ phận như bình thường, chỉ không hiện thứ hạng của chính mình (không có thông báo riêng). Bảng có thêm dòng "Thứ hạng chỉ mang tính chất giải trí, không có giá trị gì ngoài đời thật."
 - Action mới: `adminBoardReview` (POST, cần email + mã quản trị).
 
 Cài: dán đè `Code.gs` 4.16.0 (gửi riêng) và `SurveyReport.gs` mới › **Lưu** › **Triển khai › Quản lý bản triển khai › Phiên bản mới**.

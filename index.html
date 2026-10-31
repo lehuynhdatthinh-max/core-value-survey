@@ -746,7 +746,7 @@
     .board-part p{margin:8px 0 0;font-size:15px}
     .board-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:13px;font-weight:700}
     .board-pill.pass{color:#14532D;background:#E8F6EE}.board-pill.fail{color:#7F1D1D;background:#FDECEC}
-    .board-review{margin:8px 0 0;padding:8px 10px;border-radius:8px;background:#FFF1E6;color:#7C2D12;font-size:13px;line-height:1.5}
+    .board-note{margin:8px 0 0;font-size:13px;font-style:italic;color:var(--muted,#6B6B6E)}
     .board-hint{margin:6px 0 0;color:var(--muted,#6B6B6E);font-size:13px;line-height:1.5}
     .board-sub{margin:16px 0 6px;color:var(--navy,#4D4D4F);font-size:15px}
     .board-list{list-style:none;margin:0;padding:0}
@@ -3153,10 +3153,9 @@
         if (!data || data.ok === false) throw new Error((data && data.error) || 'Không có dữ liệu.');
         // Bài vừa nộp còn trong hàng đợi: tự xếp hạng tạm bằng điểm và thời gian của lần này.
         let me = data.me, top = (data.top || []).slice(), done = data.done || 0, estimated = false;
-        // Làm quá nhanh (hoặc quản trị đang xem lại): không xếp hạng, vẫn tính là đã làm.
-        let review = !!data.review;
+        // Làm quá nhanh (hoặc quản trị đang xem lại): vẫn tính là đã làm, chỉ không hiện thứ hạng của người này.
         if (data.pending && firstAttempt && payload.durationSeconds && payload.durationSeconds < (data.minSeconds || 60)){
-          review = true; done += 1;
+          done += 1;
         } else if (data.pending && firstAttempt){
           const mine = { name: payload.fullName, score: scores.score, total: scores.total, seconds: payload.durationSeconds || null, me: true };
           const above = (data.all || []).filter(row => boardBetter({ score: row[0], total: row[1], seconds: row[2] }, mine)).length;
@@ -3181,9 +3180,9 @@
           <h5 class="board-sub">Bảng xếp hạng bộ phận</h5>
           ${top.length ? `<ol class="board-list"><li class="board-row head"><span>Hạng</span><span>Họ và tên</span><span>Điểm</span><span>Thời gian</span></li>${top.map(row).join('')}${meOutside ? '<li class="board-gap">…</li>' + row(me) : ''}</ol>` : '<p class="board-hint">Chưa có ai trong bộ phận làm khảo sát tháng này.</p>'}
           ${me ? `<p class="board-me">Bạn xếp hạng <b>${me.rank}</b>${data.ranked || estimated ? ` / ${(data.ranked || 0) + (estimated ? 1 : 0)}` : ''} trong bộ phận${me.seconds ? ` · ${formatNumber(me.score)}/${formatNumber(me.total)} điểm trong ${formatDuration(me.seconds)}` : ''}${estimated ? ' (tạm tính, cập nhật sau khoảng 1 phút)' : ''}.</p>` : ''}
-          ${review ? '<p class="board-review">Bài làm của bạn đang được xem lại nên chưa được xếp hạng (làm quá nhanh, hoặc nhiều người nộp liên tiếp trên cùng một máy). Bài vẫn được tính là đã làm.</p>' : ''}
           ${!firstAttempt ? '<p class="board-hint">Bạn đang làm lại: bảng xếp hạng vẫn tính lần làm đầu tiên trong tháng.</p>' : ''}
-          <p class="board-hint">Xếp theo điểm lần làm đầu tiên trong tháng; bằng điểm thì ai làm nhanh hơn xếp trên. Thời gian (phút:giây) tính từ lúc bấm bắt đầu khảo sát đến lúc nộp.</p>`;
+          <p class="board-hint">Xếp theo điểm lần làm đầu tiên trong tháng; bằng điểm thì ai làm nhanh hơn xếp trên. Thời gian (phút:giây) tính từ lúc bấm bắt đầu khảo sát đến lúc nộp.</p>
+          <p class="board-note">Thứ hạng chỉ mang tính chất giải trí, không có giá trị gì ngoài đời thật.</p>`;
       }catch(error){
         if (box()) box().innerHTML = '<p class="board-hint">Chưa tải được kết quả của bộ phận. Mở lại trang sau ít phút để xem.</p>';
       }
